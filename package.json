@@ -1,0 +1,17 @@
+{
+  "name": "space-tube-application-service",
+  "version": "1.0.0",
+  "description": "a matrix application service to run a space tube instance",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "register": "node register.js"
+  },
+  "author": "king-mob",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "matrix-appservice": "^2.0.0"
+  },
+  "type": "module"
+}
