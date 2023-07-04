@@ -4,6 +4,10 @@ import { AppService, AppserviceHttpError } from "matrix-appservice";
 const as = new AppService({
   homeserverToken: process.env.HOME_SERVER_TOKEN
 });
+as.on("http-log",(event)=>{
+  console.log(event);
+  console.log("something happened");
+});
 as.on("type:m.room.message", (event) => {
   // handle the incoming message
   console.log(event);
