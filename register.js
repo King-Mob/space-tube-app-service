@@ -1,8 +1,10 @@
+import 'dotenv/config';
 import { AppServiceRegistration } from "matrix-appservice";
+
 
 // creating registration files
 const reg = new AppServiceRegistration();
-reg.setAppServiceUrl("http://host.docker.internal:8133");
+reg.setAppServiceUrl(`http://${process.env.HOST}:8133`);
 reg.setHomeserverToken(AppServiceRegistration.generateToken());
 reg.setAppServiceToken(AppServiceRegistration.generateToken());
 reg.setSenderLocalpart("example-appservice");
