@@ -11,7 +11,8 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "dotenv": "^16.3.1",
-    "matrix-appservice": "^2.0.0"
+    "matrix-appservice": "^2.0.0",
+    "node-fetch": "^3.3.1"
   },
   "type": "module"
 }

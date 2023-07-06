@@ -11,4 +11,6 @@ reg.setSenderLocalpart("example-appservice");
 reg.addRegexPattern("users", "@.*", true);
 reg.setProtocols(["exampleservice"]); // For 3PID lookups
 reg.setId("hello-service");
+reg.isUserMatch("@example-appservice");
 reg.outputAsYaml("registration.yaml");
+
