@@ -7,10 +7,9 @@ const reg = new AppServiceRegistration();
 reg.setAppServiceUrl(`http://${process.env.HOST}:8133`);
 reg.setHomeserverToken(AppServiceRegistration.generateToken());
 reg.setAppServiceToken(AppServiceRegistration.generateToken());
-reg.setSenderLocalpart("example-appservice");
-reg.addRegexPattern("users", "@.*", true);
-reg.setProtocols(["exampleservice"]); // For 3PID lookups
-reg.setId("hello-service");
-reg.isUserMatch("@example-appservice");
+reg.setSenderLocalpart("space-tube-bot");
+reg.addRegexPattern("users", "@_space-tube.*", true);
+reg.addRegexPattern("aliases", "#_space-tube.*", true);
+reg.setProtocols(["spacetubeservice"]); // For 3PID lookups
+reg.setId("space-tube-service");
 reg.outputAsYaml("registration.yaml");
-
