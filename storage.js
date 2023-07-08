@@ -47,12 +47,13 @@ const createManagementRoom = async () => {
     return room.room_id;
 }
 
-const managementRoomId = await createManagementRoom();
+const managementRoom = { id: await createManagementRoom() };
 
 export const storeItem = (item) => {
+    console.log("mgmtroom id", managementRoom.id);
     const txnId = uuidv4();
 
-    fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoomId}/send/${item.type}/${txnId}?user_id=@space-tube-bot:${HOME_SERVER}`, {
+    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/send/${item.type}/${txnId}?user_id=@space-tube-bot:${HOME_SERVER}`, {
         method: "PUT",
         body: JSON.stringify(item),
         headers: {
@@ -62,9 +63,9 @@ export const storeItem = (item) => {
     });
 }
 
-export const getItem = async (itemName) => {
+export const getItem = async (key, value) => {
 
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoomId}/messages?limit=1000`, {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -73,7 +74,7 @@ export const getItem = async (itemName) => {
     const eventsList = await response.json();
 
     for (const event of eventsList.chunk) {
-        if (event.content.itemName === itemName)
+        if (event.content[key] === value)
             return event;
     }
 

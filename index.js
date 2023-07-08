@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import { AppService, AppserviceHttpError } from "matrix-appservice";
-import { createManagementRoom } from "./storage.js";
 import { handleMessage, handleInvite } from './handler.js';
 // listening
 const as = new AppService({
@@ -13,15 +12,17 @@ as.on("http-log", (event) => {
 });
 
 as.on("event", event => {
-  console.log("hello")
+  console.log("event received")
   console.log(event)
 
   switch (event.type) {
     case "m.room.message":
-      handleMessage(event, managementRoomId);
+      handleMessage(event);
       break;
     case "m.room.member":
       handleInvite(event);
+      break;
+    default:
       break;
   }
 })
