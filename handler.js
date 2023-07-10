@@ -18,7 +18,7 @@ const sendMessage = (roomId, message) => {
     })
 }
 
-const sendMessageUser = (user, roomId, message) => {
+const sendMessageAsUser = (user, roomId, message) => {
     return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/send/m.room.message`, {
         method: 'POST',
         body: JSON.stringify({
@@ -67,15 +67,15 @@ const registerUser = (userId) => {
     })
 }
 
-const setDisplayName = (newUser, displayName) => {
-    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/profile/@_space-tube-${newUser.user_id}:${HOME_SERVER}/displayname`, {
+const setDisplayName = (user, displayName) => {
+    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/profile/${user.user_id}/displayname`, {
         method: 'PUT',
         body: JSON.stringify({
             displayname: displayName
         }),
         headers: {
             'Content-Type': 'application/json',
-            "Authorization": `Bearer ${newUser.access_token}`
+            "Authorization": `Bearer ${user.access_token}`
         }
     })
 }
@@ -146,6 +146,11 @@ export const handleMessage = async (event) => {
 
         const otherRoomId = otherTube.content.name.split("registration-")[1];
 
+        if (otherRoomId === event.room_id) {
+            sendMessage(event.room_id, "That's the code for this tube opening.");
+            return;
+        }
+
         const connection = `connection-${event.room_id}-${otherRoomId}`;
 
         const tubeConnection = await getItem("name", connection);
@@ -181,6 +186,9 @@ export const handleMessage = async (event) => {
                 sendMessage(otherRoomId, "I declare this tube is now open!");
             }
         }
+        else {
+            sendMessage(event.room_id, "Received connection, waiting for other group to connect.");
+        }
 
         return;
     }
@@ -188,33 +196,52 @@ export const handleMessage = async (event) => {
     const tubeIntermediary = await getItem("tubeIntermediary", event.room_id);
 
     if (tubeIntermediary) {
-        console.log(event)
         console.log("message in tube intermediary");
         //send message to all tube openings managed by this instance
 
-        console.log("tube intermediary", tubeIntermediary);
+        const { content: { user: user, userRoomId, name } } = await getItem("userId", event.sender);
 
-        const user = await getItem("user.user_id", event.sender);
+        sendMessageAsUser(user, userRoomId, message);
 
-        //really it's just the above, need to store the user_id better though
-        //find user token, use the original room in spacetube.user
-        //send message to their room
+        const clone = await getItem("originalUserId", event.sender);
 
-        //then check for their clone
-        //if not there, create it.
-        //their clone needs to be part of the intermediary and their room
-        //get that from spacetube.open, the room that isn't event.room_id
-        //clone sends message to their room
+        let cloneUser;
 
-        //once these messages are going back to the original room
-        //make sure that tubeOpen ignores messages from space tube users
+        if (clone) {
+            cloneUser = clone.content.clone;
+        }
+        else {
+            const newCloneUserResponse = await registerUser(name);
+            const newCloneUser = await newCloneUserResponse.json();
 
+            const cloneUserRoomId = tubeIntermediary.content.connectedRooms.find(roomId => roomId !== userRoomId);
+
+            cloneUser = newCloneUser;
+            cloneUser.roomId = cloneUserRoomId;
+
+            storeItem({
+                type: "spacetube.user.clone",
+                clone: cloneUser,
+                originalUserId: user.user_id,
+            });
+
+            setDisplayName(cloneUser, name);
+
+            await invite(cloneUser, cloneUser.roomId);
+            await join(cloneUser, cloneUser.roomId);
+        }
+
+        sendMessageAsUser(cloneUser, cloneUser.roomId, message);
     }
 
     const tubeOpen = await getItemIncludes("connectedRooms", event.room_id);
 
     if (tubeOpen) {
         console.log("there was a message in an open tube");
+
+        if (event.sender.includes("@_space-tube"))
+            return;
+
         const { tubeIntermediary } = tubeOpen.content;
 
         const tubeUser = await getItem("userRoomId", event.room_id);
@@ -241,30 +268,22 @@ export const handleMessage = async (event) => {
 
             storeItem({
                 type: "spacetube.user",
+                userId: newUser.user_id,
                 user: newUser,
-                userRoomId: event.room_id
+                userRoomId: event.room_id,
+                name: newTubeUserName
             });
 
             setDisplayName(newUser, newTubeUserName);
 
             await invite(newUser, tubeIntermediary);
             await join(newUser, tubeIntermediary);
+            await invite(newUser, event.room_id);
+            await join(newUser, event.room_id);
         }
 
-        console.log(user);
-        console.log(tubeIntermediary)
-        console.log(tubeOpen);
-        sendMessageUser(user, tubeIntermediary, message);
-        //tube user send message to intermediary room 
-        //(and then when it goes through intermediary, hopefully back to here)
-
+        sendMessageAsUser(user, tubeIntermediary, message);
     }
-
-
-    //check if there's a user for the group.
-    //if not, register one
-
-
 }
 
 export const handleInvite = (event) => {
