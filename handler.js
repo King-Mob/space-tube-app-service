@@ -81,7 +81,7 @@ const setDisplayName = (user, displayName) => {
 }
 
 const invite = (user, roomId) => {
-    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@space-tube-bot:wobbly.app`, {
+    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@space-tube-bot:${HOME_SERVER}`, {
         method: 'POST',
         body: JSON.stringify({
             user_id: user.user_id
