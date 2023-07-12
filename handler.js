@@ -188,44 +188,81 @@ const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) 
     console.log("shared management room", sharedTubeManagementRoom)
 
     const tubeOpening = await getItem("name", `registration-${event.room_id}`);
-    console.log("tube opening", tubeOpening)
     const localConnectionCode = tubeOpening.content.tubeCode;
 
     const localConnection = `connection-${localConnectionCode}-${remoteConnectionCode}`;
-    console.log("localconnect", localConnection)
-
     const tubeConnection = await getItemShared(sharedTubeManagementRoom, "name", localConnection);
-    console.log("tube connection", tubeConnection)
     if (!tubeConnection) {
         console.log("storing local connection")
         storeItemShared(sharedTubeManagementRoom, { name: localConnection, type: "spacetube.connect" });
     }
 
     const remoteConnection = await getItemShared(sharedTubeManagementRoom, "name", `connection-${remoteConnectionCode}-${localConnectionCode}`);
-    console.log(remoteConnection)
 
     if (remoteConnection) {
         //to get to here, both rooms have passed !space-tube connect
         console.log("this room should be connected");
+
+        const connectedRooms = [localConnectionCode, remoteConnection].sort();
+        const tubeName = `open-${connectedRooms[0]}~${connectedRooms[1]}`;
+
+        const existingTube = await getItem("name", tubeName);
+
+        if (existingTube) {
+            sendMessage(event.room_id, "This tube is already active.");
+        }
+        else {
+            const createRoomResponse = await createRoom();
+            const createdRoom = await createRoomResponse.json();
+
+            await invite({ user_id: otherInstance }, createdRoom.room_id);
+
+            storeItem({
+                name: tubeName,
+                type: "spacetube.open",
+                tubeIntermediary: createdRoom.room_id,
+                connectedRooms,
+                roomId: event.room_id
+            });
+            storeItemShared(sharedTubeManagementRoom, {
+                name: tubeName,
+                type: "spacetube.open",
+                tubeIntermediary: createdRoom.room_id,
+                connectedRooms
+            })
+
+        }
+
+    }
+    else {
+        sendMessage(event.room_id, "Received connection, waiting for other group to connect.");
     }
 
 
+    /*   
 
-
-
-    /*
-    2. post the tube connect in tube management room
-        needs to include tube create in some form.
-
-    3. check if there's another tube connect in tube management room
+    6~ on receipt of tubeOpen in shared management room, store tubeOpen in own room.
     
-    4. if there is create the intermediary room
-    5. send a tubeOpen to the shared tube management room, and to the normal one.
-    6. invite other tube instance to the intermediary room
-    7. give other tube instance admin power too
     */
 
 
+}
+
+export const handleOpen = async (event) => {
+    if (event.sender !== `@space-tube-bot:${HOME_SERVER}`) {
+        const localTubeOpening = "some room id";
+        // I think this is got from localConnectionCode. which will be the room with the other
+        // instance name in it.
+        // then retrieve the room_id using the tube create command
+
+        storeItem({
+            name: event.content.name,
+            type: "spacetube.open",
+            tubeIntermediary: event.content.tubeIntermediary,
+            connectedRooms: event.content.connectedRooms,
+            roomId: localTubeOpening
+        })
+    }
 }
 
 export const handleMessage = async (event) => {
