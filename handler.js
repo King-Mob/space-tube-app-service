@@ -367,7 +367,7 @@ export const handleInvite = async (event) => {
             }
         })
 
-        if (event.sender.includes("@space-tube-bot")) {
+        if (event.sender.includes("@space-tube-bot") && event.sender !== `@space-tube-bot:${HOME_SERVER}`) {
             await storeItem({
                 type: "spacetube.shared.management",
                 sharedWithInstance: event.sender,
