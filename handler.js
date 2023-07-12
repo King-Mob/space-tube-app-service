@@ -185,6 +185,8 @@ const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) 
         });
     }
 
+    console.log("shared management room", sharedManagementRoom)
+
     const tubeOpening = await getItem("name", `registration-${event.room_id}`);
     console.log("tube opening", tubeOpening)
     const localConnectionCode = tubeOpening.content.tubeCode;
