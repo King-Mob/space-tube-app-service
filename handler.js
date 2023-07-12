@@ -161,6 +161,7 @@ const connectSameInstance = async (event, connectionCode) => {
 }
 
 const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) => {
+    console.log("connecting to other instance")
 
     const sharedTubeManagementItem = await getItem("sharedWithInstance", otherInstance);
 
