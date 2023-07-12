@@ -192,7 +192,7 @@ const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) 
     const tubeConnection = await getItemShared(sharedTubeManagementRoom, "name", localConnection);
 
     if (!tubeConnection) {
-        storeItemShared({ name: localConnection, type: "spacetube.connect" });
+        storeItemShared(sharedTubeManagementRoom, { name: localConnection, type: "spacetube.connect" });
     }
 
     const remoteConnection = await getItem("name", `connection-${remoteConnectionCode}-${localConnectionCode}`);

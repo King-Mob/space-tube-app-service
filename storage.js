@@ -64,7 +64,7 @@ export const storeItem = (item) => {
 }
 
 export const storeItemShared = (sharedRoomId, item) => {
-    console.log("mgmtroom id", sharedRoomId);
+    console.log("shared mgmtroom id", sharedRoomId);
     const txnId = uuidv4();
 
     return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/send/${item.type}/${txnId}?user_id=@space-tube-bot:${HOME_SERVER}`, {
