@@ -63,6 +63,20 @@ export const storeItem = (item) => {
     });
 }
 
+export const storeItemShared = (sharedRoomId, item) => {
+    console.log("mgmtroom id", sharedRoomId);
+    const txnId = uuidv4();
+
+    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/send/${item.type}/${txnId}?user_id=@space-tube-bot:${HOME_SERVER}`, {
+        method: "PUT",
+        body: JSON.stringify(item),
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${APPLICATION_TOKEN}`
+        }
+    });
+}
+
 export const getItem = async (key, value) => {
 
     const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
@@ -94,6 +108,24 @@ export const getItemIncludes = async (key, value) => {
     for (const event of eventsList.chunk) {
         const possibleItem = event.content[key];
         if (possibleItem && possibleItem.includes(value))
+            return event;
+    }
+
+    return null;
+}
+
+export const getItemShared = async (sharedRoomId, key, value) => {
+
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/messages?limit=1000`, {
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${APPLICATION_TOKEN}`
+        }
+    });
+    const eventsList = await response.json();
+
+    for (const event of eventsList.chunk) {
+        if (event.content[key] === value)
             return event;
     }
 

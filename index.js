@@ -7,13 +7,11 @@ const as = new AppService({
 });
 
 as.on("http-log", (event) => {
-  console.log("http-log");
-  console.log(event);
+  console.log("http-log", event);
 });
 
 as.on("event", event => {
-  console.log("event received")
-  console.log(event)
+  console.log("event received", event)
 
   switch (event.type) {
     case "m.room.message":

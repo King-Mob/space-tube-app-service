@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { storeItem, getItem, getItemIncludes } from "./storage.js";
+import { storeItem, getItem, getItemIncludes, getItemShared, storeItemShared } from "./storage.js";
 import { v4 as uuidv4 } from 'uuid';
 
 const { HOME_SERVER, APPLICATION_TOKEN } = process.env;
@@ -104,6 +104,123 @@ const join = (user, roomId) => {
     })
 }
 
+const connectSameInstance = async (event, connectionCode) => {
+    const otherTube = await getItem("tubeCode", connectionCode);
+
+    if (!otherTube) {
+        return;
+    }
+
+    const otherRoomId = otherTube.content.name.split("registration-")[1];
+
+    if (otherRoomId === event.room_id) {
+        sendMessage(event.room_id, "That's the code for this tube opening.");
+        return;
+    }
+
+    const connection = `connection-${event.room_id}-${otherRoomId}`;
+
+    const tubeConnection = await getItem("name", connection);
+
+    if (!tubeConnection) {
+        storeItem({ name: connection, type: "spacetube.connect" });
+    }
+
+    const otherConnection = `connection-${otherRoomId}-${event.room_id}`;
+
+    const otherTubeConnection = await getItem("name", otherConnection);
+
+    if (otherTubeConnection) {
+        const connectedRooms = [event.room_id, otherRoomId].sort();
+        const tubeName = `open-${connectedRooms[0]}-${connectedRooms[1]}`;
+
+        const existingTube = await getItem("name", tubeName);
+
+        if (existingTube) {
+            sendMessage(event.room_id, "This tube is already active.");
+        }
+        else {
+            const tubeRoomResponse = await createRoom();
+            const tubeRoom = await tubeRoomResponse.json();
+            console.log(tubeRoom);
+            storeItem({
+                name: tubeName,
+                type: "spacetube.open",
+                tubeIntermediary: tubeRoom.room_id,
+                connectedRooms
+            });
+            sendMessage(event.room_id, "I declare this tube is now open!");
+            sendMessage(otherRoomId, "I declare this tube is now open!");
+        }
+    }
+    else {
+        sendMessage(event.room_id, "Received connection, waiting for other group to connect.");
+    }
+
+    return;
+}
+
+const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) => {
+
+    const sharedTubeManagementItem = await getItem("sharedWithInstance", otherInstance);
+
+    let sharedTubeManagementRoom;
+
+    if (sharedTubeManagementItem) {
+        console.log("shared room exists")
+        sharedTubeManagementRoom = sharedTubeManagementItem.content.roomId;
+    }
+    else {
+        console.log("creating shared room");
+        const createRoomResponse = await createRoom();
+        const createdRoom = await createRoomResponse.json();
+        sharedTubeManagementRoom = createdRoom.room_id;
+
+        await invite({ user_id: otherInstance }, sharedTubeManagementRoom);
+        await storeItem({
+            type: "spacetube.shared.management",
+            sharedWithInstance: otherInstance,
+            roomId: sharedTubeManagementRoom
+        });
+    }
+
+    const tubeOpening = await getItem("name", `registration-${event.room_id}`);
+    const localConnectionCode = tubeOpening.content.tubeCode;
+
+    const localConnection = `connection-${localConnectionCode}-${remoteConnectionCode}`;
+
+    const tubeConnection = await getItemShared(sharedTubeManagementRoom, "name", localConnection);
+
+    if (!tubeConnection) {
+        storeItemShared({ name: localConnection, type: "spacetube.connect" });
+    }
+
+    const remoteConnection = await getItem("name", `connection-${remoteConnectionCode}-${localConnectionCode}`);
+
+    if (remoteConnection) {
+        //to get to here, both rooms have passed !space-tube connect
+        console.log("this room should be connected");
+    }
+
+
+
+
+
+    /*
+    2. post the tube connect in tube management room
+        needs to include tube create in some form.
+
+    3. check if there's another tube connect in tube management room
+    
+    4. if there is create the intermediary room
+    5. send a tubeOpen to the shared tube management room, and to the normal one.
+    6. invite other tube instance to the intermediary room
+    7. give other tube instance admin power too
+    */
+
+
+}
+
 export const handleMessage = async (event) => {
     //for now, if the sender of the event is our instance, do nothing
     if (event.sender === `@space-tube-bot:${HOME_SERVER}`)
@@ -127,70 +244,22 @@ export const handleMessage = async (event) => {
         }
 
         sendMessage(event.room_id, `The code for this room is ${tubeCode}`);
+
+        return;
     }
 
     if (message.includes("!space-tube connect")) {
-        //handle the other instance later, but essentially it's the same but with a new tube management room.
-        //special case is when 2 instances of space tube, then will need new management room both are in?
-        //intermediary room is created and put room id tube management room
-        //if 2 instances, the second one to receive !match is going to create the intermediary room, and invite the other one
+        const connectionCode = message.split("!space-tube connect ")[1];
+        const spaceTubeInstance = connectionCode.split("~")[1];
 
-        const tubeCode = message.split("!space-tube connect ")[1];
-
-        const otherTube = await getItem("tubeCode", tubeCode);
-
-        if (!otherTube) {
-            sendMessage(event.room_id, "Tubecode not recognised");
+        if (spaceTubeInstance === `@space-tube-bot:${HOME_SERVER}`) {
+            await connectSameInstance(event, connectionCode);
             return;
-        }
-
-        const otherRoomId = otherTube.content.name.split("registration-")[1];
-
-        if (otherRoomId === event.room_id) {
-            sendMessage(event.room_id, "That's the code for this tube opening.");
-            return;
-        }
-
-        const connection = `connection-${event.room_id}-${otherRoomId}`;
-
-        const tubeConnection = await getItem("name", connection);
-
-        if (!tubeConnection) {
-            storeItem({ name: connection, type: "spacetube.connect" });
-        }
-
-        const otherConnection = `connection-${otherRoomId}-${event.room_id}`;
-
-        const otherTubeConnection = await getItem("name", otherConnection);
-
-        if (otherTubeConnection) {
-            const connectedRooms = [event.room_id, otherRoomId].sort();
-            const tubeName = `open-${connectedRooms[0]}-${connectedRooms[1]}`;
-
-            const existingTube = await getItem("name", tubeName);
-
-            if (existingTube) {
-                sendMessage(event.room_id, "This tube is already active.");
-            }
-            else {
-                const tubeRoomResponse = await createRoom();
-                const tubeRoom = await tubeRoomResponse.json();
-                console.log(tubeRoom);
-                storeItem({
-                    name: tubeName,
-                    type: "spacetube.open",
-                    tubeIntermediary: tubeRoom.room_id,
-                    connectedRooms
-                });
-                sendMessage(event.room_id, "I declare this tube is now open!");
-                sendMessage(otherRoomId, "I declare this tube is now open!");
-            }
         }
         else {
-            sendMessage(event.room_id, "Received connection, waiting for other group to connect.");
+            await connectOtherInstance(event, connectionCode, spaceTubeInstance);
+            return;
         }
-
-        return;
     }
 
     const tubeIntermediary = await getItem("tubeIntermediary", event.room_id);
@@ -286,9 +355,9 @@ export const handleMessage = async (event) => {
     }
 }
 
-export const handleInvite = (event) => {
+export const handleInvite = async (event) => {
     if (event.content.membership === "invite") {
-        fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/join/${event.room_id}?user_id=@space-tube-bot:${HOME_SERVER}`, {
+        await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/join/${event.room_id}?user_id=@space-tube-bot:${HOME_SERVER}`, {
             method: 'POST',
             body: JSON.stringify({}),
             headers: {
@@ -296,5 +365,13 @@ export const handleInvite = (event) => {
                 "Authorization": `Bearer ${APPLICATION_TOKEN}`
             }
         })
+
+        if (event.sender.includes("@space-tube-bot")) {
+            await storeItem({
+                type: "spacetube.shared.management",
+                sharedWithInstance: event.sender,
+                roomId: event.room_id
+            })
+        }
     }
 }
