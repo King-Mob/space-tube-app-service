@@ -352,6 +352,8 @@ export const handleMessage = async (event) => {
         const newMessage = "you said: " + message.split("!space-tube echo")[1];
 
         sendMessage(event.room_id, newMessage);
+
+        return;
     }
 
     if (message.includes("!space-tube create")) {
@@ -465,11 +467,19 @@ export const handleInvite = async (event) => {
 
         if (event.sender.includes("@space-tube-bot") && event.sender !== `@space-tube-bot:${HOME_SERVER}`) {
             console.log(event);
-            await storeItem({
-                type: "spacetube.shared.management",
-                sharedWithInstance: event.sender,
-                roomId: event.room_id
-            })
+
+            const sharedTubeManagementItem = await getItem("sharedWithInstance", event.sender);
+
+            if (sharedTubeManagementItem) {
+                console.log("already have shared tube management room, not storing");
+            }
+            else {
+                await storeItem({
+                    type: "spacetube.shared.management",
+                    sharedWithInstance: event.sender,
+                    roomId: event.room_id
+                })
+            }
         }
     }
 }
