@@ -304,9 +304,10 @@ const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
     console.log(event);
     console.log(message);
 
-    const { content: { user: user, userRoomId } } = await getItem("userId", event.sender);
+    const storedUser = await getItem("userId", event.sender);
 
-    if (user) {
+    if (storedUser) {
+        const { content: { user: user, userRoomId } } = storedUser;
         sendMessageAsUser(user, userRoomId, message);
     }
     else {
