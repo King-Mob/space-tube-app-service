@@ -203,7 +203,7 @@ const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) 
         //to get to here, both rooms have passed !space-tube connect
         console.log("this room should be connected");
 
-        const connectionCodes = [localConnectionCode, remoteConnection].sort();
+        const connectionCodes = [localConnectionCode, remoteConnectionCode].sort();
         const tubeName = `open-${connectionCodes[0]}~${connectionCodes[1]}`;
 
         const existingTube = await getItem("name", tubeName);
@@ -227,7 +227,7 @@ const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) 
                 name: tubeName,
                 type: "spacetube.remote.open",
                 tubeIntermediary: createdRoom.room_id,
-                connectionCode: remoteConnection
+                connectionCode: remoteConnectionCode
             })
 
         }
@@ -242,9 +242,9 @@ const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) 
 export const handleRemoteOpen = async (event) => {
     if (event.sender !== `@space-tube-bot:${HOME_SERVER}`) {
 
-        const {connectionCode} = event.content;
+        const { connectionCode } = event.content;
 
-        const tubeOpening = await getItem("tubeCode",connectionCode);
+        const tubeOpening = await getItem("tubeCode", connectionCode);
 
         const localTubeOpening = tubeOpening.room_id;
 
