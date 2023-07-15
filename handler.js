@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { storeItem, getItem, getItemIncludes, getItemShared, storeItemShared } from "./storage.js";
+import { storeItem, getItem, getItemIncludes, getItemShared, storeItemShared, getDisplayName } from "./storage.js";
 import { v4 as uuidv4 } from 'uuid';
 
 const { HOME_SERVER, APPLICATION_TOKEN } = process.env;
@@ -262,6 +262,89 @@ export const handleRemoteOpen = async (event) => {
     }
 }
 
+const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
+    const { content: { user: user, userRoomId, name } } = await getItem("userId", event.sender);
+
+    sendMessageAsUser(user, userRoomId, message);
+
+    const clone = await getItem("originalUserId", event.sender);
+
+    let cloneUser;
+
+    if (clone) {
+        cloneUser = clone.content.clone;
+    }
+    else {
+        const newCloneUserResponse = await registerUser(name);
+        const newCloneUser = await newCloneUserResponse.json();
+
+        const cloneUserRoomId = tubeIntermediary.content.connectedRooms.find(roomId => roomId !== userRoomId);
+
+        cloneUser = newCloneUser;
+        cloneUser.roomId = cloneUserRoomId;
+
+        storeItem({
+            type: "spacetube.user.clone",
+            clone: cloneUser,
+            originalUserId: user.user_id,
+        });
+
+        setDisplayName(cloneUser, name);
+
+        await invite(cloneUser, cloneUser.roomId);
+        await join(cloneUser, cloneUser.roomId);
+    }
+
+    sendMessageAsUser(cloneUser, cloneUser.roomId, message);
+}
+
+const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
+    console.log("message from remote tube")
+    console.log(tubeIntermediary);
+    console.log(event);
+    console.log(message);
+
+    const { content: { user: user, userRoomId } } = await getItem("userId", event.sender);
+
+    if (user) {
+        sendMessageAsUser(user, userRoomId, message);
+    }
+    else {
+        const clone = await getItem("originalUserId", event.sender);
+
+        let cloneUser;
+
+        if (clone) {
+            cloneUser = clone.content.clone;
+        }
+        else {
+            const cloneName = await getDisplayName(event.room_id, event.sender);
+            console.log(cloneName)
+            const newCloneUserResponse = await registerUser(cloneName);
+            const newCloneUser = await newCloneUserResponse.json();
+            console.log(newCloneUser);
+
+            const cloneUserRoomId = tubeIntermediary.content.connectedRooms[0];
+
+            cloneUser = newCloneUser;
+            cloneUser.roomId = cloneUserRoomId;
+
+            storeItem({
+                type: "spacetube.user.clone",
+                clone: cloneUser,
+                originalUserId: event.sender,
+            });
+
+            setDisplayName(cloneUser, cloneName);
+
+            await invite(cloneUser, cloneUser.roomId);
+            await join(cloneUser, cloneUser.roomId);
+        }
+
+        sendMessageAsUser(cloneUser, cloneUser.roomId, message);
+    }
+}
+
 export const handleMessage = async (event) => {
     //for now, if the sender of the event is our instance, do nothing
     if (event.sender === `@space-tube-bot:${HOME_SERVER}`)
@@ -307,55 +390,18 @@ export const handleMessage = async (event) => {
 
     if (tubeIntermediary) {
         console.log("message in tube intermediary");
-        //send message to all tube openings managed by this instance
-
-        //this message is either from a user you manage
-        //or needs to be a clone user
-
-        //maybe want to split the logic here for local and remote connections
-        console.log(tubeIntermediary);
 
         const tubeName = tubeIntermediary.content.name;
 
+        //later when we use connection codes throughout, test if the instances are the same
         if (tubeName.includes("~")) {
-            //message in remote instance tube
-            console.log("message from remote tube")
+            handleMessageRemoteTube(tubeIntermediary, event, message);
             return;
         }
-
-        const { content: { user: user, userRoomId, name } } = await getItem("userId", event.sender);
-
-        sendMessageAsUser(user, userRoomId, message);
-
-        const clone = await getItem("originalUserId", event.sender);
-
-        let cloneUser;
-
-        if (clone) {
-            cloneUser = clone.content.clone;
-        }
         else {
-            const newCloneUserResponse = await registerUser(name);
-            const newCloneUser = await newCloneUserResponse.json();
-
-            const cloneUserRoomId = tubeIntermediary.content.connectedRooms.find(roomId => roomId !== userRoomId);
-
-            cloneUser = newCloneUser;
-            cloneUser.roomId = cloneUserRoomId;
-
-            storeItem({
-                type: "spacetube.user.clone",
-                clone: cloneUser,
-                originalUserId: user.user_id,
-            });
-
-            setDisplayName(cloneUser, name);
-
-            await invite(cloneUser, cloneUser.roomId);
-            await join(cloneUser, cloneUser.roomId);
+            handleMessageLocalTube(tubeIntermediary, event, message);
+            return;
         }
-
-        sendMessageAsUser(cloneUser, cloneUser.roomId, message);
     }
 
     const tubeOpen = await getItemIncludes("connectedRooms", event.room_id);

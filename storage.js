@@ -131,3 +131,20 @@ export const getItemShared = async (sharedRoomId, key, value) => {
 
     return null;
 }
+
+export const getDisplayName = async (sharedRoomId, userId) => {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/messages?limit=1000`, {
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${APPLICATION_TOKEN}`
+        }
+    });
+    const eventsList = await response.json();
+
+    for (const event of eventsList.chunk) {
+        if (event.type === "m.room.member" && event.sender === userId && event.content.displayname)
+            return event.content.displayname;
+    }
+
+    return null;
+}
