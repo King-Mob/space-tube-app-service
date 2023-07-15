@@ -312,11 +312,20 @@ export const handleMessage = async (event) => {
         //this message is either from a user you manage
         //or needs to be a clone user
 
+        //maybe want to split the logic here for local and remote connections
+        console.log(tubeIntermediary);
+
+        const tubeName = tubeIntermediary.content.name;
+
+        if (tubeName.includes("~")) {
+            //message in remote instance tube
+            console.log("message from remote tube")
+            return;
+        }
+
         const { content: { user: user, userRoomId, name } } = await getItem("userId", event.sender);
 
         sendMessageAsUser(user, userRoomId, message);
-
-
 
         const clone = await getItem("originalUserId", event.sender);
 
