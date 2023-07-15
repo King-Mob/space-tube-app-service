@@ -290,7 +290,7 @@ export const handleMessage = async (event) => {
     }
 
     if (message.includes("!space-tube connect")) {
-        const connectionCode = message.split("!space-tube connect ")[1];
+        const connectionCode = message.split("!space-tube connect")[1].trim();
         const spaceTubeInstance = connectionCode.split("~")[1];
 
         if (spaceTubeInstance === `@space-tube-bot:${HOME_SERVER}`) {
