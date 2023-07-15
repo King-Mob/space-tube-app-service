@@ -230,6 +230,7 @@ const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) 
                 connectionCode: remoteConnectionCode
             })
 
+            sendMessage(event.room_id, "I declare this tube open!");
         }
 
     }
@@ -256,6 +257,8 @@ export const handleRemoteOpen = async (event) => {
             tubeIntermediary: event.content.tubeIntermediary,
             connectedRooms: [localTubeOpening]
         })
+
+        sendMessage(localTubeOpening, "I declare this tube open!");
     }
 }
 
@@ -306,9 +309,14 @@ export const handleMessage = async (event) => {
         console.log("message in tube intermediary");
         //send message to all tube openings managed by this instance
 
+        //this message is either from a user you manage
+        //or needs to be a clone user
+
         const { content: { user: user, userRoomId, name } } = await getItem("userId", event.sender);
 
         sendMessageAsUser(user, userRoomId, message);
+
+
 
         const clone = await getItem("originalUserId", event.sender);
 
