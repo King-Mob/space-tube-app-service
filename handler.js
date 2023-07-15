@@ -299,10 +299,7 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
 }
 
 const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
-    console.log("message from remote tube")
-    console.log(tubeIntermediary);
-    console.log(event);
-    console.log(message);
+    console.log("message from remote tube");
 
     const storedUser = await getItem("userId", event.sender);
 
@@ -320,10 +317,8 @@ const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
         }
         else {
             const cloneName = await getDisplayName(event.room_id, event.sender);
-            console.log(cloneName)
             const newCloneUserResponse = await registerUser(cloneName);
             const newCloneUser = await newCloneUserResponse.json();
-            console.log(newCloneUser);
 
             const cloneUserRoomId = tubeIntermediary.content.connectedRooms[0];
 
