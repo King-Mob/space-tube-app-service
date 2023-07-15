@@ -203,8 +203,8 @@ const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) 
         //to get to here, both rooms have passed !space-tube connect
         console.log("this room should be connected");
 
-        const connectedRooms = [localConnectionCode, remoteConnection].sort();
-        const tubeName = `open-${connectedRooms[0]}~${connectedRooms[1]}`;
+        const connectionCodes = [localConnectionCode, remoteConnection].sort();
+        const tubeName = `open-${connectionCodes[0]}~${connectionCodes[1]}`;
 
         const existingTube = await getItem("name", tubeName);
 
@@ -221,14 +221,13 @@ const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) 
                 name: tubeName,
                 type: "spacetube.open",
                 tubeIntermediary: createdRoom.room_id,
-                connectedRooms,
-                roomId: event.room_id
+                connectedRooms: [event.room_id]
             });
             storeItemShared(sharedTubeManagementRoom, {
                 name: tubeName,
-                type: "spacetube.open",
+                type: "spacetube.remote.open",
                 tubeIntermediary: createdRoom.room_id,
-                connectedRooms
+                connectionCode: remoteConnection
             })
 
         }
@@ -237,30 +236,23 @@ const connectOtherInstance = async (event, remoteConnectionCode, otherInstance) 
     else {
         sendMessage(event.room_id, "Received connection, waiting for other group to connect.");
     }
-
-
-    /*   
-
-    6~ on receipt of tubeOpen in shared management room, store tubeOpen in own room.
-    
-    */
-
-
 }
 
-export const handleOpen = async (event) => {
+// on receipt of tubeOpen in shared management room, store tubeOpen in own room.
+export const handleRemoteOpen = async (event) => {
     if (event.sender !== `@space-tube-bot:${HOME_SERVER}`) {
-        const localTubeOpening = "some room id";
-        // I think this is got from localConnectionCode. which will be the room with the other
-        // instance name in it.
-        // then retrieve the room_id using the tube create command
+
+        const {connectionCode} = event.content;
+
+        const tubeOpening = await getItem("tubeCode",connectionCode);
+
+        const localTubeOpening = tubeOpening.room_id;
 
         storeItem({
             name: event.content.name,
             type: "spacetube.open",
             tubeIntermediary: event.content.tubeIntermediary,
-            connectedRooms: event.content.connectedRooms,
-            roomId: localTubeOpening
+            connectedRooms: [localTubeOpening]
         })
     }
 }
@@ -284,7 +276,7 @@ export const handleMessage = async (event) => {
         const tubeCode = tubeOpening ? tubeOpening.content.tubeCode : `${uuidv4()}~@space-tube-bot:${HOME_SERVER}`;
 
         if (!tubeOpening) {
-            storeItem({ name: `registration-${event.room_id}`, type: "spacetube.create", tubeCode }).catch(err => console.log(err))
+            storeItem({ name: `registration-${event.room_id}`, type: "spacetube.create", tubeCode, roomId: event.room_id }).catch(err => console.log(err))
         }
 
         sendMessage(event.room_id, `The code for this room is ${tubeCode}`);

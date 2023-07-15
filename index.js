@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { AppService, AppserviceHttpError } from "matrix-appservice";
-import { handleMessage, handleInvite, handleOpen } from './handler.js';
+import { handleMessage, handleInvite, handleRemoteOpen } from './handler.js';
 // listening
 const as = new AppService({
   homeserverToken: process.env.HOME_SERVER_TOKEN
@@ -20,8 +20,8 @@ as.on("event", event => {
     case "m.room.member":
       handleInvite(event);
       break;
-    case "spacetube.open":
-      handleOpen(event)
+    case "spacetube.remote.open":
+      handleRemoteOpen(event)
     default:
       break;
   }
