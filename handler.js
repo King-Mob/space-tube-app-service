@@ -246,7 +246,9 @@ export const handleRemoteOpen = async (event) => {
 
         const tubeOpening = await getItem("tubeCode", connectionCode);
 
-        const localTubeOpening = tubeOpening.room_id;
+        const localTubeOpening = tubeOpening.content.roomId;
+
+        console.log(connectionCode, tubeOpening, localTubeOpening);
 
         storeItem({
             name: event.content.name,
