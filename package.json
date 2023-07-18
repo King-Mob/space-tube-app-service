@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "register": "node registerService.js"
+    "register": "node registerService.js",
+    "register-discord": "node discord/registerDiscord.js"
   },
   "author": "king-mob",
   "license": "GPL-3.0-or-later",

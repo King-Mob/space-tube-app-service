@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import { AppService, AppserviceHttpError } from "matrix-appservice";
 import { handleMessage, handleInvite, handleRemoteOpen } from './handler.js';
+import { startDiscord } from './discord/index.js';
+
 // listening
 const as = new AppService({
   homeserverToken: process.env.HOME_SERVER_TOKEN
@@ -61,4 +63,17 @@ as.onUserQuery = function (userId, callback) {
 as.onAliasQuery = async function (alias) {
   console.log("RECV %s", alias);
 };
+
+//handle ping
+const asApp = as.expressApp;
+asApp.post('/_matrix/app/v1/ping', (req, res) => {
+  console.log(req);
+  res.send({ message: "yo how's it going on 8133!" });
+})
+
 as.listen(8133);
+
+//starts discord service on port 8134
+if (process.env.DISCORD_TOKEN) {
+  startDiscord();
+}
