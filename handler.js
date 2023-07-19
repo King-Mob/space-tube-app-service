@@ -435,7 +435,7 @@ export const handleMessage = async (event) => {
 
         const { tubeIntermediary } = tubeOpen.content;
 
-        const tubeUser = await getItem("userRoomId", event.room_id);
+        const tubeUser = await getItem("userRoomId", event.room_id, "spacetube.user");
         let user;
 
         if (tubeUser) {
