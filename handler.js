@@ -418,14 +418,20 @@ export const handleMessage = async (event) => {
         console.log("there was a message in an open tube");
 
         const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
-        if (event.sender.includes("@_space-tube"))
-            if (bridgeUserEvent) {
-                if (event.sender !== bridgeUserEvent.content.userId) {
-                    return;
-                }
-            }
-            else
+
+        if (bridgeUserEvent) {
+            console.log("message sent through bridge");
+            console.log(bridgeUserEvent)
+            if (event.sender !== bridgeUserEvent.content.userId) {
                 return;
+            }
+        }
+        else {
+            if (event.sender.includes("@_space-tube"))
+                return;
+        }
+
+
 
         const { tubeIntermediary } = tubeOpen.content;
 
