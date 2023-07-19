@@ -431,7 +431,7 @@ export const handleMessage = async (event) => {
                 return;
         }
 
-
+        console.log("passing message to tube intermediary")
 
         const { tubeIntermediary } = tubeOpen.content;
 
