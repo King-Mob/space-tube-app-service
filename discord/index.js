@@ -1,5 +1,46 @@
 import express from 'express';
+import fetch from 'node-fetch';
 import { verifyKey, InteractionType, InteractionResponseType } from 'discord-interactions';
+import { storeItem, getItem } from '../storage.js';
+import { createRoom, invite, join, registerUser, sendMessageAsUser } from '../handler.js';
+
+export async function DiscordRequest(endpoint, options) {
+    // append endpoint to root API URL
+    const url = 'https://discord.com/api/v10/' + endpoint;
+    // Stringify payloads
+    if (options.body) options.body = JSON.stringify(options.body);
+    // Use node-fetch to make requests
+    const res = await fetch(url, {
+        headers: {
+            Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+            'Content-Type': 'application/json; charset=UTF-8',
+            'User-Agent': 'DiscordBot (https://github.com/discord/discord-example-app, 1.0.0)',
+        },
+        ...options
+    });
+    // throw API errors
+    if (!res.ok) {
+        const data = await res.json();
+        console.log(res.status);
+        throw new Error(JSON.stringify(data));
+    }
+    // return original response
+    return res;
+}
+
+export function sendMessageDiscord(event, bridgeRoom) {
+    console.log(event);
+    console.log(bridgeRoom);
+    console.log("sending message to discord")
+
+    DiscordRequest(`/channels/${bridgeRoom.channelId}/messages`, {
+        method: "POST",
+        body: {
+            content: event.content.body
+        }
+    });
+    //discord request to send message as the user here
+}
 
 function VerifyDiscordRequest(clientKey) {
     return function (req, res, buf, encoding) {
@@ -21,15 +62,13 @@ export const startDiscord = () => {
     app.use(express.json({ verify: VerifyDiscordRequest(process.env.DISCORD_PUBLIC_KEY) }));
 
     app.get('/', (req, res) => {
-        console.log(req);
         res.send("yo how's it going on 8134!");
     });
 
     app.post('/interactions', async function (req, res) {
         // Interaction type and data
-        const { type, data } = req.body;
+        const { body, body: { type, data } } = req;
 
-        console.log(req.body)
         /**
          * Handle verification requests
          */
@@ -50,6 +89,60 @@ export const startDiscord = () => {
         }
 
         if (data.name === "create") {
+            console.log(body);
+            const groupName = data.options[0].value;
+
+            let room;
+
+            const bridgeRoomEvent = await getItem("channelId", body.channel_id);
+            console.log(bridgeRoomEvent);
+            if (bridgeRoomEvent) {
+                room = bridgeRoomEvent.content;
+                room.room_id = room.roomId;
+            }
+            else {
+                const roomResponse = await createRoom(groupName);
+                room = await roomResponse.json();
+
+                await storeItem({
+                    type: "spacetube.bridge.create",
+                    service: "discord",
+                    bridgeRoomId: room.room_id,
+                    roomId: room.room_id,
+                    channelId: body.channel_id,
+                    guildId: body.guild_id
+                });
+            }
+
+            console.log(room)
+
+            let user;
+            const bridgeUserEvent = await getItem("bridgeRoomId", room.room_id);
+            if (bridgeUserEvent) {
+                user = bridgeUserEvent.content;
+                user.access_token = user.user.access_token;
+            }
+            else {
+                const userResponse = await registerUser(`discord-${groupName}`);
+                user = await userResponse.json();
+                user;
+
+                await storeItem({
+                    type: "spacetube.bridge.user.create",
+                    userId: user.user_id,
+                    user: user,
+                    bridgeRoomId: room.room_id,
+                    userRoomId: room.room_id,
+                    guildId: body.guild_id,
+                    channelId: body.channel_id
+                });
+            }
+
+            await invite(user, room.room_id);
+            await join(user, room.room_id);
+
+            sendMessageAsUser(user, room.room_id, "!space-tube create");
+
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
@@ -59,6 +152,13 @@ export const startDiscord = () => {
         }
 
         if (data.name === "connect") {
+            const connectionCode = data.options[0].value;
+
+            //check for user in tube management using guildid
+            //check for room in tube management using guldId and channelId
+            //send message to room "!space-tube connect <connectionCode>"
+            //hope that works
+
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
@@ -68,6 +168,12 @@ export const startDiscord = () => {
         }
 
         if (data.name === "send") {
+            const message = data.options[0].value;
+
+            //check for user in tube management using guildid
+            //check for room in tube management using guldId and channelId
+            //send message to room
+
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {

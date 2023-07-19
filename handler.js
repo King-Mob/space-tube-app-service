@@ -1,10 +1,11 @@
 import fetch from 'node-fetch';
 import { storeItem, getItem, getItemIncludes, getItemShared, storeItemShared, getDisplayName } from "./storage.js";
 import { v4 as uuidv4 } from 'uuid';
+import { sendMessageDiscord } from './discord/index.js';
 
 const { HOME_SERVER, APPLICATION_TOKEN } = process.env;
 
-const sendMessage = (roomId, message) => {
+export const sendMessage = (roomId, message) => {
     return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/send/m.room.message?user_id=@space-tube-bot:${HOME_SERVER}`, {
         method: 'POST',
         body: JSON.stringify({
@@ -18,7 +19,7 @@ const sendMessage = (roomId, message) => {
     })
 }
 
-const sendMessageAsUser = (user, roomId, message) => {
+export const sendMessageAsUser = (user, roomId, message) => {
     return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/send/m.room.message`, {
         method: 'POST',
         body: JSON.stringify({
@@ -32,10 +33,12 @@ const sendMessageAsUser = (user, roomId, message) => {
     })
 }
 
-const createRoom = () => {
+export const createRoom = (name) => {
     return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/createRoom?user_id=@space-tube-bot:${HOME_SERVER}`, {
         method: 'POST',
-        body: JSON.stringify({}),
+        body: JSON.stringify({
+            name: name ? name : "no-name"
+        }),
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -53,7 +56,7 @@ const getRoomState = (roomId) => {
     })
 }
 
-const registerUser = (userId) => {
+export const registerUser = (userId) => {
     return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/register`, {
         method: 'POST',
         body: JSON.stringify({
@@ -67,7 +70,7 @@ const registerUser = (userId) => {
     })
 }
 
-const setDisplayName = (user, displayName) => {
+export const setDisplayName = (user, displayName) => {
     return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/profile/${user.user_id}/displayname`, {
         method: 'PUT',
         body: JSON.stringify({
@@ -80,7 +83,7 @@ const setDisplayName = (user, displayName) => {
     })
 }
 
-const invite = (user, roomId) => {
+export const invite = (user, roomId) => {
     return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@space-tube-bot:${HOME_SERVER}`, {
         method: 'POST',
         body: JSON.stringify({
@@ -93,7 +96,7 @@ const invite = (user, roomId) => {
     })
 }
 
-const join = (user, roomId) => {
+export const join = (user, roomId) => {
     return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/join/${roomId}`, {
         method: 'POST',
         body: JSON.stringify({}),
@@ -249,8 +252,6 @@ export const handleRemoteOpen = async (event) => {
 
         const localTubeOpening = tubeOpening.content.roomId;
 
-        console.log(connectionCode, tubeOpening, localTubeOpening);
-
         storeItem({
             name: event.content.name,
             type: "spacetube.open",
@@ -342,7 +343,16 @@ const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
 }
 
 export const handleMessage = async (event) => {
-    //for now, if the sender of the event is our instance, do nothing
+    //Check for a bridge
+    const bridgeRoomEvent = await getItem("bridgeRoomId", event.room_id);
+    console.log("what happened")
+    console.log(bridgeRoomEvent)
+    if (bridgeRoomEvent) {
+        console.log("sending message to discord")
+        sendMessageDiscord(event, bridgeRoomEvent.content);
+    }
+
+
     if (event.sender === `@space-tube-bot:${HOME_SERVER}`)
         return;
 
