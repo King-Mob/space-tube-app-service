@@ -117,7 +117,7 @@ export const startDiscord = () => {
             console.log(room)
 
             let user;
-            const bridgeUserEvent = await getItem("bridgeRoomId", room.room_id);
+            const bridgeUserEvent = await getItem("bridgeUserRoomId", room.room_id);
             if (bridgeUserEvent) {
                 user = bridgeUserEvent.content;
                 user.access_token = user.user.access_token;
@@ -125,13 +125,12 @@ export const startDiscord = () => {
             else {
                 const userResponse = await registerUser(`discord-${groupName}`);
                 user = await userResponse.json();
-                user;
 
                 await storeItem({
                     type: "spacetube.bridge.user.create",
                     userId: user.user_id,
                     user: user,
-                    bridgeRoomId: room.room_id,
+                    bridgeUserRoomId: room.room_id,
                     userRoomId: room.room_id,
                     guildId: body.guild_id,
                     channelId: body.channel_id
