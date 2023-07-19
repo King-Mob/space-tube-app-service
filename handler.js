@@ -345,13 +345,13 @@ const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
 export const handleMessage = async (event) => {
     //Check for a bridge
     const bridgeRoomEvent = await getItem("bridgeRoomId", event.room_id);
-    console.log("what happened")
-    console.log(bridgeRoomEvent)
     if (bridgeRoomEvent) {
-        console.log("sending message to discord")
-        sendMessageDiscord(event, bridgeRoomEvent.content);
-    }
+        const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
+        const bridgeUser = bridgeUserEvent.content;
 
+        if (event.sender !== bridgeUser.userId)
+            sendMessageDiscord(event, bridgeRoomEvent.content);
+    }
 
     if (event.sender === `@space-tube-bot:${HOME_SERVER}`)
         return;
@@ -417,8 +417,15 @@ export const handleMessage = async (event) => {
     if (tubeOpen) {
         console.log("there was a message in an open tube");
 
+        const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
         if (event.sender.includes("@_space-tube"))
-            return;
+            if (bridgeUserEvent) {
+                if (event.sender !== bridgeUserEvent.content.userId) {
+                    return;
+                }
+            }
+            else
+                return;
 
         const { tubeIntermediary } = tubeOpen.content;
 
