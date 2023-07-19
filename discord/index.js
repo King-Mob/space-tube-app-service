@@ -153,10 +153,17 @@ export const startDiscord = () => {
         if (data.name === "connect") {
             const connectionCode = data.options[0].value;
 
-            //check for user in tube management using guildid
-            //check for room in tube management using guldId and channelId
-            //send message to room "!space-tube connect <connectionCode>"
-            //hope that works
+            const bridgeRoomEvent = await getItem("channelId", body.channel_id, "spacetube.bridge.create");
+            const bridgeRoom = bridgeRoomEvent.content;
+
+            console.log(bridgeRoom);
+
+            const bridgeUserEvent = await getItem("bridgeUserRoomId", bridgeRoom.roomId);
+            const bridgeUser = bridgeUserEvent.content;
+
+            console.log(bridgeUser)
+
+            sendMessageAsUser(bridgeUser.user, bridgeRoom.roomId, `!space-tube connect ${connectionCode}`);
 
             return res.send({
                 type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,

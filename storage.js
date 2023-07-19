@@ -77,7 +77,7 @@ export const storeItemShared = (sharedRoomId, item) => {
     });
 }
 
-export const getItem = async (key, value) => {
+export const getItem = async (key, value, type) => {
 
     const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
         headers: {
@@ -88,8 +88,15 @@ export const getItem = async (key, value) => {
     const eventsList = await response.json();
 
     for (const event of eventsList.chunk) {
-        if (event.content[key] === value)
-            return event;
+        if (event.content[key] === value) {
+            if (type) { //match by optional type
+                if (event.type === type)
+                    return event;
+            }
+            else
+                return event;
+        }
+
     }
 
     return null;
