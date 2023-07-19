@@ -473,6 +473,9 @@ export const handleMessage = async (event) => {
             await join(newUser, event.room_id);
         }
 
+        console.log(tubeIntermediary)
+        console.log(user)
+
         sendMessageAsUser(user, tubeIntermediary, message);
     }
 }
