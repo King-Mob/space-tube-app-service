@@ -63,13 +63,13 @@ export async function sendMessageDiscord(event, bridgeRoom) {
         });
     }
 
-    console.log(webhook)
+    const displayName = await getDisplayName(event.room_id, event.sender);
 
     DiscordRequest(`/webhooks/${webhook.id}/${webhook.token}`, {
         method: "POST",
         body: {
             content: event.content.body,
-            username: event.sender
+            username: displayName || event.sender
         }
     })
 
