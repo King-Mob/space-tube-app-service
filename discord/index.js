@@ -28,18 +28,53 @@ export async function DiscordRequest(endpoint, options) {
     return res;
 }
 
-export function sendMessageDiscord(event, bridgeRoom) {
+export async function sendMessageDiscord(event, bridgeRoom) {
     console.log(event);
     console.log(bridgeRoom);
     console.log("sending message to discord")
+    // send message as the space tube bot user
 
+    /*
     DiscordRequest(`/channels/${bridgeRoom.channelId}/messages`, {
         method: "POST",
         body: {
             content: event.content.body
         }
-    });
-    //discord request to send message as the user here
+    });*/
+
+    let webhook;
+    const webhookEvent = await getItem("channelId", bridgeRoom.channelId, "spacetube.create.webhook");
+    if (webhookEvent) {
+        webhook = webhookEvent.content;
+    }
+    else {
+        const webhookResponse = await DiscordRequest(`/channels/${bridgeRoom.channelId}/webhooks`, {
+            method: 'POST',
+            body: {
+                name: "spacetube-webhook"
+            }
+        })
+        webhook = await webhookResponse.json();
+        webhook.channelId = bridgeRoom.channelId;
+
+        await storeItem({
+            ...webhook,
+            type: "spacetube.create.webhook"
+        });
+    }
+
+    console.log(webhook)
+
+    DiscordRequest(`/webhooks/${webhook.id}/${webhook.token}`, {
+        method: "POST",
+        body: {
+            content: event.content.body,
+            username: event.sender
+        }
+    })
+
+    // sending message using webhook
+
 }
 
 function VerifyDiscordRequest(clientKey) {
