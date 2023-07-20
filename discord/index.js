@@ -1,7 +1,7 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import { verifyKey, InteractionType, InteractionResponseType } from 'discord-interactions';
-import { storeItem, getItem } from '../storage.js';
+import { storeItem, getItem, getDisplayName } from '../storage.js';
 import { createRoom, invite, join, registerUser, sendMessageAsUser } from '../handler.js';
 
 export async function DiscordRequest(endpoint, options) {
@@ -62,6 +62,8 @@ export async function sendMessageDiscord(event, bridgeRoom) {
             type: "spacetube.create.webhook"
         });
     }
+
+    console.log(webhook)
 
     const displayName = await getDisplayName(event.room_id, event.sender);
 
