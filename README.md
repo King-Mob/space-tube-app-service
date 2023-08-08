@@ -84,16 +84,16 @@ You need an https connection to port 8134 on the server you're running the app s
 
 Currently I'm using ngrok.
 
-`install ngrok``
+`install ngrok`
 
-`ngrox http 8134``
+`ngrox http 8134`
 
 You should get a message that contains this:
-`https://<string-of-letters-and-numbers>.ngrok-free.app/``
+`https://<string-of-letters-and-numbers>.ngrok-free.app/`
 
 Copy that url, add `/interactions` to the end and paste this into the bot interactions url field on the [discord applications interface](https://discord.com/developers/applications) like so:
 
-`https://<string-of-letters-and-numbers>.ngrok-free.app/interactions``
+`https://<string-of-letters-and-numbers>.ngrok-free.app/interactions`
 
 Click the save button and if it disappears, you are good to go!
 
