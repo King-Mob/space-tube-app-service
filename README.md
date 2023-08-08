@@ -42,8 +42,7 @@ on that server you need:
 * git `git --version`
 * npm `node --version` recommend later version of node, 18.12.0 works 
 
-1. create your homeserver. this service assumes you have a domain, matrix.example.com that you run matrix on. this is how [matrix-docker-ansible-deploy](https://github.com/spantaleev/matrix-docker-ansible-deploy) gets you to set it up.  
-    a. you need the federation turned on if you want space-tube to work across different homeservers.
+1. create your homeserver. this service assumes you have a domain, matrix.example.com that you run matrix on. This is how [matrix-docker-ansible-deploy](https://github.com/spantaleev/matrix-docker-ansible-deploy) gets you to set it up. If you're new to matrix, matrix-docker-ansible-deploy is a straightforward way to start. Note: you need the federation turned on if you want space-tube to work across different homeservers.
 2. `git clone https://github.com/King-Mob/space-tube-app-service.git` the appservice to your server. `cd space-tube-app-service` to open the directory
 3. `npm install` the app service
 4. `cp .env.example .env` creates a .env file by copying the example env into the project folder. Make sure HOST is set to either host.docker.internal or localhost and HOME_SERVER set to the domain you're running matrix on, e.g. example.com
