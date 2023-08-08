@@ -42,36 +42,30 @@ on that server you need:
 * git `git --version`
 * npm `node --version` recommend later version of node, 18.12.0 works 
 
-
-1. create your homeserver. this service assumes you have a domain, matrix.example.com that you run matrix on. this is how matrix-ansible-docker gets you to set it up.
-	a. you need the federation turned on if you want space-tube to work across different homeservers.
+1. create your homeserver. this service assumes you have a domain, matrix.example.com that you run matrix on. this is how [matrix-docker-ansible-deploy](https://github.com/spantaleev/matrix-docker-ansible-deploy) gets you to set it up.  
+    a. you need the federation turned on if you want space-tube to work across different homeservers.
 2. `git clone https://github.com/King-Mob/space-tube-app-service.git` the appservice to your server. `cd space-tube-app-service` to open the directory
 3. `npm install` the app service
-4. create a .env file by copying the example env into the root directory,
-Make sure HOST is set to either host.docker.internal or localhost and HOME_SERVER set to the domain you're running matrix on, e.g. example.com
-5. `npm run register` to create your registration file
-6. Copy the tokens into your .env file
-7. Add the registration config file to your homeserver. For matrix-ansible-docker that means adding these vars to your vars.yml
-
+4. `cp .env.example .env` creates a .env file by copying the example env into the project folder. Make sure HOST is set to either host.docker.internal or localhost and HOME_SERVER set to the domain you're running matrix on, e.g. example.com
+5. `npm run register` to create your registration file. This creates registration.yaml in the project folder.
+6. Copy the hs_token and as_token from registration.yaml and paste into your .env file as HOME_SERVER_TOKEN and APPLICATION_TOKEN respectively.
+7. Add the registration config file to your homeserver. For matrix-ansible-docker that means adding these vars to your vars.yml:
+```
 matrix_synapse_container_extra_arguments: ['--add-host host.docker.internal:host-gateway --mount type=bind,src=/root/space-tube-app-service,dst=/appservice-spacetube']
 matrix_synapse_app_service_config_files: ['/appservice-spacetube/registration.yaml']
+```
 
-For a normal synapse instance just add the path to the registration.yaml to the server config file.
+For a normal synapse instance add the path to the registration.yaml to the [server config file](https://matrix-org.github.io/synapse/latest/application_services.html), which should be in `configs/homeserver.yaml` within synapse.
+`app_service_config_files: - /root/space-tube-app-service/registration.yaml`
 
-8. set-up and restart your homeserver
-9. start the app service, npm start, or use systemd or pm2 etc to keep it running
+8. Set-up and restart your homeserver
+9. Start the app service using `npm start`. To have it run indefinitely, you'll need a process runner like systemd or pm2. [SystemD](https://nodesource.com/blog/running-your-node-js-app-with-systemd-part-1/) is a standard linux way to run processes. [PM2](https://www.digitalocean.com/community/tutorials/how-to-use-pm2-to-setup-a-node-js-production-environment-on-an-ubuntu-vps) is an easy to use node solution.
 
-10. start talking to space tube
+10. Start talking to space tube
 	invite `@space-tube-bot:<your domain>` to your chat e.g. @space-tube-bot:example.com
 	`!space-tube echo <some test text>`
 
 You can interact with it in the same way as the default space-tube instance, and connect to others on different instances.
-
-How to have the app service keep running:
-
-https://nodesource.com/blog/running-your-node-js-app-with-systemd-part-1/
-https://www.digitalocean.com/community/tutorials/how-to-use-pm2-to-setup-a-node-js-production-environment-on-an-ubuntu-vps
-
 
 ### Discord Set-up
 
@@ -80,32 +74,39 @@ The discord connection uses a bot created through discord's interface here: http
 Create a discord application, and a bot.
 
 Copy the  public key, the app id, and the discord token into your .env file, like so:
-
+```
 DISCORD_PUBLIC_KEY=something
 DISCORD_APP_ID=something
 DISCORD_TOKEN=something
-
+```
 run `npm run register-discord`
 
 You need an https connection to port 8134 on the server you're running the app service on.
 
 Currently I'm using ngrok.
 
-install ngrok
+`install ngrok``
 
-ngrox http 8134
+`ngrox http 8134``
 
 You should get a message that contains this:
 `https://<string-of-letters-and-numbers>.ngrok-free.app/``
 
-Paste this into the bot interactions url field like so:
+Copy that url, add `/interactions` to the end and paste this into the bot interactions url field on the [discord applications interface](https://discord.com/developers/applications) like so:
 
 `https://<string-of-letters-and-numbers>.ngrok-free.app/interactions``
 
-If the save button disappears, you are good to go!
+Click the save button and if it disappears, you are good to go!
 
 ## Feedback
 
 Please join me in #space-tube-public:spacetu.be on matrix if you have any feedback or questions at all about the project.
 
 Life is more spacious in tubes!
+
+## Acknowledgements
+
+This project was funded through the NGI0 Entrust Fund, a fund established by NLnet with financial support from the European Commission's Next Generation Internet programme, under the aegis of DG Communications Networks, Content and Technology under grant agreement No 101069594.
+
+![nlnet logo](https://nlnet.nl/logo/banner.png)
+![NG10 logo](https://nlnet.nl/image/logos/NGI0Entrust_tag.svg)
