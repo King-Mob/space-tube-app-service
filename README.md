@@ -46,18 +46,18 @@ on that server you need:
 2. `git clone https://github.com/King-Mob/space-tube-app-service.git` the appservice to your server. `cd space-tube-app-service` to open the directory
 3. `npm install` the app service
 4. `cp .env.example .env` creates a .env file by copying the example env into the project folder. Make sure HOST is set to either host.docker.internal or localhost and HOME_SERVER set to the domain you're running matrix on, e.g. example.com
-5. `npm run register` to create your registration file. This creates registration.yaml in the project folder.
-6. Copy the hs_token and as_token from registration.yaml and paste into your .env file as HOME_SERVER_TOKEN and APPLICATION_TOKEN respectively.
-7. Add the registration config file to your homeserver. For matrix-ansible-docker that means adding these vars to your vars.yml:
+5. `npm run register` to create your registration file. This creates `registration.yaml` in the project folder.
+6. Copy the `hs_token` and `as_token` from `registration.yaml` and paste into your `.env` file as `HOME_SERVER_TOKEN` and `APPLICATION_TOKEN` respectively.
+7. Add the path to the registration config file to your homeserver. For matrix-ansible-docker that means adding these vars to your vars.yml:
 ```
 matrix_synapse_container_extra_arguments: ['--add-host host.docker.internal:host-gateway --mount type=bind,src=/root/space-tube-app-service,dst=/appservice-spacetube']
 matrix_synapse_app_service_config_files: ['/appservice-spacetube/registration.yaml']
 ```
 
-For a normal synapse instance add the path to the registration.yaml to the [server config file](https://matrix-org.github.io/synapse/latest/application_services.html), which should be in `configs/homeserver.yaml` within synapse.
+For a normal synapse instance add the path to `registration.yaml` to the [server config file](https://matrix-org.github.io/synapse/latest/application_services.html), which should be in `configs/homeserver.yaml` within synapse.
 `app_service_config_files: - /root/space-tube-app-service/registration.yaml`
 
-8. Set-up and restart your homeserver
+8. Set-up and restart your homeserver.
 9. Start the app service using `npm start`. To have it run indefinitely, you'll need a process runner like systemd or pm2. [SystemD](https://nodesource.com/blog/running-your-node-js-app-with-systemd-part-1/) is a standard linux way to run processes. [PM2](https://www.digitalocean.com/community/tutorials/how-to-use-pm2-to-setup-a-node-js-production-environment-on-an-ubuntu-vps) is an easy to use node solution.
 
 10. Start talking to space tube
