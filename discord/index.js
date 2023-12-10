@@ -160,7 +160,7 @@ export const startDiscord = () => {
                 user.access_token = user.user.access_token;
             }
             else {
-                const userResponse = await registerUser(`discord-${groupName}`);
+                const userResponse = await registerUser(`disco-${groupName}`);
                 user = await userResponse.json();
 
                 await storeItem({
