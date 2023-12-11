@@ -22,7 +22,7 @@ There's a default instance hosted on spacetu.be that you can use.
 
 ### On Discord
 
-1. Add the Space Tube bot to your server, using this link: https://discord.com/api/oauth2/authorize?client_id=1024778983021215764&permissions=67584&scope=applications.commands%20bot
+1. Add the Space Tube bot to your server, using this link: https://discord.com/oauth2/authorize?client_id=1024778983021215764&permissions=603982848&response_type=code&redirect_uri=https%3A%2F%2Fspacetube.spacetu.be&scope=messages.read+bot
 2. Add Space Tube bot to the channel you want to open the tube in
 3. use the /create command to make a new tube opening
 4. Copy the connection code Space Tube Bot sent you
