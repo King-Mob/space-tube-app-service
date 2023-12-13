@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import express from 'express';
+import path from 'path';
 import { AppService, AppserviceHttpError } from "matrix-appservice";
 import { handleMessage, handleInvite, handleRemoteOpen } from './handler.js';
 import { startDiscord } from './discord/index.js';
@@ -73,7 +75,15 @@ asApp.post('/_matrix/app/v1/ping', (req, res) => {
 
 as.listen(8133);
 
-//starts discord service on port 8134
+const app = express();
+
+app.get('/', function (req, res) {
+  res.sendFile(path.resolve("web/index.html"));
+});
+
+//starts discord service
 if (process.env.DISCORD_TOKEN) {
-  startDiscord();
+  startDiscord(app);
 }
+
+app.listen(8134);

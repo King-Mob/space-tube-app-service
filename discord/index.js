@@ -94,13 +94,8 @@ function VerifyDiscordRequest(clientKey) {
     };
 }
 
-export const startDiscord = () => {
-    const app = express();
+export const startDiscord = (app) => {
     app.use(express.json({ verify: VerifyDiscordRequest(process.env.DISCORD_PUBLIC_KEY) }));
-
-    app.get('/', (req, res) => {
-        res.send("yo how's it going on 8134!");
-    });
 
     app.post('/interactions', async function (req, res) {
         // Interaction type and data
@@ -226,5 +221,5 @@ export const startDiscord = () => {
         }
     });
 
-    app.listen(8134);
+
 }
