@@ -220,6 +220,4 @@ export const startDiscord = (app) => {
             });
         }
     });
-
-
 }
