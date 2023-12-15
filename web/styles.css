@@ -1,0 +1,22 @@
+h1 {
+  color: red;
+}
+
+body {
+  height: 100%;
+}
+
+#tube-room-container {
+  height: 50%;
+}
+
+#matrix-room-container {
+  height: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+input {
+  font-size: 5rem;
+}

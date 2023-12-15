@@ -1,21 +1,21 @@
-import 'dotenv/config';
-import express from 'express';
-import path from 'path';
+import "dotenv/config";
+import express from "express";
+import path from "path";
 import { AppService, AppserviceHttpError } from "matrix-appservice";
-import { handleMessage, handleInvite, handleRemoteOpen } from './handler.js';
-import { startDiscord } from './discord/index.js';
+import { handleMessage, handleInvite, handleRemoteOpen } from "./handler.js";
+import { startDiscord } from "./discord/index.js";
 
 // listening
 const as = new AppService({
-  homeserverToken: process.env.HOME_SERVER_TOKEN
+  homeserverToken: process.env.HOME_SERVER_TOKEN,
 });
 
 as.on("http-log", (event) => {
   console.log("http-log", event);
 });
 
-as.on("event", event => {
-  console.log("event received", event)
+as.on("event", (event) => {
+  console.log("event received", event);
 
   switch (event.type) {
     case "m.room.message":
@@ -25,22 +25,22 @@ as.on("event", event => {
       handleInvite(event);
       break;
     case "spacetube.remote.open":
-      handleRemoteOpen(event)
+      handleRemoteOpen(event);
     default:
       break;
   }
-})
+});
 
-as.on("ephemeral", event => {
+as.on("ephemeral", (event) => {
   console.log(event);
-})
+});
 
 as.onUserQuery = function (userId, callback) {
   // handle the incoming user query then respond
   console.log("RECV %s", userId);
 
-  console.log("is this the invite function???")
-  console.log(callback)
+  console.log("is this the invite function???");
+  console.log(callback);
 
   /*
   // if this userId cannot be created, or if some error
@@ -68,17 +68,25 @@ as.onAliasQuery = async function (alias) {
 
 //handle ping
 const asApp = as.expressApp;
-asApp.post('/_matrix/app/v1/ping', (req, res) => {
+asApp.post("/_matrix/app/v1/ping", (req, res) => {
   console.log(req);
   res.send({ message: "yo how's it going on 8133!" });
-})
+});
 
 as.listen(8133);
 
 const app = express();
 
-app.get('/', function (req, res) {
+app.get("/", function (req, res) {
   res.sendFile(path.resolve("web/index.html"));
+});
+
+app.get("/styles.css", (ref, res) => {
+  res.sendFile(path.resolve("web/styles.css"));
+});
+
+app.get("/scripts.js", (ref, res) => {
+  res.sendFile(path.resolve("web/scripts.js"));
 });
 
 //starts discord service
