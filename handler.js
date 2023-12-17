@@ -588,7 +588,7 @@ export const handleLink = async (event) => {
     });
     linkToken = newLinkToken;
   } else {
-    linkToken = event.content.linkToken;
+    linkToken = linkEvent.content.linkToken;
   }
 
   sendMessage(
