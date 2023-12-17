@@ -15,11 +15,27 @@ const tubeCode = urlParams.get("tubeCode");
 const start = async () => {
   if (!tubeCode) {
     return;
-    //take to homepage and check localstorage for some optional spacetube codes?
+    //??take to homepage and check localstorage for some optional spacetube codes?
   }
 
-  //access user details from localstorage
-  //  if none, register a user, invite to matrix room id and store in localstorage
+  let user;
+  const storedUser = localStorage.getItem("spacetube-user");
+  if (!storedUser) {
+    const userName = "jeff";
+    const response = await fetch(`${url}/api/register`, {
+      method: "post",
+      body: JSON.stringify({ tubeCode, userName }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log(response);
+
+    // store name and authcode in localstorage
+  } else {
+    user = JSON.parse(storedUser);
+  }
 
   //send code and user details to spacetube api to get matrix room and tube room details
   //  this should be a direct matrix client server api request anyway

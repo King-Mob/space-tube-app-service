@@ -81,12 +81,26 @@ app.get("/", function (req, res) {
   res.sendFile(path.resolve("web/index.html"));
 });
 
-app.get("/styles.css", (ref, res) => {
+app.get("/styles.css", (req, res) => {
   res.sendFile(path.resolve("web/styles.css"));
 });
 
-app.get("/scripts.js", (ref, res) => {
+app.get("/scripts.js", (req, res) => {
   res.sendFile(path.resolve("web/scripts.js"));
+});
+
+app.post("/api/register", (req, res) => {
+  //check tubecode exists
+
+  // register a user
+
+  //invite to matrix room id
+
+  //return auth code
+
+  res.send({
+    success: true,
+  });
 });
 
 //starts discord service
