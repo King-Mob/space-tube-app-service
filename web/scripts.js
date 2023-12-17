@@ -10,10 +10,10 @@ const url = `localhost:8134`;
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
-const tubeCode = urlParams.get("tubeCode");
+const linkToken = urlParams.get("linkToken");
 
 const start = async () => {
-  if (!tubeCode) {
+  if (!linkToken) {
     return;
     //??take to homepage and check localstorage for some optional spacetube codes?
   }
@@ -24,7 +24,7 @@ const start = async () => {
     const userName = "jeff";
     const response = await fetch(`${url}/api/register`, {
       method: "post",
-      body: JSON.stringify({ tubeCode, userName }),
+      body: JSON.stringify({ linkToken, userName }),
       headers: {
         "Content-Type": "application/json",
       },
@@ -44,7 +44,7 @@ const start = async () => {
 
   const response = await fetch(`${url}/api/tubeinfo`, {
     method: "post",
-    body: JSON.stringify({ tubeCode, userDetails }),
+    body: JSON.stringify({ linkToken, userDetails }),
     headers: {
       "Content-Type": "application/json",
     },

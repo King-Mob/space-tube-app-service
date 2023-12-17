@@ -577,24 +577,22 @@ export const handleInvite = async (event) => {
 };
 
 export const handleLink = async (event) => {
-  //check for tube code event by room id
   let linkEvent = await getItem("roomId", event.room_id, "spacetube.link");
-
+  let linkToken;
   if (!linkEvent) {
-    linkEvent = {
+    const newLinkToken = uuidv4();
+    await storeItem({
       type: "spacetube.link",
-      linkToken: uuidv4(),
+      linkToken: newLinkToken,
       roomId: event.room_id,
-    };
-    await storeItem(linkEvent);
+    });
+    linkToken = newLinkToken;
+  } else {
+    linkToken = event.content.linkToken;
   }
-
-  console.log(linkEvent);
 
   sendMessage(
     event.room_id,
-    `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkEvent.linkToken}`
+    `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}`
   );
-
-  //send message to room with link containing linkToken
 };
