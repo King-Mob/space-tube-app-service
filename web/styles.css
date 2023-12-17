@@ -4,6 +4,11 @@ h1 {
   font-size: 5rem;
 }
 
+p {
+  font-family: monospace;
+  font-size: 3rem;
+}
+
 body {
   height: 100%;
   width: 100%;
@@ -16,6 +21,11 @@ body {
   width: 100%;
 }
 
+.room-events-container {
+  height: 90%;
+  overflow-y: scroll;
+}
+
 @media only screen and (max-width: 600px) {
   body {
     flex-direction: row-reverse;
@@ -26,12 +36,28 @@ body {
   }
 }
 
+@media only screen and (max-width: 600px) {
+  body {
+    background-color: lightblue;
+  }
+}
+
 #matrix-room-container {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
+#new-message-container {
+  display: flex;
+}
+
 input {
   font-size: 5rem;
+  width: 90%;
+}
+
+#send-button {
+  font-size: 5rem;
+  width: 10%;
 }

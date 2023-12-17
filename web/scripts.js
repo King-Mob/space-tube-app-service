@@ -4,8 +4,7 @@ console.log("welcome to s p a c e t u b e");
 //react app might be a lot better.
 
 const homeServer = "spacetu.be";
-//const url = `https://spacetube.${homeServer}`;
-const url = `localhost:8134`;
+const url = `https://spacetube.${homeServer}`;
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
@@ -29,41 +28,98 @@ const start = async () => {
         "Content-Type": "application/json",
       },
     });
+    const registration = await response.json();
 
-    console.log(response);
+    if (registration.success) {
+      user = {
+        name: userName,
+        userId: registration.user_id,
+        accessToken: registration.access_token,
+      };
 
-    // store name and authcode in localstorage
+      localStorage.setItem("spacetube-user", JSON.stringify(user));
+    } else {
+      console.log("registration failed");
+      return;
+    }
   } else {
     user = JSON.parse(storedUser);
   }
 
-  //send code and user details to spacetube api to get matrix room and tube room details
-  //  this should be a direct matrix client server api request anyway
-  //  actually maybe not for the tube room if we want that to be privileged
-  //  otherwise we have to share the bot details
+  console.log(user);
 
-  const response = await fetch(`${url}/api/tubeinfo`, {
-    method: "post",
-    body: JSON.stringify({ linkToken, userDetails }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  console.log(response); //response has matrix room id and a token to request tube room
+  const response = await fetch(`${url}/api/tubeInfo?linkToken=${linkToken}`);
+  const tubeInfo = await response.json();
 
   const getRooms = async () => {
-    //matrix client server request for matrix room events
-    //spacetube api request for tube room details, including userdetails and token
-    //return rooms;
+    const response = await fetch(
+      `https://matrix.${homeServer}/_matrix/client/v3/rooms/${tubeInfo.matrixRoomId}/messages?limit=1000`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.accessToken}`,
+        },
+      }
+    );
+    const eventsList = await response.json();
+
+    return {
+      matrixRoom: eventsList.chunk,
+      tubeRoom: tubeInfo.tubeRoomEvents,
+    };
   };
 
   const renderRooms = (rooms) => {
-    //display matrix room and tube room state/events
-    //for each event in the matrix room result, create a div and put a p inside
-    //make a button and add the sendEvent function to it.
-    const sendEvent = (event) => {
-      //send an event to the matrix room
+    const matrixRoomContainer = document.getElementById(
+      "matrix-room-events-container"
+    );
+
+    rooms.matrixRoom.forEach((event) => {
+      if (event.type === "m.room.message") {
+        const messageElement = document.createElement("p");
+        messageElement.innerHTML = `${event.sender}: ${event.content.body}`;
+        matrixRoomContainer.append(messageElement);
+      }
+    });
+
+    const tubeRoomContainer = document.getElementById(
+      "tube-room-events-container"
+    );
+
+    rooms.tubeRoom.forEach((event) => {
+      if (event.type === "m.room.message") {
+        const messageElement = document.createElement("p");
+        messageElement.innerHTML = `${event.sender}: ${event.content.body}`;
+        tubeRoomContainer.append(messageElement);
+      }
+    });
+
+    const button = document.getElementById("send-button");
+    button.disabled = false;
+
+    const input = document.getElementById("new-message-text");
+    input.onchange = (event) => {
+      const message = event.target.value;
+      console.log(message);
+
+      button.onclick = () => sendEvent(message);
+    };
+
+    const sendEvent = async (message) => {
+      fetch(
+        `https://matrix.${homeServer}/_matrix/client/v3/rooms/${tubeInfo.matrixRoomId}/send/m.room.message`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            body: message,
+            msgtype: "m.text",
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.accessToken}`,
+          },
+        }
+      );
     };
   };
 

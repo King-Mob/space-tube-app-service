@@ -7,10 +7,18 @@
   <body>
     <div id="tube-room-container" class="room-container">
       <h1>Tube Room</h1>
+      <div id="tube-room-events-container" class="room-events-container"></div>
     </div>
     <div id="matrix-room-container" class="room-container">
       <h1>Matrix Room</h1>
-      <input type="text" />
+      <div
+        id="matrix-room-events-container"
+        class="room-events-container"
+      ></div>
+      <div id="new-message-container">
+        <input type="text" id="new-message-text" />
+        <button id="send-button" disabled>-></button>
+      </div>
     </div>
     <script src="scripts.js"></script>
   </body>

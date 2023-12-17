@@ -2,7 +2,16 @@ import "dotenv/config";
 import express from "express";
 import path from "path";
 import { AppService, AppserviceHttpError } from "matrix-appservice";
-import { handleMessage, handleInvite, handleRemoteOpen } from "./handler.js";
+import {
+  handleMessage,
+  handleInvite,
+  handleRemoteOpen,
+  registerUser,
+  invite,
+  join,
+  setDisplayName,
+} from "./handler.js";
+import { getItem, getItemIncludes } from "./storage.js";
 import { startDiscord } from "./discord/index.js";
 
 // listening
@@ -75,7 +84,10 @@ asApp.post("/_matrix/app/v1/ping", (req, res) => {
 
 as.listen(8133);
 
+//spacetube service on 8134
+
 const app = express();
+app.use(express.json());
 
 app.get("/", function (req, res) {
   res.sendFile(path.resolve("web/index.html"));
@@ -89,18 +101,69 @@ app.get("/scripts.js", (req, res) => {
   res.sendFile(path.resolve("web/scripts.js"));
 });
 
-app.post("/api/register", (req, res) => {
-  //check tubecode exists
+app.post("/api/register", async (req, res) => {
+  const linkEvent = await getItem(
+    "linkToken",
+    req.body.linkToken,
+    "spacetube.link"
+  );
+  if (linkEvent) {
+    const userRegistration = await registerUser(req.body.userName);
+    const user = await userRegistration.json();
 
-  // register a user
+    await setDisplayName(user, req.body.userName);
+    await invite(user, linkEvent.content.roomId);
+    await join(user, linkEvent.content.roomId);
 
-  //invite to matrix room id
+    res.send({
+      success: true,
+      ...user,
+    });
+  } else {
+    res.send({
+      success: false,
+      message: "No room active with that link token",
+    });
+  }
+});
 
-  //return auth code
+app.get("/api/tubeInfo", async (req, res) => {
+  const linkEvent = await getItem(
+    "linkToken",
+    req.query.linkToken,
+    "spacetube.link"
+  );
+  if (linkEvent) {
+    //get tube room events
+    const tube = await getItemIncludes(
+      "connectedRooms",
+      linkEvent.content.roomId
+    );
+    const { tubeIntermediary } = tube.content;
 
-  res.send({
-    success: true,
-  });
+    const response = await fetch(
+      `https://matrix.${process.env.HOME_SERVER}/_matrix/client/v3/rooms/${tubeIntermediary}/messages?limit=1000`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.APPLICATION_TOKEN}`,
+        },
+      }
+    );
+    const eventsList = await response.json();
+
+    res.send({
+      success: true,
+      matrixRoomId: linkEvent.content.roomId,
+      tubeRoomEvents: eventsList.chunk,
+    });
+  } else {
+    res.send({
+      success: false,
+      message: "No room active with that link token",
+    });
+  }
+  //send matrix room id and tube room events
 });
 
 //starts discord service
