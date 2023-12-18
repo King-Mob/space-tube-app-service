@@ -63,7 +63,10 @@ const start = async () => {
 
     return {
       matrixRoom: eventsList.chunk,
-      tubeRoom: tubeInfo.tubeRoomEvents,
+      tubeRoom: {
+        name: tubeInfo.tubeRoomName,
+        events: tubeInfo.tubeRoomEvents
+      }
     };
   };
 
@@ -72,25 +75,84 @@ const start = async () => {
       "matrix-room-events-container"
     );
 
+    rooms.matrixRoom.names = {};
+
     rooms.matrixRoom.forEach((event) => {
+      if (event.type === "m.room.name") {
+        const roomTitle = document.getElementById("matrix-room-title");
+        roomTitle.innerHTML = "🏠" + event.content.name;
+      }
       if (event.type === "m.room.message") {
+        const messageContainerElement = document.createElement("div");
+        messageContainerElement.classList.add("message-container");
+        const nameElement = document.createElement("p");
+        nameElement.innerHTML = rooms.matrixRoom.names[event.sender] || event.sender;
+        nameElement.classList.add("name");
+        messageContainerElement.append(nameElement);
         const messageElement = document.createElement("p");
-        messageElement.innerHTML = `${event.sender}: ${event.content.body}`;
-        matrixRoomContainer.append(messageElement);
+        messageElement.innerHTML = event.content.body;
+        messageContainerElement.append(messageElement);
+        messageContainerElement.onclick = () => {
+          if (confirm("Send this message to the tube?")) {
+            const txnId = self.crypto.randomUUID();
+
+            fetch(`https://matrix.${homeServer}/_matrix/client/v3/rooms/${tubeInfo.matrixRoomId}/send/spacetube.egress/${txnId}?user_id=@${user.userId}`, {
+              method: "PUT",
+              body: JSON.stringify({
+                type: "spacetube.egress",
+                body: event.content.body
+              }),
+              headers: {
+                'Content-Type': 'application/json',
+                "Authorization": `Bearer ${user.accessToken}`
+              }
+            });
+          }
+        }
+        matrixRoomContainer.append(messageContainerElement);
+      }
+      if (event.type === "m.room.member" && event.content.displayname && event.content.membership === "join") {
+        rooms.matrixRoom.names[event.sender] = event.content.displayname;
       }
     });
+
+    console.log(rooms.matrixRoom)
+
+    matrixRoomContainer.scrollTo(0, matrixRoomContainer.scrollHeight);
 
     const tubeRoomContainer = document.getElementById(
       "tube-room-events-container"
     );
 
-    rooms.tubeRoom.forEach((event) => {
+    rooms.tubeRoom.names = {};
+
+    rooms.tubeRoom.events.forEach((event) => {
+      if (event.type === "m.room.name") {
+        const roomTitle = document.getElementById("tube-room-title");
+        roomTitle.innerHTML = event.content.name;
+      }
       if (event.type === "m.room.message") {
+        const messageContainerElement = document.createElement("div");
+        messageContainerElement.classList.add("message-container");
+        const nameElement = document.createElement("p");
+        nameElement.innerHTML = rooms.tubeRoom.names[event.sender] || event.sender;
+        nameElement.classList.add("name");
+        messageContainerElement.append(nameElement);
         const messageElement = document.createElement("p");
-        messageElement.innerHTML = `${event.sender}: ${event.content.body}`;
-        tubeRoomContainer.append(messageElement);
+        messageElement.innerHTML = event.content.body;
+        messageContainerElement.append(messageElement);
+        tubeRoomContainer.append(messageContainerElement);
+      }
+      if (event.type === "m.room.member" && event.content.displayname) {
+        rooms.tubeRoom.names[event.sender] = event.content.displayname;
       }
     });
+
+    const roomTitle = document.getElementById("tube-room-title");
+    const tubeRoomTitle = `🛸🛸${rooms.tubeRoom.names[Object.keys(rooms.tubeRoom.names)[2]]} + ${rooms.tubeRoom.names[Object.keys(rooms.tubeRoom.names)[3]]}🛸🛸`;
+    roomTitle.innerHTML = tubeRoomTitle;
+
+    tubeRoomContainer.scrollTo(0, tubeRoomContainer.scrollHeight);
 
     const button = document.getElementById("send-button");
     button.disabled = false;
@@ -98,9 +160,12 @@ const start = async () => {
     const input = document.getElementById("new-message-text");
     input.onchange = (event) => {
       const message = event.target.value;
-      console.log(message);
 
-      button.onclick = () => sendEvent(message);
+      button.onclick = async () => {
+        sendEvent(message);
+        input.value = "";
+        setTimeout(() => getRooms().then(rooms => renderRooms(rooms)), 100);
+      }
     };
 
     const sendEvent = async (message) => {
@@ -121,7 +186,7 @@ const start = async () => {
     };
   };
 
-  renderRooms(await getRooms());
+  getRooms().then(rooms => renderRooms(rooms));
 };
 
 start();

@@ -598,3 +598,23 @@ export const handleLink = async (event) => {
     `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${name}`
   );
 };
+
+export const handleEgress = async (event) => {
+  const message = event.content.body;
+  const tubeIntermediary = await getItem("tubeIntermediary", event.room_id);
+
+  if (tubeIntermediary) {
+    console.log("egress event in tube intermediary");
+
+    const tubeName = tubeIntermediary.content.name;
+
+    //later when we use connection codes throughout, test if the instances are the same
+    if (tubeName.includes("~")) {
+      handleMessageRemoteTube(tubeIntermediary, event, message);
+      return;
+    } else {
+      handleMessageLocalTube(tubeIntermediary, event, message);
+      return;
+    }
+  }
+}

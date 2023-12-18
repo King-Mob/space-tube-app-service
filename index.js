@@ -6,6 +6,7 @@ import {
   handleMessage,
   handleInvite,
   handleRemoteOpen,
+  handleEgress,
   registerUser,
   invite,
   join,
@@ -36,6 +37,8 @@ as.on("event", (event) => {
       break;
     case "spacetube.remote.open":
       handleRemoteOpen(event);
+    case "spacetube.egress":
+      handleEgress(event);
     default:
       break;
   }
@@ -93,6 +96,10 @@ insertEnv(process.env);
 
 app.get("/", function (req, res) {
   res.sendFile(path.resolve("web/index.html"));
+});
+
+app.get("/favicon.png", function (req, res) {
+  res.sendFile(path.resolve("web/favicon.png"));
 });
 
 app.get("/styles.css", (req, res) => {
