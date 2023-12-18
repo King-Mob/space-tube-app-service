@@ -46,11 +46,11 @@ const start = async () => {
 
   console.log(user);
 
-  const response = await fetch(`${url}/api/tubeInfo?linkToken=${linkToken}`);
-  const tubeInfo = await response.json();
-
   const getRooms = async () => {
-    const response = await fetch(
+    const tubeInfoResponse = await fetch(`${url}/api/tubeInfo?linkToken=${linkToken}`);
+    const tubeInfo = await tubeInfoResponse.json();
+
+    const matrixRoomResponse = await fetch(
       `https://matrix.${homeServer}/_matrix/client/v3/rooms/${tubeInfo.matrixRoomId}/messages?limit=1000`,
       {
         headers: {
@@ -59,9 +59,10 @@ const start = async () => {
         },
       }
     );
-    const eventsList = await response.json();
+    const eventsList = await matrixRoomResponse.json();
 
     return {
+      matrixRoomId: tubeInfo.matrixRoomId,
       matrixRoom: eventsList.chunk,
       tubeRoom: {
         name: tubeInfo.tubeRoomName,
@@ -74,6 +75,7 @@ const start = async () => {
     const matrixRoomContainer = document.getElementById(
       "matrix-room-events-container"
     );
+    matrixRoomContainer.replaceChildren();
 
     rooms.matrixRoom.names = {};
 
@@ -96,7 +98,7 @@ const start = async () => {
           if (confirm("Send this message to the tube?")) {
             const txnId = self.crypto.randomUUID();
 
-            fetch(`https://matrix.${homeServer}/_matrix/client/v3/rooms/${tubeInfo.matrixRoomId}/send/spacetube.egress/${txnId}?user_id=@${user.userId}`, {
+            fetch(`https://matrix.${homeServer}/_matrix/client/v3/rooms/${rooms.matrixRoomId}/send/spacetube.egress/${txnId}?user_id=@${user.userId}`, {
               method: "PUT",
               body: JSON.stringify({
                 type: "spacetube.egress",
@@ -108,6 +110,7 @@ const start = async () => {
               }
             });
           }
+          setTimeout(() => getRooms().then(rooms => renderRooms(rooms)), 3500);
         }
         matrixRoomContainer.append(messageContainerElement);
       }
@@ -116,13 +119,13 @@ const start = async () => {
       }
     });
 
-    console.log(rooms.matrixRoom)
-
     matrixRoomContainer.scrollTo(0, matrixRoomContainer.scrollHeight);
 
     const tubeRoomContainer = document.getElementById(
       "tube-room-events-container"
     );
+
+    tubeRoomContainer.replaceChildren();
 
     rooms.tubeRoom.names = {};
 
@@ -170,7 +173,7 @@ const start = async () => {
 
     const sendEvent = async (message) => {
       fetch(
-        `https://matrix.${homeServer}/_matrix/client/v3/rooms/${tubeInfo.matrixRoomId}/send/m.room.message`,
+        `https://matrix.${homeServer}/_matrix/client/v3/rooms/${rooms.matrixRoomId}/send/m.room.message`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -186,7 +189,7 @@ const start = async () => {
     };
   };
 
-  getRooms().then(rooms => renderRooms(rooms));
+  setInterval(() => getRooms().then(rooms => renderRooms(rooms)), 1000);
 };
 
 start();
