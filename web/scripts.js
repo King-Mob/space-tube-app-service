@@ -6,6 +6,7 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
 const linkToken = urlParams.get("linkToken");
+const displayName = urlParams.get("name");
 
 const start = async () => {
   if (!linkToken) {
@@ -16,7 +17,8 @@ const start = async () => {
   let user;
   const storedUser = localStorage.getItem("spacetube-user");
   if (!storedUser) {
-    const userName = "jeff";
+    const userName = displayName;
+
     const response = await fetch(`${url}/api/register`, {
       method: "post",
       body: JSON.stringify({ linkToken, userName }),

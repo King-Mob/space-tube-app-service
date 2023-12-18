@@ -591,8 +591,10 @@ export const handleLink = async (event) => {
     linkToken = linkEvent.content.linkToken;
   }
 
+  const name = await getDisplayName(event.room_id, event.sender);
+
   sendMessage(
     event.room_id,
-    `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}`
+    `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${name}`
   );
 };
