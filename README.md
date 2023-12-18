@@ -13,11 +13,11 @@ There's a default instance hosted on spacetu.be that you can use.
 ### On Matrix
 
 1. Invite `@space-tube-bot:spacetu.be` to the room you want to open the tube in
-2. Send `!space-tube create` in the room
+2. Send `!spacetube create` in the room
 3. Copy the connection code
 4. Share the connection with the group you want to connect to
 6. Receive their connection code, from the group you want to connect to
-5. Send `!space-tube connect <their-connection-code>`
+5. Send `!spacetube connect <their-connection-code>`
 6. The tube is open, get talking
 
 ### On Discord
@@ -62,7 +62,7 @@ For a normal synapse instance add the path to `registration.yaml` to the [server
 
 10. Start talking to space tube
 	invite `@space-tube-bot:<your domain>` to your chat e.g. @space-tube-bot:example.com
-	`!space-tube echo <some test text>`
+	`!spacetube echo <some test text>`
 
 You can interact with it in the same way as the default space-tube instance, and connect to others on different instances.
 

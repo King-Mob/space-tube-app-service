@@ -249,7 +249,7 @@ const connectOtherInstance = async (
   );
 
   if (remoteConnection) {
-    //to get to here, both rooms have passed !space-tube connect
+    //to get to here, both rooms have passed !spacetube connect
     console.log("this room should be connected");
 
     const connectionCodes = [localConnectionCode, remoteConnectionCode].sort();
@@ -405,15 +405,15 @@ export const handleMessage = async (event) => {
 
   const message = event.content.body;
 
-  if (message.includes("!space-tube echo")) {
-    const newMessage = "you said: " + message.split("!space-tube echo")[1];
+  if (message.includes("!spacetube echo")) {
+    const newMessage = "you said: " + message.split("!spacetube echo")[1];
 
     sendMessage(event.room_id, newMessage);
 
     return;
   }
 
-  if (message.includes("!space-tube create")) {
+  if (message.includes("!spacetube create")) {
     const tubeOpening = await getItem("name", `registration-${event.room_id}`);
 
     const tubeCode = tubeOpening
@@ -434,8 +434,8 @@ export const handleMessage = async (event) => {
     return;
   }
 
-  if (message.includes("!space-tube connect")) {
-    const connectionCode = message.split("!space-tube connect")[1].trim();
+  if (message.includes("!spacetube connect")) {
+    const connectionCode = message.split("!spacetube connect")[1].trim();
     const spaceTubeInstance = connectionCode.split("~")[1];
 
     if (spaceTubeInstance === `@space-tube-bot:${HOME_SERVER}`) {

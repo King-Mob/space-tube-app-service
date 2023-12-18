@@ -193,7 +193,7 @@ export const startDiscord = (app) => {
       await invite(user, room.room_id);
       await join(user, room.room_id);
 
-      sendMessageAsUser(user, room.room_id, "!space-tube create");
+      sendMessageAsUser(user, room.room_id, "!spacetube create");
 
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -222,7 +222,7 @@ export const startDiscord = (app) => {
       sendMessageAsUser(
         bridgeUser.user,
         bridgeRoom.roomId,
-        `!space-tube connect ${connectionCode}`
+        `!spacetube connect ${connectionCode}`
       );
 
       return res.send({
