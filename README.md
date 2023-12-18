@@ -10,7 +10,7 @@ You can use the default hosted instance running on spacetu.be or set-up your own
 
 There's a default instance hosted on spacetu.be that you can use.
 
-### On Matrix
+### Through Your Matrix Client
 
 1. Invite `@space-tube-bot:spacetu.be` to the room you want to open the tube in
 2. Send `!spacetube create` in the room
@@ -20,7 +20,16 @@ There's a default instance hosted on spacetu.be that you can use.
 5. Send `!spacetube connect <their-connection-code>`
 6. The tube is open, get talking
 
-### On Discord
+### Through The Web
+
+1. Open a room that you have previously set up with spacetube with your matrix client
+2. Send `!spacetube link` in the room you use spacetube in
+3. Spacetube will give you a link, click on the link
+4. You can now send message to the original room
+5. Click on a message, and confirm you want to forward a copy to the shared spacetube
+6. You are using the web version of spacetube!
+
+### Through Discord
 
 1. Add the Space Tube bot to your server, using this link: https://discord.com/oauth2/authorize?client_id=1024778983021215764&permissions=603982848&response_type=code&redirect_uri=https%3A%2F%2Fspacetube.spacetu.be&scope=messages.read+bot
 2. Add Space Tube bot to the channel you want to open the tube in
@@ -29,7 +38,7 @@ There's a default instance hosted on spacetu.be that you can use.
 5. Share the connection with the group you want to connect to
 6. Receive their connection code, from the group you want to connect to
 7. Use the /connect command, entering the connection code from the other group
-8. Use /send to send messages to the other group 
+8. Use /send to send messages to the other group
 
 ## Self-Hosting Instructions
 
