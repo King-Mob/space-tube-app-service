@@ -602,22 +602,71 @@ export const handleLink = async (event) => {
 export const handleEgress = async (event) => {
   console.log("egress event happened")
   const message = event.content.body;
-  const tubeIntermediary = await getItem("tubeIntermediary", event.room_id);
+  const tubeOpen = await getItemIncludes("connectedRooms", event.room_id);
 
-  console.log(tubeIntermediary);
+  if (tubeOpen) {
+    console.log("there was a message in an open tube");
 
-  if (tubeIntermediary) {
-    console.log("egress event in tube intermediary");
+    const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
 
-    const tubeName = tubeIntermediary.content.name;
-
-    //later when we use connection codes throughout, test if the instances are the same
-    if (tubeName.includes("~")) {
-      handleMessageRemoteTube(tubeIntermediary, event, message);
-      return;
+    if (bridgeUserEvent) {
+      console.log("message sent through bridge");
+      console.log(bridgeUserEvent);
+      if (event.sender !== bridgeUserEvent.content.userId) {
+        return;
+      }
     } else {
-      handleMessageLocalTube(tubeIntermediary, event, message);
-      return;
+      //if (event.sender.includes("@_space-tube")) return;
     }
+
+    console.log("passing message to tube intermediary");
+
+    const { tubeIntermediary } = tubeOpen.content;
+
+    const tubeUser = await getItem(
+      "userRoomId",
+      event.room_id,
+      "spacetube.user"
+    );
+    let user;
+
+    if (tubeUser) {
+      user = tubeUser.content.user;
+    } else {
+      const roomStateResponse = await getRoomState(event.room_id);
+      const roomState = await roomStateResponse.json();
+
+      let newTubeUserName = "default";
+
+      for (const roomEvent of roomState) {
+        if (roomEvent.type === "m.room.name")
+          newTubeUserName = roomEvent.content.name;
+      }
+
+      const newUserResponse = await registerUser(newTubeUserName);
+      const newUser = await newUserResponse.json();
+
+      user = newUser;
+
+      storeItem({
+        type: "spacetube.user",
+        userId: newUser.user_id,
+        user: newUser,
+        userRoomId: event.room_id,
+        name: newTubeUserName,
+      });
+
+      setDisplayName(newUser, newTubeUserName);
+
+      await invite(newUser, tubeIntermediary);
+      await join(newUser, tubeIntermediary);
+      await invite(newUser, event.room_id);
+      await join(newUser, event.room_id);
+    }
+
+    console.log(tubeIntermediary);
+    console.log(user);
+
+    sendMessageAsUser(user, tubeIntermediary, message);
   }
 }
