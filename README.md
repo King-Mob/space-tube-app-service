@@ -26,7 +26,7 @@ There's a default instance hosted on spacetu.be that you can use.
 2. Send `!spacetube link` in the room you use spacetube in
 3. Spacetube will give you a link with a link token and name in it. The link token is tied to your original matrix room and basically grants access to it. The name will be your display name on the web view of spacetube.
 4. Follow the link. Once it loads, you can now send message to the original room using the textbox and button at the bottom
-5. Click on a message, and confirm you want to forward a copy to the shared spacetube
+5. To forward a message to the spacetube, click on a message and confirm
 6. You are using the web version of spacetube!
 
 ### Through Discord
