@@ -161,6 +161,12 @@ const start = async () => {
     button.disabled = false;
 
     const input = document.getElementById("new-message-text");
+    input.onkeyup = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        button.click();
+      }
+    }
     input.onchange = (event) => {
       const message = event.target.value;
 
