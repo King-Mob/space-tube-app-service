@@ -59,7 +59,12 @@ const LINK_COMMAND = {
   name: "link",
   description: "get a link to view your spacetube",
   type: 1,
-  options: [],
+  options: [{
+    name: "message",
+    description: "what you want to repeat",
+    type: 3,
+    required: true,
+  },],
 };
 
 const ALL_COMMANDS = [
