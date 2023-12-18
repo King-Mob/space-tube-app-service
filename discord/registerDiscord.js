@@ -67,12 +67,28 @@ const LINK_COMMAND = {
   },],
 };
 
+const ECHO_SECOND_COMMAND = {
+  name: "echosecondx",
+  description: "echo what has been sent",
+  type: 1,
+  options: [
+    {
+      name: "message",
+      description: "what you want to repeat",
+      type: 3,
+      required: true,
+    },
+  ],
+};
+
+
 const ALL_COMMANDS = [
   ECHO_COMMAND,
   CREATE_COMMAND,
   CONNECT_COMMAND,
   SEND_COMMAND,
   LINK_COMMAND,
+  ECHO_SECOND_COMMAND
 ];
 
 async function InstallGlobalCommands(appId, commands) {
