@@ -77,3 +77,8 @@ input {
   font-size: 2rem;
   font-family: monospace;
 }
+
+.forwarded {
+  font-size: 1.5rem;
+  opacity: 0.5;
+}

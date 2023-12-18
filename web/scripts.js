@@ -79,6 +79,8 @@ const start = async () => {
 
     rooms.matrixRoom.names = {};
 
+    console.log(rooms.matrixRoom)
+
     rooms.matrixRoom.forEach((event) => {
       if (event.type === "m.room.name") {
         const roomTitle = document.getElementById("matrix-room-title");
@@ -86,6 +88,7 @@ const start = async () => {
       }
       if (event.type === "m.room.message") {
         const messageContainerElement = document.createElement("div");
+        messageContainerElement.id = event.event_id;
         messageContainerElement.classList.add("message-container");
         const nameElement = document.createElement("p");
         nameElement.innerHTML = rooms.matrixRoom.names[event.sender] || event.sender;
@@ -102,7 +105,8 @@ const start = async () => {
               method: "PUT",
               body: JSON.stringify({
                 type: "spacetube.egress",
-                body: event.content.body
+                body: event.content.body,
+                originalEventId: event.event_id
               }),
               headers: {
                 'Content-Type': 'application/json',
@@ -113,6 +117,13 @@ const start = async () => {
           setTimeout(() => getRooms().then(rooms => renderRooms(rooms)), 3500);
         }
         matrixRoomContainer.append(messageContainerElement);
+      }
+      if (event.type === "spacetube.egress" && event.content.originalEventId) {
+        const forwarded = document.createElement("p");
+        forwarded.innerHTML = `forwarded to tube by ${rooms.matrixRoom.names[event.sender] || event.sender}`;
+        forwarded.classList.add("forwarded");
+        const originalMessageContainer = document.getElementById(event.content.originalEventId);
+        originalMessageContainer.append(forwarded);
       }
       if (event.type === "m.room.member" && event.content.displayname && event.content.membership === "join") {
         rooms.matrixRoom.names[event.sender] = event.content.displayname;
