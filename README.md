@@ -40,6 +40,12 @@ There's a default instance hosted on spacetu.be that you can use.
 7. Use the /connect command, entering the connection code from the other group
 8. Use /send to send messages to the other group
 
+#### Experimental Web Feature
+
+You can also use the web interface through discord by using `/send !spacetube link`. You will probably want to edit the link, because at the moment, the name comes back as a long string that isn't very friendly. Change the name part in the url, it looks like this: https://spacetube.spacetu.be/?linkToken=cRaZyNuMb3R5aNdLeTtErs&name=yourdesiredname
+
+Change yourdesiredname to the chat nickname you want, and then follow the link.
+
 ## Self-Hosting Instructions
 
 You can host space tube yourself! It's an app service on matrix, so you'll need a home server, and to connect your instance to other platforms requires some specific things for each one.
