@@ -607,18 +607,6 @@ export const handleEgress = async (event) => {
   if (tubeOpen) {
     console.log("there was a message in an open tube");
 
-    const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
-
-    if (bridgeUserEvent) {
-      console.log("message sent through bridge");
-      console.log(bridgeUserEvent);
-      if (event.sender !== bridgeUserEvent.content.userId) {
-        return;
-      }
-    } else {
-      //if (event.sender.includes("@_space-tube")) return;
-    }
-
     console.log("passing message to tube intermediary");
 
     const { tubeIntermediary } = tubeOpen.content;
