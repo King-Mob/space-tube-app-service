@@ -15,7 +15,7 @@ const start = async () => {
   }
 
   let user;
-  const storedUser = localStorage.getItem("spacetube-user");
+  const storedUser = localStorage.getItem(`spacetube-user-${linkToken}`);
   if (!storedUser) {
     const userName = displayName;
 
@@ -35,7 +35,7 @@ const start = async () => {
         accessToken: registration.access_token,
       };
 
-      localStorage.setItem("spacetube-user", JSON.stringify(user));
+      localStorage.setItem(`spacetube-user-${linkToken}`, JSON.stringify(user));
     } else {
       console.log("registration failed");
       return;
