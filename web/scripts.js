@@ -79,8 +79,6 @@ const start = async () => {
 
     rooms.matrixRoom.names = {};
 
-    console.log(rooms.matrixRoom)
-
     rooms.matrixRoom.forEach((event) => {
       if (event.type === "m.room.name") {
         const roomTitle = document.getElementById("matrix-room-title");
@@ -162,8 +160,11 @@ const start = async () => {
       }
     });
 
+    console.log(rooms.tubeRoom)
+
     const roomTitle = document.getElementById("tube-room-title");
-    const tubeRoomTitle = `🛸🛸${rooms.tubeRoom.names[Object.keys(rooms.tubeRoom.names)[2]]} + ${rooms.tubeRoom.names[Object.keys(rooms.tubeRoom.names)[3]]}🛸🛸`;
+    const roomParticipants = Object.values(rooms.tubeRoom.names).filter(name => !name.includes("_"));
+    const tubeRoomTitle = `🛸🛸${roomParticipants[0]} + ${roomParticipants[1]}🛸🛸`;
     roomTitle.innerHTML = tubeRoomTitle;
 
     tubeRoomContainer.scrollTo(0, tubeRoomContainer.scrollHeight);
