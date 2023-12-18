@@ -600,8 +600,11 @@ export const handleLink = async (event) => {
 };
 
 export const handleEgress = async (event) => {
+  console.log("egress event happened")
   const message = event.content.body;
   const tubeIntermediary = await getItem("tubeIntermediary", event.room_id);
+
+  console.log(tubeIntermediary);
 
   if (tubeIntermediary) {
     console.log("egress event in tube intermediary");
