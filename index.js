@@ -13,6 +13,7 @@ import {
 } from "./handler.js";
 import { getItem, getItemIncludes } from "./storage.js";
 import { startDiscord } from "./discord/index.js";
+import { insertEnv } from "./build.js";
 
 // listening
 const as = new AppService({
@@ -88,6 +89,7 @@ as.listen(8133);
 
 const app = express();
 app.use(express.json());
+insertEnv(process.env);
 
 app.get("/", function (req, res) {
   res.sendFile(path.resolve("web/index.html"));
@@ -99,6 +101,10 @@ app.get("/styles.css", (req, res) => {
 
 app.get("/scripts.js", (req, res) => {
   res.sendFile(path.resolve("web/scripts.js"));
+});
+
+app.get("/constants.js", (req, res) => {
+  res.sendFile(path.resolve("web/constants.js"));
 });
 
 app.post("/api/register", async (req, res) => {

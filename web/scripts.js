@@ -1,9 +1,5 @@
-console.log("welcome to s p a c e t u b e");
+console.log("welcome to 🛸s p a c e t u b e🛸");
 
-//need the environment variable at some point. this all seems like having a transpiled
-//react app might be a lot better.
-
-const homeServer = "spacetu.be";
 const url = `https://spacetube.${homeServer}`;
 
 const queryString = window.location.search;
