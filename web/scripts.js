@@ -112,7 +112,6 @@ const start = async () => {
               }
             });
           }
-          setTimeout(() => getRooms().then(rooms => renderRooms(rooms)), 3500);
         }
         matrixRoomContainer.append(messageContainerElement);
       }
@@ -127,8 +126,6 @@ const start = async () => {
         rooms.matrixRoom.names[event.sender] = event.content.displayname;
       }
     });
-
-    matrixRoomContainer.scrollTo(0, matrixRoomContainer.scrollHeight);
 
     const tubeRoomContainer = document.getElementById(
       "tube-room-events-container"
@@ -160,14 +157,10 @@ const start = async () => {
       }
     });
 
-    console.log(rooms.tubeRoom)
-
     const roomTitle = document.getElementById("tube-room-title");
     const roomParticipants = Object.values(rooms.tubeRoom.names).filter(name => !name.includes("_"));
     const tubeRoomTitle = `🛸🛸${roomParticipants[0]} + ${roomParticipants[1]}🛸🛸`;
     roomTitle.innerHTML = tubeRoomTitle;
-
-    tubeRoomContainer.scrollTo(0, tubeRoomContainer.scrollHeight);
 
     const button = document.getElementById("send-button");
     button.disabled = false;
@@ -207,7 +200,15 @@ const start = async () => {
     };
   };
 
-  setInterval(() => getRooms().then(rooms => renderRooms(rooms)), 1000);
+  getRooms().then(rooms => renderRooms(rooms)).then(() => {
+    const matrixRoomContainer = document.getElementById("matrix-room-container");
+    const tubeRoomContainer = document.getElementById("tube-room-container");
+
+    matrixRoomContainer.scrollTo(0, matrixRoomContainer.scrollHeight);
+    tubeRoomContainer.scrollTo(0, tubeRoomContainer.scrollHeight);
+  })
+    .then(setInterval(() => getRooms().then(rooms => renderRooms(rooms)), 1000));
+
 };
 
 start();
