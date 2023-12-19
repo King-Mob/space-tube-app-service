@@ -201,8 +201,8 @@ const start = async () => {
   };
 
   getRooms().then(rooms => renderRooms(rooms)).then(() => {
-    const matrixRoomContainer = document.getElementById("matrix-room-container");
-    const tubeRoomContainer = document.getElementById("tube-room-container");
+    const matrixRoomContainer = document.getElementById("matrix-room-events-container");
+    const tubeRoomContainer = document.getElementById("tube-room-events-container");
 
     matrixRoomContainer.scrollTo(0, matrixRoomContainer.scrollHeight);
     tubeRoomContainer.scrollTo(0, tubeRoomContainer.scrollHeight);
