@@ -137,7 +137,7 @@ export const join = (user, roomId) => {
 };
 
 const getRoomsList = async (user) => {
-  return fetch(
+  return await fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms`,
     {
       method: "GET",
@@ -146,7 +146,7 @@ const getRoomsList = async (user) => {
         Authorization: `Bearer ${user.access_token}`,
       },
     }
-  );
+  ).json();
 }
 
 const registerTube = async (roomId) => {
