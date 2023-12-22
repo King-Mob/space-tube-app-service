@@ -59,36 +59,15 @@ const LINK_COMMAND = {
   name: "link",
   description: "get a link to view your spacetube",
   type: 1,
-  options: [{
-    name: "message",
-    description: "what you want to repeat",
-    type: 3,
-    required: true,
-  },],
+  options: [],
 };
-
-const ECHO_SECOND_COMMAND = {
-  name: "echosecondx",
-  description: "echo what has been sent",
-  type: 1,
-  options: [
-    {
-      name: "message",
-      description: "what you want to repeat",
-      type: 3,
-      required: true,
-    },
-  ],
-};
-
 
 const ALL_COMMANDS = [
   ECHO_COMMAND,
   CREATE_COMMAND,
   CONNECT_COMMAND,
   SEND_COMMAND,
-  LINK_COMMAND,
-  ECHO_SECOND_COMMAND
+  LINK_COMMAND
 ];
 
 async function InstallGlobalCommands(appId, commands) {
