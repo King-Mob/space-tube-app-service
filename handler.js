@@ -478,12 +478,10 @@ export const handleMessage = async (event) => {
         user = tubeUser.content.user;
 
         const roomsList = await getRoomsList(user);
-        console.log(roomsList)
-        if (!roomsList.includes(tubeIntermediary)) {
+        if (!roomsList.joined_rooms.includes(tubeIntermediary)) {
           await invite(user, tubeIntermediary);
           await join(user, tubeIntermediary);
         }
-        //check it's in the destination room for the tubeOpen
       } else {
         const roomStateResponse = await getRoomState(event.room_id);
         const roomState = await roomStateResponse.json();
