@@ -136,6 +136,20 @@ export const join = (user, roomId) => {
   );
 };
 
+const getRoomsList = (user) => {
+  return fetch(
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms`,
+    {
+      method: "POST",
+      body: JSON.stringify({}),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.access_token}`,
+      },
+    }
+  );
+}
+
 const registerTube = async (roomId) => {
   const tubeOpening = await getItem("name", `registration-${roomId}`);
 
@@ -461,6 +475,14 @@ export const handleMessage = async (event) => {
 
       if (tubeUser) {
         user = tubeUser.content.user;
+
+        const roomsList = await getRoomsList(user);
+        console.log(roomsList)
+        if (!roomsList.includes(tubeIntermediary)) {
+          await invite(user, tubeIntermediary);
+          await join(user, tubeIntermediary);
+        }
+        //check it's in the destination room for the tubeOpen
       } else {
         const roomStateResponse = await getRoomState(event.room_id);
         const roomState = await roomStateResponse.json();
