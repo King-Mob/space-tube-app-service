@@ -139,15 +139,18 @@ const connectSameInstance = async (event, connectionCode) => {
   const otherTube = await getItem("tubeCode", connectionCode);
 
   if (!otherTube) {
+    sendMessage(event.room_id, "That code isn't recognised.");
     return;
   }
 
-  const otherRoomId = otherTube.content.name.split("registration-")[1];
+  const otherRoomId = otherTube.content.roomId;
 
   if (otherRoomId === event.room_id) {
-    sendMessage(event.room_id, "That's the code for this tube opening.");
+    sendMessage(event.room_id, "That's the creation code for this space, that you would share with another group.");
     return;
   }
+
+  /*
 
   const connection = `connection-${event.room_id}-${otherRoomId}`;
 
@@ -160,6 +163,31 @@ const connectSameInstance = async (event, connectionCode) => {
   const otherConnection = `connection-${otherRoomId}-${event.room_id}`;
 
   const otherTubeConnection = await getItem("name", otherConnection);
+
+  */
+
+  const connectedRooms = [event.room_id, otherRoomId].sort();
+  const tubeName = `open-${connectedRooms[0]}-${connectedRooms[1]}`;
+
+  const existingTube = await getItem("name", tubeName);
+
+  if (existingTube) {
+    sendMessage(event.room_id, "This tube is already active.");
+  } else {
+    const tubeRoomResponse = await createRoom();
+    const tubeRoom = await tubeRoomResponse.json();
+    console.log(tubeRoom);
+    storeItem({
+      name: tubeName,
+      type: "spacetube.open",
+      tubeIntermediary: tubeRoom.room_id,
+      connectedRooms,
+    });
+    sendMessage(event.room_id, "I declare this tube is now open!");
+    sendMessage(otherRoomId, "I declare this tube is now open!");
+  }
+
+  /*
 
   if (otherTubeConnection) {
     const connectedRooms = [event.room_id, otherRoomId].sort();
@@ -187,7 +215,7 @@ const connectSameInstance = async (event, connectionCode) => {
       event.room_id,
       "Received connection, waiting for other group to connect."
     );
-  }
+  }*/
 
   return;
 };
@@ -391,13 +419,13 @@ const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
 };
 
 export const handleMessage = async (event) => {
-  //Check for a bridge
+  //Check if the event comes from a bridged room
   const bridgeRoomEvent = await getItem("bridgeRoomId", event.room_id);
   if (bridgeRoomEvent) {
     const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
     const bridgeUser = bridgeUserEvent.content;
 
-    if (event.sender !== bridgeUser.userId)
+    if (event.sender !== bridgeUser.userId && bridgeRoomEvent.service === 'discord')
       sendMessageDiscord(event, bridgeRoomEvent.content);
   }
 
@@ -605,7 +633,7 @@ export const handleEgress = async (event) => {
   const tubeOpen = await getItemIncludes("connectedRooms", event.room_id);
 
   if (tubeOpen) {
-    console.log("there was a message in an open tube");
+    console.log("message forwaded to open tube");
 
     console.log("passing message to tube intermediary");
 
