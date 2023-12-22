@@ -140,8 +140,7 @@ const getRoomsList = (user) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms`,
     {
-      method: "POST",
-      body: JSON.stringify({}),
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${user.access_token}`,
