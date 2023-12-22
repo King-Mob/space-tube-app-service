@@ -135,6 +135,25 @@ export const join = (user, roomId) => {
   );
 };
 
+const registerTube = async (roomId) => {
+  const tubeOpening = await getItem("name", `registration-${roomId}`);
+
+  const tubeCode = tubeOpening
+    ? tubeOpening.content.tubeCode
+    : `${uuidv4()}~@space-tube-bot:${HOME_SERVER}`;
+
+  if (!tubeOpening) {
+    storeItem({
+      name: `registration-${roomId}`,
+      type: "spacetube.create",
+      tubeCode,
+      roomId: roomId,
+    }).catch((err) => console.log(err));
+  }
+
+  return tubeCode;
+}
+
 const connectSameInstance = async (event, connectionCode) => {
   const otherTube = await getItem("tubeCode", connectionCode);
 
@@ -149,6 +168,8 @@ const connectSameInstance = async (event, connectionCode) => {
     sendMessage(event.room_id, "That's the creation code for this space, that you would share with another group.");
     return;
   }
+
+  await registerTube(event.room_id);
 
   /*
 
@@ -250,6 +271,8 @@ const connectOtherInstance = async (
       roomId: sharedTubeManagementRoom,
     });
   }
+
+  const localConnectionCode = await registerTube(event.room_id);
 
   const connectionCodes = [localConnectionCode, remoteConnectionCode].sort();
   const tubeName = `open-${connectionCodes[0]}~${connectionCodes[1]}`;
@@ -473,20 +496,8 @@ export const handleMessage = async (event) => {
   }
 
   if (message.includes("!spacetube create")) {
-    const tubeOpening = await getItem("name", `registration-${event.room_id}`);
 
-    const tubeCode = tubeOpening
-      ? tubeOpening.content.tubeCode
-      : `${uuidv4()}~@space-tube-bot:${HOME_SERVER}`;
-
-    if (!tubeOpening) {
-      storeItem({
-        name: `registration-${event.room_id}`,
-        type: "spacetube.create",
-        tubeCode,
-        roomId: event.room_id,
-      }).catch((err) => console.log(err));
-    }
+    const tubeCode = await registerTube(event.room_id);
 
     sendMessage(event.room_id, `The code for this room is ${tubeCode}`);
 
