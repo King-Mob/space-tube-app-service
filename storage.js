@@ -121,6 +121,27 @@ export const getItemIncludes = async (key, value) => {
     return null;
 }
 
+export const getAllItemIncludes = async (key, value) => {
+
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${APPLICATION_TOKEN}`
+        }
+    });
+    const eventsList = await response.json();
+
+    const matchingEvents = [];
+
+    for (const event of eventsList.chunk) {
+        const possibleItem = event.content[key];
+        if (possibleItem && possibleItem.includes(value))
+            matchingEvents.push(event);
+    }
+
+    return matchingEvents.length > 0 ? matchingEvents : null;
+}
+
 export const getItemShared = async (sharedRoomId, key, value) => {
 
     const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/messages?limit=1000`, {

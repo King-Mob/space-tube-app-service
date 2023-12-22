@@ -3,6 +3,7 @@ import {
   storeItem,
   getItem,
   getItemIncludes,
+  getAllItemIncludes,
   getItemShared,
   storeItemShared,
   getDisplayName,
@@ -427,72 +428,74 @@ export const handleMessage = async (event) => {
     }
   }
 
-  const tubeOpen = await getItemIncludes("connectedRooms", event.room_id);
+  const tubesOpen = await getAllItemIncludes("connectedRooms", event.room_id);
 
-  if (tubeOpen) {
-    console.log("there was a message in an open tube");
+  if (tubesOpen) {
+    tubesOpen.forEach(async tubeOpen => {
+      console.log("there was a message in an open tube");
 
-    const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
+      const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
 
-    if (bridgeUserEvent) {
-      console.log("message sent through bridge");
-      console.log(bridgeUserEvent);
-      if (event.sender !== bridgeUserEvent.content.userId) {
-        return;
-      }
-    } else {
-      if (event.sender.includes("@_space-tube")) return;
-    }
-
-    console.log("passing message to tube intermediary");
-
-    const { tubeIntermediary } = tubeOpen.content;
-
-    const tubeUser = await getItem(
-      "userRoomId",
-      event.room_id,
-      "spacetube.user"
-    );
-    let user;
-
-    if (tubeUser) {
-      user = tubeUser.content.user;
-    } else {
-      const roomStateResponse = await getRoomState(event.room_id);
-      const roomState = await roomStateResponse.json();
-
-      let newTubeUserName = "default";
-
-      for (const roomEvent of roomState) {
-        if (roomEvent.type === "m.room.name")
-          newTubeUserName = roomEvent.content.name;
+      if (bridgeUserEvent) {
+        console.log("message sent through bridge");
+        console.log(bridgeUserEvent);
+        if (event.sender !== bridgeUserEvent.content.userId) {
+          return;
+        }
+      } else {
+        if (event.sender.includes("@_space-tube")) return;
       }
 
-      const newUserResponse = await registerUser(newTubeUserName);
-      const newUser = await newUserResponse.json();
+      console.log("passing message to tube intermediary");
 
-      user = newUser;
+      const { tubeIntermediary } = tubeOpen.content;
 
-      storeItem({
-        type: "spacetube.user",
-        userId: newUser.user_id,
-        user: newUser,
-        userRoomId: event.room_id,
-        name: newTubeUserName,
-      });
+      const tubeUser = await getItem(
+        "userRoomId",
+        event.room_id,
+        "spacetube.user"
+      );
+      let user;
 
-      setDisplayName(newUser, newTubeUserName);
+      if (tubeUser) {
+        user = tubeUser.content.user;
+      } else {
+        const roomStateResponse = await getRoomState(event.room_id);
+        const roomState = await roomStateResponse.json();
 
-      await invite(newUser, tubeIntermediary);
-      await join(newUser, tubeIntermediary);
-      await invite(newUser, event.room_id);
-      await join(newUser, event.room_id);
-    }
+        let newTubeUserName = "default";
 
-    console.log(tubeIntermediary);
-    console.log(user);
+        for (const roomEvent of roomState) {
+          if (roomEvent.type === "m.room.name")
+            newTubeUserName = roomEvent.content.name;
+        }
 
-    sendMessageAsUser(user, tubeIntermediary, message);
+        const newUserResponse = await registerUser(newTubeUserName);
+        const newUser = await newUserResponse.json();
+
+        user = newUser;
+
+        storeItem({
+          type: "spacetube.user",
+          userId: newUser.user_id,
+          user: newUser,
+          userRoomId: event.room_id,
+          name: newTubeUserName,
+        });
+
+        setDisplayName(newUser, newTubeUserName);
+
+        await invite(newUser, tubeIntermediary);
+        await join(newUser, tubeIntermediary);
+        await invite(newUser, event.room_id);
+        await join(newUser, event.room_id);
+      }
+
+      console.log(tubeIntermediary);
+      console.log(user);
+
+      sendMessageAsUser(user, tubeIntermediary, message);
+    })
   }
 };
 
