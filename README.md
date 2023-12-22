@@ -14,11 +14,9 @@ There's a default instance hosted on spacetu.be that you can use.
 
 1. Invite `@space-tube-bot:spacetu.be` to the room you want to open the tube in
 2. Send `!spacetube create` in the room
-3. Copy the connection code
-4. Share the connection with the group you want to connect to
-6. Receive their connection code, from the group you want to connect to
-5. Send `!spacetube connect <their-connection-code>`
-6. The tube is open, get talking
+3. Copy the connection code and send to a contact in the group you want to connect to
+4. Have your contact in the other group send `!spacetube connect <the-connection-code>`
+5. The tube is open, get talking
 
 ### Through The Web
 
@@ -34,11 +32,9 @@ There's a default instance hosted on spacetu.be that you can use.
 1. Add the Space Tube bot to your server, using this link: https://discord.com/oauth2/authorize?client_id=1024778983021215764&permissions=603982848&response_type=code&redirect_uri=https%3A%2F%2Fspacetube.spacetu.be&scope=messages.read+bot
 2. Add Space Tube bot to the channel you want to open the tube in
 3. use the /create command to make a new tube opening
-4. Copy the connection code Space Tube Bot sent you
-5. Share the connection with the group you want to connect to
-6. Receive their connection code, from the group you want to connect to
-7. Use the /connect command, entering the connection code from the other group
-8. Use /send to send messages to the other group
+4. Copy the connection code Space Tube Bot sent you and share with your contact in the other group
+5. Have your contact use the /connect command, entering the connection code you shared
+6. Use /send to send messages to the other group
 
 #### Experimental Web Feature
 
