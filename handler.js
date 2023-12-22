@@ -430,6 +430,8 @@ export const handleMessage = async (event) => {
 
   const tubesOpen = await getAllItemIncludes("connectedRooms", event.room_id);
 
+  console.log(tubesOpen)
+
   if (tubesOpen) {
     tubesOpen.forEach(async tubeOpen => {
       console.log("there was a message in an open tube");
