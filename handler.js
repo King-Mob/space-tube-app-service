@@ -448,7 +448,7 @@ export const handleMessage = async (event) => {
         if (event.sender.includes("@_space-tube")) return;
       }
 
-      console.log("passing message to tube intermediary");
+      console.log("passing message to tube intermediary", tubeOpen.content);
 
       const { tubeIntermediary } = tubeOpen.content;
 
