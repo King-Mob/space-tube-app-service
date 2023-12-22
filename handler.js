@@ -299,9 +299,11 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
     content: { user: user, userRoomId, name },
   } = await getItem("userId", event.sender);
 
+  //have we already sent this to the originating tube? perhaps something with event ids
   sendMessageAsUser(user, userRoomId, message);
 
   const clone = await getItem("originalUserId", event.sender);
+  //which clone user should it go to? tubeintermediary, or maybe get all items or something should have it
 
   let cloneUser;
 
