@@ -171,22 +171,6 @@ const connectSameInstance = async (event, connectionCode) => {
 
   await registerTube(event.room_id);
 
-  /*
-
-  const connection = `connection-${event.room_id}-${otherRoomId}`;
-
-  const tubeConnection = await getItem("name", connection);
-
-  if (!tubeConnection) {
-    storeItem({ name: connection, type: "spacetube.connect" });
-  }
-
-  const otherConnection = `connection-${otherRoomId}-${event.room_id}`;
-
-  const otherTubeConnection = await getItem("name", otherConnection);
-
-  */
-
   const connectedRooms = [event.room_id, otherRoomId].sort();
   const tubeName = `open-${connectedRooms[0]}-${connectedRooms[1]}`;
 
@@ -207,36 +191,6 @@ const connectSameInstance = async (event, connectionCode) => {
     sendMessage(event.room_id, "I declare this tube is now open!");
     sendMessage(otherRoomId, "I declare this tube is now open!");
   }
-
-  /*
-
-  if (otherTubeConnection) {
-    const connectedRooms = [event.room_id, otherRoomId].sort();
-    const tubeName = `open-${connectedRooms[0]}-${connectedRooms[1]}`;
-
-    const existingTube = await getItem("name", tubeName);
-
-    if (existingTube) {
-      sendMessage(event.room_id, "This tube is already active.");
-    } else {
-      const tubeRoomResponse = await createRoom();
-      const tubeRoom = await tubeRoomResponse.json();
-      console.log(tubeRoom);
-      storeItem({
-        name: tubeName,
-        type: "spacetube.open",
-        tubeIntermediary: tubeRoom.room_id,
-        connectedRooms,
-      });
-      sendMessage(event.room_id, "I declare this tube is now open!");
-      sendMessage(otherRoomId, "I declare this tube is now open!");
-    }
-  } else {
-    sendMessage(
-      event.room_id,
-      "Received connection, waiting for other group to connect."
-    );
-  }*/
 
   return;
 };
@@ -302,72 +256,6 @@ const connectOtherInstance = async (
 
     sendMessage(event.room_id, "I declare this tube open!");
   }
-  /*
-
-console.log("shared management room", sharedTubeManagementRoom);
-
-const tubeOpening = await getItem("name", `registration-${event.room_id}`);
-const localConnectionCode = tubeOpening.content.tubeCode;
-
-const localConnection = `connection-${localConnectionCode}-${remoteConnectionCode}`;
-const tubeConnection = await getItemShared(
-sharedTubeManagementRoom,
-"name",
-localConnection
-);
-if (!tubeConnection) {
-console.log("storing local connection");
-storeItemShared(sharedTubeManagementRoom, {
-  name: localConnection,
-  type: "spacetube.connect",
-});
-}
-
-const remoteConnection = await getItemShared(
-sharedTubeManagementRoom,
-"name",
-`connection-${remoteConnectionCode}-${localConnectionCode}`
-);
-
-if (remoteConnection) {
-//to get to here, both rooms have passed !spacetube connect
-console.log("this room should be connected");
-
-const connectionCodes = [localConnectionCode, remoteConnectionCode].sort();
-const tubeName = `open-${connectionCodes[0]}~${connectionCodes[1]}`;
-
-const existingTube = await getItem("name", tubeName);
-
-if (existingTube) {
-  sendMessage(event.room_id, "This tube is already active.");
-} else {
-  const createRoomResponse = await createRoom();
-  const createdRoom = await createRoomResponse.json();
-
-  await invite({ user_id: otherInstance }, createdRoom.room_id);
-
-  storeItem({
-    name: tubeName,
-    type: "spacetube.open",
-    tubeIntermediary: createdRoom.room_id,
-    connectedRooms: [event.room_id],
-  });
-  storeItemShared(sharedTubeManagementRoom, {
-    name: tubeName,
-    type: "spacetube.remote.open",
-    tubeIntermediary: createdRoom.room_id,
-    connectionCode: remoteConnectionCode,
-  });
-
-  sendMessage(event.room_id, "I declare this tube open!");
-}
-} else {
-sendMessage(
-  event.room_id,
-  "Received connection, waiting for other group to connect."
-);
-}
-*/
 };
 
 // on receipt of tubeOpen in shared management room, store tubeOpen in own room.
