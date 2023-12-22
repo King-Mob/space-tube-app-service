@@ -136,7 +136,7 @@ export const join = (user, roomId) => {
   );
 };
 
-const getRoomsList = (user) => {
+const getRoomsList = async (user) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms`,
     {
