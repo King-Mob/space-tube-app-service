@@ -299,6 +299,8 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
     content: { user: user, userRoomId, name },
   } = await getItem("userId", event.sender);
 
+  console.log("handlemessagelocaltube", tubeIntermediary, event)
+
   //have we already sent this to the originating tube? perhaps something with event ids
   sendMessageAsUser(user, userRoomId, message);
 
