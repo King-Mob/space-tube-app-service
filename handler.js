@@ -295,18 +295,18 @@ export const handleRemoteOpen = async (event) => {
   }
 };
 
+const sendHomeTubeMessage = async (event, message) => {
+  const {
+    content: { user: user, userRoomId },
+  } = await getItem("userId", event.sender);
+
+  sendMessageAsUser(user, userRoomId, message);
+}
+
 const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
   const {
     content: { user: user, userRoomId, name },
   } = await getItem("userId", event.sender);
-
-  if (!await getItem("sentEventId", event.event_id)) {
-    sendMessageAsUser(user, userRoomId, message);
-    await storeItem({
-      sentEventId: event.event_id,
-      event
-    })
-  }
 
   const clones = await getAllItems("originalUserId", event.sender);
 
@@ -458,15 +458,13 @@ export const handleMessage = async (event) => {
 
   const tubesOpen = await getAllItemIncludes("connectedRooms", event.room_id);
 
-  console.log(tubesOpen)
-
   if (tubesOpen) {
-    tubesOpen.forEach(async tubeOpen => {
+    for (const tubeOpen of tubesOpen) {
       console.log("there was a message in an open tube");
 
       const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
 
-      if (bridgeUserEvent) {
+      if (bridgeUserEvent) { //this code is wrong and breaking discord, I think.
         console.log("message sent through bridge");
         console.log(bridgeUserEvent);
         if (event.sender !== bridgeUserEvent.content.userId) {
@@ -531,7 +529,8 @@ export const handleMessage = async (event) => {
       console.log(user);
 
       sendMessageAsUser(user, tubeIntermediary, message);
-    })
+    }
+    sendHomeTubeMessage(event, message);
   }
 };
 
