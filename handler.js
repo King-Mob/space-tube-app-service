@@ -386,7 +386,8 @@ export const handleMessage = async (event) => {
     const bridgeUser = bridgeUserEvent.content;
 
     if (event.sender !== bridgeUser.userId && bridgeRoomEvent.service === 'discord')
-      sendMessageDiscord(event, bridgeRoomEvent.content);
+      console.log("message to discord should be sent")
+    sendMessageDiscord(event, bridgeRoomEvent.content);
   }
 
   if (event.sender === `@space-tube-bot:${HOME_SERVER}`) return;
