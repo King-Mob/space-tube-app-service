@@ -102,7 +102,7 @@ export const getItem = async (key, value, type) => {
     return null;
 }
 
-export const getAllItems = async (key, value) => {
+export const getAllItems = async (key, value, type) => {
 
     const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
         headers: {
