@@ -295,16 +295,6 @@ export const handleRemoteOpen = async (event) => {
   }
 };
 
-const sendHomeTubeMessage = async (event, message) => {
-  console.log("hometube", event, message)
-
-  const {
-    content: { user: user, userRoomId },
-  } = await getItem("userId", event.sender);
-
-  sendMessageAsUser(user, userRoomId, message);
-}
-
 const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
   const {
     content: { user: user, userRoomId, name },
@@ -461,6 +451,8 @@ export const handleMessage = async (event) => {
   const tubesOpen = await getAllItemIncludes("connectedRooms", event.room_id);
 
   if (tubesOpen) {
+    let user;
+
     for (const tubeOpen of tubesOpen) {
       console.log("there was a message in an open tube");
 
@@ -485,7 +477,7 @@ export const handleMessage = async (event) => {
         event.room_id,
         "spacetube.user"
       );
-      let user;
+
 
       if (tubeUser) {
         user = tubeUser.content.user;
@@ -532,7 +524,7 @@ export const handleMessage = async (event) => {
 
       sendMessageAsUser(user, tubeIntermediary, message);
     }
-    sendHomeTubeMessage(event, message);
+    sendMessageAsUser(user, event.room_id, message);
   }
 };
 
