@@ -296,6 +296,8 @@ export const handleRemoteOpen = async (event) => {
 };
 
 const sendHomeTubeMessage = async (event, message) => {
+  console.log("hometube", event, message)
+
   const {
     content: { user: user, userRoomId },
   } = await getItem("userId", event.sender);
