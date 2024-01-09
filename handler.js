@@ -2,6 +2,7 @@ import fetch from "node-fetch";
 import {
   storeItem,
   getItem,
+  getAllItems,
   getItemIncludes,
   getAllItemIncludes,
   getItemShared,
@@ -304,14 +305,25 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
   //have we already sent this to the originating tube? perhaps something with event ids
   sendMessageAsUser(user, userRoomId, message);
 
-  const clone = await getItem("originalUserId", event.sender);
   //which clone user should it go to? tubeintermediary, or maybe get all items or something should have it
+  //all it has to do is reject the clone if the tubeIntermediary room doesn't match
+  //that leads to creating too many new clones though
+
+  //get all the clones.
+  //select the right one.
+  //if none, create a new one
+
+  const clones = await getAllItems("originalUserId", event.sender);
 
   let cloneUser;
 
-  if (clone) {
-    cloneUser = clone.content.clone;
-  } else {
+  if (clones) {
+    clones.forEach(clone => {
+      if (tubeIntermediary.content.connectedRooms.includes(clone.content.clone.roomId))
+        cloneUser = clone.content.clone;
+    })
+  }
+  if (!cloneUser) {
     const newCloneUserResponse = await registerUser(name);
     const newCloneUser = await newCloneUserResponse.json();
 
