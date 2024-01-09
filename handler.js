@@ -300,20 +300,15 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
     content: { user: user, userRoomId, name },
   } = await getItem("userId", event.sender);
 
-  //have we already sent this to the originating tube? perhaps something with event ids
-  sendMessageAsUser(user, userRoomId, message);
-
-  //which clone user should it go to? tubeintermediary, or maybe get all items or something should have it
-  //all it has to do is reject the clone if the tubeIntermediary room doesn't match
-  //that leads to creating too many new clones though
-
-  //get all the clones.
-  //select the right one.
-  //if none, create a new one
+  if (!await getItem("sentEventId", event.event_id)) {
+    sendMessageAsUser(user, userRoomId, message);
+    await storeItem({
+      sentEventId: event.event_id,
+      event
+    })
+  }
 
   const clones = await getAllItems("originalUserId", event.sender);
-
-  console.log("clones", clones);
 
   let cloneUser;
 
