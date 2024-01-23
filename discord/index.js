@@ -132,7 +132,7 @@ export const startDiscord = (app) => {
       //const output = res.send({ type: InteractionResponseType.PONG });
       //console.log(output);
 
-      return res.send({ "type": 1 });
+      return app.verify(res.send({ "type": 1 }));
     }
 
     if (data.name === "echo") {
