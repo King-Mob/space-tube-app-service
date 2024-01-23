@@ -391,7 +391,7 @@ export const handleMessage = async (event) => {
       sendMessageDiscord(event, bridgeRoomEvent.content);
     }*/
 
-    if (bridgeRoomEvent.content.service === "discord") {
+    if (event.sender !== bridgeUser.userId && bridgeRoomEvent.content.service === "discord") {
       console.log("message to discord should be sent")
       sendMessageDiscord(event, bridgeRoomEvent.content);
     }
