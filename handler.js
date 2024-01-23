@@ -455,8 +455,10 @@ export const handleMessage = async (event) => {
     for (const tubeOpen of tubesOpen) {
       console.log("there was a message in an open tube");
 
-      /*
-      const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
+
+      const bridgeUserEvent = await getAllItems("bridgeUserRoomId", event.room_id);
+
+      console.log(bridgeUserEvent)
 
       if (bridgeUserEvent) { //this code is wrong and breaking discord, I think.
         console.log("message sent through bridge");
@@ -466,7 +468,7 @@ export const handleMessage = async (event) => {
         }
       } else {
         if (event.sender.includes("@_space-tube")) return;
-      }*/
+      }
 
       console.log("passing message to tube intermediary", tubeOpen.content);
 
