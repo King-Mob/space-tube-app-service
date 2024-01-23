@@ -385,7 +385,13 @@ export const handleMessage = async (event) => {
     const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
     const bridgeUser = bridgeUserEvent.content;
 
+    /*
     if (event.sender !== bridgeUser.userId && bridgeRoomEvent.service === 'discord') {
+      console.log("message to discord should be sent")
+      sendMessageDiscord(event, bridgeRoomEvent.content);
+    }*/
+
+    if (bridgeRoomEvent.service === "discord") {
       console.log("message to discord should be sent")
       sendMessageDiscord(event, bridgeRoomEvent.content);
     }
@@ -455,19 +461,15 @@ export const handleMessage = async (event) => {
     for (const tubeOpen of tubesOpen) {
       console.log("there was a message in an open tube");
 
-
       const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
 
       console.log(bridgeUserEvent)
 
-      if (bridgeUserEvent) { //this code is wrong and breaking discord, I think.
-        console.log("message sent through bridge");
-        console.log(bridgeUserEvent);
-        if (event.sender !== bridgeUserEvent.content.userId) {
-          return;
-        }
-      } else {
-        if (event.sender.includes("@_space-tube")) return;
+      if (event.sender.includes("@_space-tube") && !bridgeUserEvent)
+        return;
+
+      if (bridgeUserEvent && event.sender !== bridgeUserEvent.content.userId) {
+        return;
       }
 
       console.log("passing message to tube intermediary", tubeOpen.content);
