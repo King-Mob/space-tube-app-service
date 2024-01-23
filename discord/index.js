@@ -129,10 +129,10 @@ export const startDiscord = (app) => {
      */
     if (type === InteractionType.PING) {
       console.log("ping");
-      const output = res.send({ type: InteractionResponseType.PONG });
+      //const output = res.send({ type: InteractionResponseType.PONG });
       //console.log(output);
-      res.send({ "type": 1 })
-      return output;
+
+      return res.send({ "type": 1 });
     }
 
     if (data.name === "echo") {
