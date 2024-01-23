@@ -387,7 +387,9 @@ export const handleMessage = async (event) => {
 
     if (event.sender !== bridgeUser.userId && bridgeRoomEvent.service === 'discord')
       console.log("message to discord should be sent")
+    //this console log accidentally fixed it, but I think it induces the doubling
     sendMessageDiscord(event, bridgeRoomEvent.content);
+
   }
 
   if (event.sender === `@space-tube-bot:${HOME_SERVER}`) return;
