@@ -112,11 +112,11 @@ function VerifyDiscordRequest(clientKey) {
 }
 
 export const startDiscord = (app) => {
-  app.use(
-    express.json({
-      verify: VerifyDiscordRequest(process.env.DISCORD_PUBLIC_KEY),
-    })
-  );
+  /* app.use(
+     express.json({
+       verify: VerifyDiscordRequest(process.env.DISCORD_PUBLIC_KEY),
+     })
+   );*/
 
   app.post("/interactions", verifyKeyMiddleware(process.env.DISCORD_PUBLIC_KEY), async function (req, res) {
     // Interaction type and data
