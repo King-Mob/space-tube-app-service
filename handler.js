@@ -456,7 +456,7 @@ export const handleMessage = async (event) => {
       console.log("there was a message in an open tube");
 
 
-      const bridgeUserEvent = await getAllItems("bridgeUserRoomId", event.room_id);
+      const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
 
       console.log(bridgeUserEvent)
 
