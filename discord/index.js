@@ -44,15 +44,6 @@ export async function sendMessageDiscord(event, bridgeRoom) {
   console.log(event);
   console.log(bridgeRoom);
   console.log("sending message to discord");
-  // send message as the space tube bot user
-
-  /*
-    DiscordRequest(`/channels/${bridgeRoom.channelId}/messages`, {
-        method: "POST",
-        body: {
-            content: event.content.body
-        }
-    });*/
 
   let webhook;
   const webhookEvent = await getItem(
@@ -92,8 +83,6 @@ export async function sendMessageDiscord(event, bridgeRoom) {
       username: displayName || event.sender,
     },
   });
-
-  // sending message using webhook
 }
 
 function VerifyDiscordRequest(clientKey) {
@@ -130,8 +119,6 @@ export const startDiscord = (app) => {
      */
     if (type === InteractionType.PING) {
       console.log("ping");
-
-
       return res.send({ type: InteractionResponseType.PONG });
     }
 

@@ -385,11 +385,10 @@ export const handleMessage = async (event) => {
     const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
     const bridgeUser = bridgeUserEvent.content;
 
-    if (event.sender !== bridgeUser.userId && bridgeRoomEvent.service === 'discord')
+    if (event.sender !== bridgeUser.userId && bridgeRoomEvent.service === 'discord') {
       console.log("message to discord should be sent")
-    //this console log accidentally fixed it, but I think it induces the doubling
-    sendMessageDiscord(event, bridgeRoomEvent.content);
-
+      sendMessageDiscord(event, bridgeRoomEvent.content);
+    }
   }
 
   if (event.sender === `@space-tube-bot:${HOME_SERVER}`) return;
