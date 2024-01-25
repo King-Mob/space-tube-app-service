@@ -99,10 +99,10 @@ const start = async () => {
           if (confirm("Send this message to the tube?")) {
             const txnId = self.crypto.randomUUID();
 
-            fetch(`https://matrix.${homeServer}/_matrix/client/v3/rooms/${rooms.matrixRoomId}/send/spacetube.egress/${txnId}?user_id=@${user.userId}`, {
+            fetch(`https://matrix.${homeServer}/_matrix/client/v3/rooms/${rooms.matrixRoomId}/send/spacetube.forward/${txnId}?user_id=@${user.userId}`, {
               method: "PUT",
               body: JSON.stringify({
-                type: "spacetube.egress",
+                type: "spacetube.forward",
                 body: event.content.body,
                 originalEventId: event.event_id
               }),
@@ -115,7 +115,7 @@ const start = async () => {
         }
         matrixRoomContainer.append(messageContainerElement);
       }
-      if (event.type === "spacetube.egress" && event.content.originalEventId) {
+      if (event.type === "spacetube.forward" && event.content.originalEventId) {
         const forwarded = document.createElement("p");
         forwarded.innerHTML = `forwarded to tube by ${rooms.matrixRoom.names[event.sender] || event.sender}`;
         forwarded.classList.add("forwarded");
