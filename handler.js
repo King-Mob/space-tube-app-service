@@ -381,6 +381,8 @@ const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
 const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
   console.log("passing message to tube intermediary");
 
+  let user;
+
   const message = event.content.body;
 
   const tubeUser = await getItem(
@@ -430,6 +432,8 @@ const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
   }
 
   sendMessageAsUser(user, tubeIntermediary, message);
+
+  return user;
 }
 
 export const handleMessage = async (event) => {
@@ -518,7 +522,7 @@ export const handleMessage = async (event) => {
         return;
       }
 
-      await forwardToTubeIntermediary(tubeOpen.content, event);
+      user = await forwardToTubeIntermediary(tubeOpen.content, event);
     }
     sendMessageAsUser(user, event.room_id, message);
   }
