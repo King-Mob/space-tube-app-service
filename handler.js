@@ -522,6 +522,8 @@ export const handleMessage = async (event) => {
         return;
       }
 
+      console.log(tubeOpen.content)
+
       user = await forwardToTubeIntermediary(tubeOpen.content, event);
     }
     sendMessageAsUser(user, event.room_id, message);
