@@ -3,14 +3,16 @@ import express from "express";
 import path from "path";
 import { AppService, AppserviceHttpError } from "matrix-appservice";
 import {
-  handleMessage,
-  handleInvite,
-  handleRemoteOpen,
-  handleForward,
   registerUser,
   invite,
   join,
   setDisplayName,
+} from "./matrixClientRequests.js";
+import {
+  handleMessage,
+  handleInvite,
+  handleRemoteOpen,
+  handleForward,
 } from "./handler.js";
 import { getItem, getItemIncludes } from "./storage.js";
 import { startDiscord } from "./discord/index.js";
