@@ -524,7 +524,7 @@ export const handleMessage = async (event) => {
 
       console.log(tubeOpen.content)
 
-      user = await forwardToTubeIntermediary(tubeOpen.content, event);
+      user = await forwardToTubeIntermediary(tubeOpen.content.tubeIntermediary, event);
     }
     sendMessageAsUser(user, event.room_id, message);
   }
@@ -587,6 +587,6 @@ export const handleForward = async (event) => {
   const tubeOpen = await getItemIncludes("connectedRooms", event.room_id);
 
   if (tubeOpen) {
-    await forwardToTubeIntermediary(tubeOpen.content, event);
+    await forwardToTubeIntermediary(tubeOpen.content.tubeIntermediary, event);
   }
 }
