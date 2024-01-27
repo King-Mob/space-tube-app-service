@@ -17,7 +17,7 @@ const ECHO_COMMAND = {
 
 const CREATE_COMMAND = {
   name: "create",
-  description: "create a space-tube opening",
+  description: "create a spacetube opening",
   type: 1,
   options: [
     {
@@ -31,7 +31,7 @@ const CREATE_COMMAND = {
 
 const CONNECT_COMMAND = {
   name: "connect",
-  description: "connect to another space-tube opening",
+  description: "connect to another spacetube opening",
   type: 1,
   options: [
     {
@@ -67,7 +67,7 @@ const ALL_COMMANDS = [
   CREATE_COMMAND,
   CONNECT_COMMAND,
   SEND_COMMAND,
-  LINK_COMMAND
+  LINK_COMMAND,
 ];
 
 async function InstallGlobalCommands(appId, commands) {

@@ -2,7 +2,7 @@
 
 Welcome to Space Tube!
 
-Space Tube is a way to connect chat groups together, so that they can communicate with each other as their group identities. 
+Space Tube is a way to connect chat groups together, so that they can communicate with each other as their group identities.
 
 You can use the default hosted instance running on spacetu.be or set-up your own. Here are the instructions on how to do that.
 
@@ -12,7 +12,7 @@ There's a default instance hosted on spacetu.be that you can use.
 
 ### Through Your Matrix Client
 
-1. Invite `@space-tube-bot:spacetu.be` to the room you want to open the tube in
+1. Invite `@space-tube-bot:spacetu.be` to the room you want to open the tube in (for now the room CAN'T be end to end encrypted)
 2. Send `!spacetube create` in the room
 3. Copy the connection code and send to a contact in the group you want to connect to
 4. Have your contact in the other group send `!spacetube connect <the-connection-code>`
@@ -25,7 +25,8 @@ There's a default instance hosted on spacetu.be that you can use.
 3. Spacetube will give you a link with a link token and name in it. The link token is tied to your original matrix room and basically grants access to it. The name will be your display name on the web view of spacetube.
 4. Follow the link. Once it loads, you can now send message to the original room using the textbox and button at the bottom
 5. To forward a message to the spacetube, click on a message and confirm
-6. You are using the web version of spacetube!
+
+You are using the web version of spacetube!
 
 ### Through Discord
 
@@ -48,18 +49,19 @@ You can host space tube yourself! It's an app service on matrix, so you'll need 
 
 You will need:
 
-* a matrix homeserver. The recommended way to have one is using matrix-ansible-docker
-on that server you need:
-* git `git --version`
-* npm `node --version` recommend later version of node, 18.12.0 works 
+- a matrix homeserver. The recommended way to have one is using matrix-ansible-docker
+  on that server you need:
+- git `git --version`
+- npm `node --version` recommend later version of node, 18.12.0 works
 
-1. create your homeserver. this service assumes you have a domain, matrix.example.com that you run matrix on. This is how [matrix-docker-ansible-deploy](https://github.com/spantaleev/matrix-docker-ansible-deploy) gets you to set it up. If you're new to matrix, matrix-docker-ansible-deploy is a straightforward way to start. Note: you need the federation turned on if you want space-tube to work across different homeservers.
+1. create your homeserver. this service assumes you have a domain, matrix.example.com that you run matrix on. This is how [matrix-docker-ansible-deploy](https://github.com/spantaleev/matrix-docker-ansible-deploy) gets you to set it up. If you're new to matrix, matrix-docker-ansible-deploy is a straightforward way to start. Note: you need the federation turned on if you want spacetube to work across different homeservers.
 2. `git clone https://github.com/King-Mob/space-tube-app-service.git` the appservice to your server. `cd space-tube-app-service` to open the directory
 3. `npm install` the app service
 4. `cp .env.example .env` creates a .env file by copying the example env into the project folder. Make sure HOST is set to either host.docker.internal or localhost and HOME_SERVER set to the domain you're running matrix on, e.g. example.com
 5. `npm run register` to create your registration file. This creates `registration.yaml` in the project folder.
 6. Copy the `hs_token` and `as_token` from `registration.yaml` and paste into your `.env` file as `HOME_SERVER_TOKEN` and `APPLICATION_TOKEN` respectively.
 7. Add the path to the registration config file to your homeserver. For matrix-ansible-docker that means adding these variables to your vars.yml. The first variable sets up a link between the docker container and the project folder using a variable called `src` that references the absolute path of the project. Change the `src` if it's different from your project setup.
+
 ```
 matrix_synapse_container_extra_arguments: ['--add-host host.docker.internal:host-gateway --mount type=bind,src=/root/space-tube-app-service,dst=/appservice-spacetube']
 matrix_synapse_app_service_config_files: ['/appservice-spacetube/registration.yaml']
@@ -72,10 +74,10 @@ For a normal synapse instance add the path to `registration.yaml` to the [server
 9. Start the app service using `npm start`. To have it run indefinitely, you'll need a process runner like systemd or pm2. [SystemD](https://nodesource.com/blog/running-your-node-js-app-with-systemd-part-1/) is a standard linux way to run processes. [PM2](https://www.digitalocean.com/community/tutorials/how-to-use-pm2-to-setup-a-node-js-production-environment-on-an-ubuntu-vps) is an easy to use node solution.
 
 10. Start talking to space tube
-	invite `@space-tube-bot:<your domain>` to your chat e.g. @space-tube-bot:example.com
-	`!spacetube echo <some test text>`
+    invite `@space-tube-bot:<your domain>` to your chat e.g. @space-tube-bot:example.com
+    `!spacetube echo <some test text>`
 
-You can interact with it in the same way as the default space-tube instance, and connect to others on different instances.
+You can interact with it in the same way as the default spacetube instance, and connect to others on different instances.
 
 ### Discord Set-up
 
@@ -83,12 +85,14 @@ The discord connection uses a bot created through discord's interface here: http
 
 Create a discord application, and a bot.
 
-Copy the  public key, the app id, and the discord token into your .env file, like so:
+Copy the public key, the app id, and the discord token into your .env file, like so:
+
 ```
 DISCORD_PUBLIC_KEY=something
 DISCORD_APP_ID=something
 DISCORD_TOKEN=something
 ```
+
 run `npm run register-discord`
 
 You need an https connection to port 8134 on the server you're running the app service on.
@@ -110,7 +114,7 @@ Click the save button and if it disappears, you are good to go!
 
 ## Feedback
 
-Please join me in #space-tube-public:spacetu.be on matrix if you have any feedback or questions at all about the project.
+Please join me in #spacetube-public:spacetu.be on matrix if you have any feedback or questions at all about the project.
 
 Life is more spacious in tubes!
 
