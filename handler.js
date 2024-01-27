@@ -1,154 +1,47 @@
-import fetch from "node-fetch";
 import {
   storeItem,
   getItem,
+  getAllItems,
   getItemIncludes,
   getAllItemIncludes,
-  getItemShared,
   storeItemShared,
   getDisplayName,
 } from "./storage.js";
+import {
+  sendMessage,
+  sendMessageAsUser,
+  createRoom,
+  getRoomState,
+  registerUser,
+  setDisplayName,
+  invite,
+  join,
+  joinAsSpaceTube,
+  getRoomsList
+} from "./matrixClientRequests.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendMessageDiscord } from "./discord/index.js";
 
-const { HOME_SERVER, APPLICATION_TOKEN } = process.env;
+const { HOME_SERVER } = process.env;
 
-export const sendMessage = (roomId, message) => {
-  return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/send/m.room.message?user_id=@space-tube-bot:${HOME_SERVER}`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        body: message,
-        msgtype: "m.text",
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${APPLICATION_TOKEN}`,
-      },
-    }
-  );
-};
+const createClone = async (name, roomId, originalUserId) => {
+  const newCloneUserResponse = await registerUser(name);
+  const newCloneUser = await newCloneUserResponse.json();
 
-export const sendMessageAsUser = (user, roomId, message) => {
-  return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/send/m.room.message`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        body: message,
-        msgtype: "m.text",
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.access_token}`,
-      },
-    }
-  );
-};
+  newCloneUser.roomId = roomId;
 
-export const createRoom = (name) => {
-  return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/createRoom?user_id=@space-tube-bot:${HOME_SERVER}`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        name: name ? name : "no-name",
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${APPLICATION_TOKEN}`,
-      },
-    }
-  );
-};
-
-const getRoomState = (roomId) => {
-  return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/state`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${APPLICATION_TOKEN}`,
-      },
-    }
-  );
-};
-
-export const registerUser = (userId) => {
-  return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/register`, {
-    method: "POST",
-    body: JSON.stringify({
-      type: "m.login.application_service",
-      username: `_space-tube-${userId}-${uuidv4()}`,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${APPLICATION_TOKEN}`,
-    },
+  storeItem({
+    type: "spacetube.user.clone",
+    clone: newCloneUser,
+    originalUserId
   });
-};
 
-export const setDisplayName = (user, displayName) => {
-  return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/profile/${user.user_id}/displayname`,
-    {
-      method: "PUT",
-      body: JSON.stringify({
-        displayname: displayName,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.access_token}`,
-      },
-    }
-  );
-};
+  setDisplayName(newCloneUser, name);
 
-export const invite = (user, roomId) => {
-  return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@space-tube-bot:${HOME_SERVER}`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        user_id: user.user_id,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${APPLICATION_TOKEN}`,
-      },
-    }
-  );
-};
+  await invite(newCloneUser, roomId);
+  await join(newCloneUser, roomId);
 
-export const join = (user, roomId) => {
-  return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/join/${roomId}`,
-    {
-      method: "POST",
-      body: JSON.stringify({}),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.access_token}`,
-      },
-    }
-  );
-};
-
-const getRoomsList = async (user) => {
-  const response = await fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.access_token}`,
-      },
-    }
-  );
-
-  return response.json();
+  return newCloneUser;
 }
 
 const registerTube = async (roomId) => {
@@ -296,40 +189,25 @@ export const handleRemoteOpen = async (event) => {
 
 const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
   const {
-    content: { user: user, userRoomId, name },
+    content: { userRoomId, name },
   } = await getItem("userId", event.sender);
 
-  //have we already sent this to the originating tube? perhaps something with event ids
-  sendMessageAsUser(user, userRoomId, message);
-
-  const clone = await getItem("originalUserId", event.sender);
-  //which clone user should it go to? tubeintermediary, or maybe get all items or something should have it
+  const clones = await getAllItems("originalUserId", event.sender);
 
   let cloneUser;
 
-  if (clone) {
-    cloneUser = clone.content.clone;
-  } else {
-    const newCloneUserResponse = await registerUser(name);
-    const newCloneUser = await newCloneUserResponse.json();
-
+  if (clones) {
+    clones.forEach(clone => {
+      if (tubeIntermediary.content.connectedRooms.includes(clone.content.clone.roomId))
+        cloneUser = clone.content.clone;
+    })
+  }
+  if (!cloneUser) {
     const cloneUserRoomId = tubeIntermediary.content.connectedRooms.find(
       (roomId) => roomId !== userRoomId
     );
 
-    cloneUser = newCloneUser;
-    cloneUser.roomId = cloneUserRoomId;
-
-    storeItem({
-      type: "spacetube.user.clone",
-      clone: cloneUser,
-      originalUserId: user.user_id,
-    });
-
-    setDisplayName(cloneUser, name);
-
-    await invite(cloneUser, cloneUser.roomId);
-    await join(cloneUser, cloneUser.roomId);
+    cloneUser = await createClone(name, cloneUserRoomId, event.sender);
   }
 
   sendMessageAsUser(cloneUser, cloneUser.roomId, message);
@@ -340,12 +218,7 @@ const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
 
   const storedUser = await getItem("userId", event.sender);
 
-  if (storedUser) {
-    const {
-      content: { user: user, userRoomId },
-    } = storedUser;
-    sendMessageAsUser(user, userRoomId, message);
-  } else {
+  if (!storedUser) {
     const clone = await getItem("originalUserId", event.sender);
 
     let cloneUser;
@@ -353,30 +226,73 @@ const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
     if (clone) {
       cloneUser = clone.content.clone;
     } else {
-      const cloneName = await getDisplayName(event.room_id, event.sender);
-      const newCloneUserResponse = await registerUser(cloneName);
-      const newCloneUser = await newCloneUserResponse.json();
-
+      const name = await getDisplayName(event.room_id, event.sender);
       const cloneUserRoomId = tubeIntermediary.content.connectedRooms[0];
 
-      cloneUser = newCloneUser;
-      cloneUser.roomId = cloneUserRoomId;
-
-      storeItem({
-        type: "spacetube.user.clone",
-        clone: cloneUser,
-        originalUserId: event.sender,
-      });
-
-      setDisplayName(cloneUser, cloneName);
-
-      await invite(cloneUser, cloneUser.roomId);
-      await join(cloneUser, cloneUser.roomId);
+      cloneUser = await createClone(name, cloneUserRoomId, event.sender);
     }
 
     sendMessageAsUser(cloneUser, cloneUser.roomId, message);
   }
 };
+
+const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
+  console.log("passing message to tube intermediary");
+
+  let user;
+
+  const message = event.content.body;
+
+  const tubeUser = await getItem(
+    "userRoomId",
+    event.room_id,
+    "spacetube.user"
+  );
+
+  if (tubeUser) {
+    user = tubeUser.content.user;
+
+    const roomsList = await getRoomsList(user);
+    if (!roomsList.joined_rooms.includes(tubeIntermediary)) {
+      await invite(user, tubeIntermediary);
+      await join(user, tubeIntermediary);
+    }
+  } else {
+    const roomStateResponse = await getRoomState(event.room_id);
+    const roomState = await roomStateResponse.json();
+
+    let newTubeUserName = "default";
+
+    for (const roomEvent of roomState) {
+      if (roomEvent.type === "m.room.name")
+        newTubeUserName = roomEvent.content.name;
+    }
+
+    const newUserResponse = await registerUser(newTubeUserName);
+    const newUser = await newUserResponse.json();
+
+    user = newUser;
+
+    storeItem({
+      type: "spacetube.user",
+      userId: newUser.user_id,
+      user: newUser,
+      userRoomId: event.room_id,
+      name: newTubeUserName,
+    });
+
+    setDisplayName(newUser, newTubeUserName);
+
+    await invite(newUser, tubeIntermediary);
+    await join(newUser, tubeIntermediary);
+    await invite(newUser, event.room_id);
+    await join(newUser, event.room_id);
+  }
+
+  sendMessageAsUser(user, tubeIntermediary, message);
+
+  return user;
+}
 
 export const handleMessage = async (event) => {
   //Check if the event comes from a bridged room
@@ -385,8 +301,11 @@ export const handleMessage = async (event) => {
     const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
     const bridgeUser = bridgeUserEvent.content;
 
-    if (event.sender !== bridgeUser.userId && bridgeRoomEvent.service === 'discord')
-      sendMessageDiscord(event, bridgeRoomEvent.content);
+    if (event.sender !== bridgeUser.userId) {
+      if (bridgeRoomEvent.content.service === "discord") {
+        sendMessageDiscord(event, bridgeRoomEvent.content);
+      }
+    }
   }
 
   if (event.sender === `@space-tube-bot:${HOME_SERVER}`) return;
@@ -402,7 +321,6 @@ export const handleMessage = async (event) => {
   }
 
   if (message.includes("!spacetube create")) {
-
     const tubeCode = await registerTube(event.room_id);
 
     sendMessage(event.room_id, `The code for this room is ${tubeCode}`);
@@ -447,96 +365,30 @@ export const handleMessage = async (event) => {
 
   const tubesOpen = await getAllItemIncludes("connectedRooms", event.room_id);
 
-  console.log(tubesOpen)
-
   if (tubesOpen) {
-    tubesOpen.forEach(async tubeOpen => {
+    let user;
+
+    for (const tubeOpen of tubesOpen) {
       console.log("there was a message in an open tube");
 
       const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
 
-      if (bridgeUserEvent) {
-        console.log("message sent through bridge");
-        console.log(bridgeUserEvent);
-        if (event.sender !== bridgeUserEvent.content.userId) {
-          return;
-        }
-      } else {
-        if (event.sender.includes("@_space-tube")) return;
+      if (event.sender.includes("@_space-tube") && !bridgeUserEvent)
+        return;
+
+      if (bridgeUserEvent && event.sender !== bridgeUserEvent.content.userId) {
+        return;
       }
 
-      console.log("passing message to tube intermediary", tubeOpen.content);
-
-      const { tubeIntermediary } = tubeOpen.content;
-
-      const tubeUser = await getItem(
-        "userRoomId",
-        event.room_id,
-        "spacetube.user"
-      );
-      let user;
-
-      if (tubeUser) {
-        user = tubeUser.content.user;
-
-        const roomsList = await getRoomsList(user);
-        if (!roomsList.joined_rooms.includes(tubeIntermediary)) {
-          await invite(user, tubeIntermediary);
-          await join(user, tubeIntermediary);
-        }
-      } else {
-        const roomStateResponse = await getRoomState(event.room_id);
-        const roomState = await roomStateResponse.json();
-
-        let newTubeUserName = "default";
-
-        for (const roomEvent of roomState) {
-          if (roomEvent.type === "m.room.name")
-            newTubeUserName = roomEvent.content.name;
-        }
-
-        const newUserResponse = await registerUser(newTubeUserName);
-        const newUser = await newUserResponse.json();
-
-        user = newUser;
-
-        storeItem({
-          type: "spacetube.user",
-          userId: newUser.user_id,
-          user: newUser,
-          userRoomId: event.room_id,
-          name: newTubeUserName,
-        });
-
-        setDisplayName(newUser, newTubeUserName);
-
-        await invite(newUser, tubeIntermediary);
-        await join(newUser, tubeIntermediary);
-        await invite(newUser, event.room_id);
-        await join(newUser, event.room_id);
-      }
-
-      console.log(tubeIntermediary);
-      console.log(user);
-
-      sendMessageAsUser(user, tubeIntermediary, message);
-    })
+      user = await forwardToTubeIntermediary(tubeOpen.content.tubeIntermediary, event);
+    }
+    sendMessageAsUser(user, event.room_id, message);
   }
 };
 
 export const handleInvite = async (event) => {
   if (event.content.membership === "invite") {
-    await fetch(
-      `https://matrix.${HOME_SERVER}/_matrix/client/v3/join/${event.room_id}?user_id=@space-tube-bot:${HOME_SERVER}`,
-      {
-        method: "POST",
-        body: JSON.stringify({}),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${APPLICATION_TOKEN}`,
-        },
-      }
-    );
+    await joinAsSpaceTube(event.room_id);
 
     if (
       event.sender.includes("@space-tube-bot") &&
@@ -585,62 +437,10 @@ export const handleLink = async (event) => {
   );
 };
 
-export const handleEgress = async (event) => {
-  console.log("egress event happened")
-  const message = event.content.body;
+export const handleForward = async (event) => {
   const tubeOpen = await getItemIncludes("connectedRooms", event.room_id);
 
   if (tubeOpen) {
-    console.log("message forwaded to open tube");
-
-    console.log("passing message to tube intermediary");
-
-    const { tubeIntermediary } = tubeOpen.content;
-
-    const tubeUser = await getItem(
-      "userRoomId",
-      event.room_id,
-      "spacetube.user"
-    );
-    let user;
-
-    if (tubeUser) {
-      user = tubeUser.content.user;
-    } else {
-      const roomStateResponse = await getRoomState(event.room_id);
-      const roomState = await roomStateResponse.json();
-
-      let newTubeUserName = "default";
-
-      for (const roomEvent of roomState) {
-        if (roomEvent.type === "m.room.name")
-          newTubeUserName = roomEvent.content.name;
-      }
-
-      const newUserResponse = await registerUser(newTubeUserName);
-      const newUser = await newUserResponse.json();
-
-      user = newUser;
-
-      storeItem({
-        type: "spacetube.user",
-        userId: newUser.user_id,
-        user: newUser,
-        userRoomId: event.room_id,
-        name: newTubeUserName,
-      });
-
-      setDisplayName(newUser, newTubeUserName);
-
-      await invite(newUser, tubeIntermediary);
-      await join(newUser, tubeIntermediary);
-      await invite(newUser, event.room_id);
-      await join(newUser, event.room_id);
-    }
-
-    console.log(tubeIntermediary);
-    console.log(user);
-
-    sendMessageAsUser(user, tubeIntermediary, message);
+    await forwardToTubeIntermediary(tubeOpen.content.tubeIntermediary, event);
   }
 }

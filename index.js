@@ -3,14 +3,16 @@ import express from "express";
 import path from "path";
 import { AppService, AppserviceHttpError } from "matrix-appservice";
 import {
-  handleMessage,
-  handleInvite,
-  handleRemoteOpen,
-  handleEgress,
   registerUser,
   invite,
   join,
   setDisplayName,
+} from "./matrixClientRequests.js";
+import {
+  handleMessage,
+  handleInvite,
+  handleRemoteOpen,
+  handleForward,
 } from "./handler.js";
 import { getItem, getItemIncludes } from "./storage.js";
 import { startDiscord } from "./discord/index.js";
@@ -37,8 +39,8 @@ as.on("event", (event) => {
       break;
     case "spacetube.remote.open":
       handleRemoteOpen(event);
-    case "spacetube.egress":
-      handleEgress(event);
+    case "spacetube.forward":
+      handleForward(event);
     default:
       break;
   }
@@ -147,7 +149,6 @@ app.get("/api/tubeInfo", async (req, res) => {
     "spacetube.link"
   );
   if (linkEvent) {
-    //get tube room events
     const tube = await getItemIncludes(
       "connectedRooms",
       linkEvent.content.roomId
@@ -176,7 +177,6 @@ app.get("/api/tubeInfo", async (req, res) => {
       message: "No room active with that link token",
     });
   }
-  //send matrix room id and tube room events
 });
 
 //starts discord service

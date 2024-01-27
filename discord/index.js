@@ -2,6 +2,7 @@ import express from "express";
 import fetch from "node-fetch";
 import {
   verifyKey,
+  verifyKeyMiddleware,
   InteractionType,
   InteractionResponseType,
 } from "discord-interactions";
@@ -12,7 +13,7 @@ import {
   join,
   registerUser,
   sendMessageAsUser,
-} from "../handler.js";
+} from "../matrixClientRequests.js";
 
 export async function DiscordRequest(endpoint, options) {
   // append endpoint to root API URL
@@ -43,15 +44,6 @@ export async function sendMessageDiscord(event, bridgeRoom) {
   console.log(event);
   console.log(bridgeRoom);
   console.log("sending message to discord");
-  // send message as the space tube bot user
-
-  /*
-    DiscordRequest(`/channels/${bridgeRoom.channelId}/messages`, {
-        method: "POST",
-        body: {
-            content: event.content.body
-        }
-    });*/
 
   let webhook;
   const webhookEvent = await getItem(
@@ -91,8 +83,6 @@ export async function sendMessageDiscord(event, bridgeRoom) {
       username: displayName || event.sender,
     },
   });
-
-  // sending message using webhook
 }
 
 function VerifyDiscordRequest(clientKey) {
@@ -111,13 +101,13 @@ function VerifyDiscordRequest(clientKey) {
 }
 
 export const startDiscord = (app) => {
-  app.use(
-    express.json({
-      verify: VerifyDiscordRequest(process.env.DISCORD_PUBLIC_KEY),
-    })
-  );
+  /* app.use(
+     express.json({
+       verify: VerifyDiscordRequest(process.env.DISCORD_PUBLIC_KEY),
+     })
+   );*/
 
-  app.post("/interactions", async function (req, res) {
+  app.post("/interactions", verifyKeyMiddleware(process.env.DISCORD_PUBLIC_KEY), async function (req, res) {
     // Interaction type and data
     const {
       body,

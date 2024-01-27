@@ -102,6 +102,32 @@ export const getItem = async (key, value, type) => {
     return null;
 }
 
+export const getAllItems = async (key, value, type) => {
+
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${APPLICATION_TOKEN}`
+        }
+    });
+    const eventsList = await response.json();
+
+    const matchingEvents = [];
+
+    for (const event of eventsList.chunk) {
+        if (event.content[key] === value) {
+            if (type) { //match by optional type
+                if (event.type === type)
+                    matchingEvents.push(event);
+            }
+            else
+                matchingEvents.push(event);
+        }
+    }
+
+    return matchingEvents.length > 0 ? matchingEvents : null;
+}
+
 export const getItemIncludes = async (key, value) => {
 
     const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
