@@ -1,4 +1,3 @@
-import express from "express";
 import fetch from "node-fetch";
 import {
   verifyKey,
@@ -107,7 +106,7 @@ export const startDiscord = (app) => {
      })
    );*/
 
-  app.post("/interactions", verifyKeyMiddleware(process.env.DISCORD_PUBLIC_KEY), async function (req, res) {
+  app.post("/interactions", VerifyDiscordRequest(process.env.DISCORD_PUBLIC_KEY), async function (req, res) {
     // Interaction type and data
     const {
       body,
