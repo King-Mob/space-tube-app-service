@@ -16,6 +16,7 @@ import {
 } from "./handler.js";
 import { getItem, getItemIncludes } from "./storage.js";
 import { startDiscord } from "./discord/index.js";
+import { startWhatsapp } from "./whatsapp/index.js";
 import { insertEnv } from "./build.js";
 
 // listening
@@ -182,6 +183,9 @@ app.get("/api/tubeInfo", async (req, res) => {
 //starts discord service
 if (process.env.DISCORD_TOKEN) {
   startDiscord(app);
+}
+if (process.env.WHATSAPP_USER_ID) {
+  startWhatsapp();
 }
 
 app.listen(8134);

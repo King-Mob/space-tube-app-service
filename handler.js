@@ -21,6 +21,7 @@ import {
 } from "./matrixClientRequests.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendMessageDiscord } from "./discord/index.js";
+import { sendMessageWhatsapp } from "./whatsapp/index.js";
 
 const { HOME_SERVER } = process.env;
 
@@ -304,6 +305,9 @@ export const handleMessage = async (event) => {
     if (event.sender !== bridgeUser.userId) {
       if (bridgeRoomEvent.content.service === "discord") {
         sendMessageDiscord(event, bridgeRoomEvent.content);
+      }
+      if (bridgeRoomEvent.content.service === "whatsapp") {
+        sendMessageWhatsapp(event, bridgeRoomEvent.content);
       }
     }
   }
