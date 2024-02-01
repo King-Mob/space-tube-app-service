@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
 import {
   verifyKey,
-  verifyKeyMiddleware,
   InteractionType,
   InteractionResponseType,
 } from "discord-interactions";
@@ -100,12 +99,6 @@ function VerifyDiscordRequest(clientKey) {
 }
 
 export const startDiscord = (app) => {
-  /* app.use(
-     express.json({
-       verify: VerifyDiscordRequest(process.env.DISCORD_PUBLIC_KEY),
-     })
-   );*/
-
   app.post("/interactions", VerifyDiscordRequest(process.env.DISCORD_PUBLIC_KEY), async function (req, res) {
     // Interaction type and data
     const {
