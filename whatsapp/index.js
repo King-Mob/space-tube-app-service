@@ -41,7 +41,7 @@ export const startWhatsapp = async () => {
 
         console.log(spacetubebotJoined)
 
-        if (!spacetubebotJoined) {
+        if (spacetubebotJoined.length < 1) {
             client.invite(roomId, `@space-tube-bot:${HOME_SERVER}`);
             await joinAsSpaceTube(roomId)
         }
