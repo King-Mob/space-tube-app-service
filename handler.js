@@ -330,7 +330,7 @@ export const handleMessage = async (event) => {
     const tubeCode = await registerTube(event.room_id);
 
     sendMessage(event.room_id, "The code for this room is:");
-    sendMessage(event.room_id, tubeCode);
+    setTimeout(() => sendMessage(event.room_id, tubeCode), 500);
 
     return;
   }
