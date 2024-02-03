@@ -39,6 +39,8 @@ export const startWhatsapp = async () => {
 
         const spacetubebotJoined = room.getJoinedMembers().includes(`@space-tube-bot:${HOME_SERVER}`);
 
+        console.log(room.getJoinedMembers());
+
         if (!spacetubebotJoined) {
             client.invite(roomId, `@space-tube-bot:${HOME_SERVER}`);
             await joinAsSpaceTube(roomId)
@@ -59,11 +61,12 @@ export const startWhatsapp = async () => {
         const message = event.event.content.body;
 
         if (event.event.sender === `@space-tube-bot:${HOME_SERVER}`) {
-            client.sendTextMessage(roomId, "🤖spacetube🤖" + message);
+            client.sendTextMessage(roomId, `🤖spacetube🤖: ${message}`);
         }
         else {
-            const displayName = room.getMember(event.sender).name;
-            client.sendTextMessage(roomId, `🎭${displayName}🎭 ${message}`)
+            const displayName = room.getMember(event.sender).name | "whatever";
+            console.log(room.getMember(event.sender))
+            client.sendTextMessage(roomId, `🎭${displayName}🎭: ${message}`)
         }
 
         const reply = (text) => {
