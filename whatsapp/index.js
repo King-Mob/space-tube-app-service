@@ -1,8 +1,9 @@
 import * as sdk from "matrix-js-sdk";
 import { RoomMemberEvent, RoomEvent, ClientEvent } from "matrix-js-sdk";
-import { getDisplayName } from "../storage.js";
+import { getDisplayName, getItem, storeItem } from "../storage.js";
+import { joinAsSpaceTube, getRoomState, registerUser, join, invite } from "../matrixClientRequests.js";
 
-const { WHATSAPP_HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_PASSWORD } = process.env;
+const { HOME_SERVER, WHATSAPP_HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_PASSWORD } = process.env;
 
 let client;
 
@@ -31,10 +32,19 @@ export const startWhatsapp = async () => {
 
     const scriptStart = Date.now();
 
-    client.on(RoomEvent.Timeline, function (event, room, toStartOfTimeline) {
+    client.on(RoomEvent.Timeline, async function (event, room, toStartOfTimeline) {
         const roomId = event.event.room_id;
 
         const eventTime = event.event.origin_server_ts;
+
+        /*
+        if (!room.members.includes(`@space-tube-bot:${HOME_SERVER}`)) {
+            client.invite(roomId, `@space-tube-bot:${HOME_SERVER}`);
+            await joinAsSpaceTube(roomId)
+        }
+        */
+
+        console.log(room);
 
         if (scriptStart > eventTime) {
             return; //don't run commands for old messages
@@ -55,12 +65,21 @@ export const startWhatsapp = async () => {
         const message = event.event.content.body.toLowerCase();
 
         if (message.includes("spacetube echo")) {
-            reply(message.replace("spacetube echo", ""));
+            reply("🤖spacetube🤖" + message.replace("spacetube echo", ""));
         }
 
         //use message.includes to test for spacetube command and to test for @otherGroup
 
-        //spacetube create
+        if (message.includes("spacetube create")) {
+
+            reply("🤖spacetube🤖 creating tube.");
+
+            return;
+
+        }
+
+
+
 
         //spacetube connect, sets up the @
         //also needs to create bridgeRoom and bridgeUser that handleMessage relates to
