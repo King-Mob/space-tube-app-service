@@ -39,6 +39,8 @@ export const startWhatsapp = async () => {
 
         const spacetubebotJoined = room.getJoinedMembers().filter(member => member.userId === `@space-tube-bot:${HOME_SERVER}`);
 
+        console.log(spacetubebotJoined)
+
         if (!spacetubebotJoined) {
             client.invite(roomId, `@space-tube-bot:${HOME_SERVER}`);
             await joinAsSpaceTube(roomId)
@@ -70,22 +72,13 @@ export const startWhatsapp = async () => {
             client.sendTextMessage(roomId, text);
         };
 
-        if (message.toLowerCase().includes("spacetube echo")) {
-            reply("🤖spacetube🤖" + message.replace("spacetube echo", ""));
-        }
-
         //use message.includes to test for spacetube command and to test for @otherGroup
 
         if (message.toLowerCase().includes("spacetube create")) {
-
             reply("🤖spacetube🤖 creating tube.");
 
             return;
-
         }
-
-
-
 
         //spacetube connect, sets up the @
         //also needs to create bridgeRoom and bridgeUser that handleMessage relates to
