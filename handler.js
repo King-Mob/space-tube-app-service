@@ -329,7 +329,8 @@ export const handleMessage = async (event) => {
   if (message.includes("!spacetube create")) {
     const tubeCode = await registerTube(event.room_id);
 
-    sendMessage(event.room_id, `The code for this room is ${tubeCode}`);
+    sendMessage(event.room_id, "The code for this room is:");
+    sendMessage(event.room_id, tubeCode);
 
     return;
   }
