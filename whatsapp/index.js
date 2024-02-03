@@ -56,23 +56,27 @@ export const startWhatsapp = async () => {
             return; //don't reply to your own messages
         }
 
+        const message = event.event.content.body;
+
         if (event.event.sender === `@space-tube-bot:${HOME_SERVER}`) {
-            client.sendTextMessage(roomId, event.event.content.body);
+            client.sendTextMessage(roomId, "🤖spacetube🤖" + message);
+        }
+        else {
+            const displayName = room.getMember(event.sender).name;
+            client.sendTextMessage(roomId, `🎭${displayName}🎭 ${message}`)
         }
 
         const reply = (text) => {
             client.sendTextMessage(roomId, text);
         };
 
-        const message = event.event.content.body.toLowerCase();
-
-        if (message.includes("spacetube echo")) {
+        if (message.toLowerCase().includes("spacetube echo")) {
             reply("🤖spacetube🤖" + message.replace("spacetube echo", ""));
         }
 
         //use message.includes to test for spacetube command and to test for @otherGroup
 
-        if (message.includes("spacetube create")) {
+        if (message.toLowerCase().includes("spacetube create")) {
 
             reply("🤖spacetube🤖 creating tube.");
 
