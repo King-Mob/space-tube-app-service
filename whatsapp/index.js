@@ -37,9 +37,7 @@ export const startWhatsapp = async () => {
 
         const eventTime = event.event.origin_server_ts;
 
-        const spacetubebotJoined = room.getJoinedMembers().includes(`@space-tube-bot:${HOME_SERVER}`);
-
-        console.log(room.getJoinedMembers());
+        const spacetubebotJoined = room.getJoinedMembers().filter(member => member.userId === `@space-tube-bot:${HOME_SERVER}`);
 
         if (!spacetubebotJoined) {
             client.invite(roomId, `@space-tube-bot:${HOME_SERVER}`);
@@ -65,8 +63,8 @@ export const startWhatsapp = async () => {
         }
         else {
             const displayName = "whatever";
-            console.log(room.getMember(event.sender))
-            client.sendTextMessage(roomId, `🎭${displayName}🎭: ${message}`)
+            console.log(room.getMember(event.event.sender))
+            // client.sendTextMessage(roomId, `🎭${displayName}🎭: ${message}`)
         }
 
         const reply = (text) => {
