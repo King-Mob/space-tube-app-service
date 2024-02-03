@@ -314,6 +314,8 @@ export const handleMessage = async (event) => {
 
   if (event.sender === `@space-tube-bot:${HOME_SERVER}`) return;
 
+  if (event.sender === `@spacetube-whatsapp:${HOME_SERVER}`) return;
+
   const message = event.content.body;
 
   if (message.includes("!spacetube echo")) {

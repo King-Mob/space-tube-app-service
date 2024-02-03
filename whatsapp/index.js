@@ -62,9 +62,8 @@ export const startWhatsapp = async () => {
             client.sendTextMessage(roomId, `🤖spacetube🤖: ${message}`);
         }
         else {
-            const displayName = "whatever";
-            console.log(room.getMember(event.event.sender))
-            // client.sendTextMessage(roomId, `🎭${displayName}🎭: ${message}`)
+            const displayName = room.getMember(event.event.sender).name || event.event.sender;
+            client.sendTextMessage(roomId, `🎭${displayName}🎭: ${message}`)
         }
 
         const reply = (text) => {
