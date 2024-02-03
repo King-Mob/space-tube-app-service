@@ -37,13 +37,6 @@ export const startWhatsapp = async () => {
 
         const eventTime = event.event.origin_server_ts;
 
-        const spacetubebotJoined = room.getJoinedMembers().filter(member => member.userId === `@space-tube-bot:${HOME_SERVER}`);
-
-        if (spacetubebotJoined.length < 1) {
-            client.invite(roomId, `@space-tube-bot:${HOME_SERVER}`);
-            await joinAsSpaceTube(roomId);
-        }
-
         if (scriptStart > eventTime) {
             return; //don't run commands for old messages
         }
@@ -54,6 +47,13 @@ export const startWhatsapp = async () => {
 
         if (event.event.sender === `@${WHATSAPP_USER_ID}:${WHATSAPP_HOME_SERVER}`) {
             return; //don't reply to your own messages
+        }
+
+        const spacetubebotJoined = room.getJoinedMembers().filter(member => member.userId === `@space-tube-bot:${HOME_SERVER}`);
+
+        if (spacetubebotJoined.length < 1) {
+            client.invite(roomId, `@space-tube-bot:${HOME_SERVER}`);
+            await joinAsSpaceTube(roomId);
         }
 
         const message = event.event.content.body;
