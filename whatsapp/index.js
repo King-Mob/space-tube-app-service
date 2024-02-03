@@ -39,11 +39,9 @@ export const startWhatsapp = async () => {
 
         const spacetubebotJoined = room.getJoinedMembers().filter(member => member.userId === `@space-tube-bot:${HOME_SERVER}`);
 
-        console.log(spacetubebotJoined)
-
         if (spacetubebotJoined.length < 1) {
             client.invite(roomId, `@space-tube-bot:${HOME_SERVER}`);
-            await joinAsSpaceTube(roomId)
+            await joinAsSpaceTube(roomId);
         }
 
         if (scriptStart > eventTime) {
@@ -76,7 +74,6 @@ export const startWhatsapp = async () => {
 
         if (message.toLowerCase().includes("spacetube create")) {
             reply("🤖spacetube🤖 creating tube.");
-
             return;
         }
 

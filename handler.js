@@ -318,8 +318,6 @@ export const handleMessage = async (event) => {
 
   const message = event.content.body;
 
-  console.log("handling message", event)
-
   if (message.includes("!spacetube echo")) {
     const newMessage = "you said: " + message.split("!spacetube echo")[1];
 
