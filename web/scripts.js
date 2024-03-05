@@ -8,6 +8,11 @@ const urlParams = new URLSearchParams(queryString);
 const linkToken = urlParams.get("linkToken");
 const displayName = urlParams.get("name");
 
+//lines 20-40 are creating a new user or having one
+//lines 50-75 getting the two room informations
+//lines 78-200 are rendering the rooms, which includes creating the input functionality
+//lines 200-end are initiating the whole thing
+
 const start = async () => {
   if (!linkToken) {
     return;

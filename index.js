@@ -95,6 +95,8 @@ as.listen(8133);
 
 const app = express();
 app.use(express.json());
+app.use(express.static("dist-web"));
+
 insertEnv(process.env);
 
 app.get("/", function (req, res) {

@@ -2,3 +2,5 @@
 /node_modules
 registration.yaml
 constants.js
+/dist-web
+/.parcel-cache

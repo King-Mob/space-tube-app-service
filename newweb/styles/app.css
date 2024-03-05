@@ -1,0 +1,86 @@
+body {
+  margin: 0;
+}
+
+#app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.room-container {
+  height: 50%;
+  width: 100%;
+}
+
+@media only screen and (min-width: 1000px) {
+  #app {
+    flex-direction: row-reverse;
+  }
+  .room-container {
+    height: 100%;
+    width: 50%;
+  }
+}
+
+h1 {
+  color: black;
+  background-color: rgba(0, 0, 0, 0.2);
+  font-family: monospace;
+  font-size: 3rem;
+  margin: 0;
+}
+
+.message-container {
+  padding: 10px 5px;
+}
+
+.name {
+  opacity: 0.7;
+}
+
+p {
+  font-family: monospace;
+  font-size: 2rem;
+  margin: 0px;
+}
+
+.room-events-container {
+  flex-grow: 1;
+  overflow-y: scroll;
+}
+
+#tube-room-container {
+  background-color: lightgrey;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#matrix-room-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 2;
+  background-color: wheat;
+}
+
+#new-message-container {
+  display: flex;
+  width: 100%;
+}
+
+input {
+  font-size: 1.5rem;
+  flex-grow: 1;
+}
+
+#send-button {
+  font-size: 2rem;
+  font-family: monospace;
+}
+
+.forwarded {
+  font-size: 1.5rem;
+  opacity: 0.5;
+}

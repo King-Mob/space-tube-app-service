@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node index.js",
     "register": "node registerService.js",
-    "register-discord": "node discord/registerDiscord.js"
+    "register-discord": "node discord/registerDiscord.js",
+    "dev-web": "parcel newweb/index.html --dist-dir ./dist-web",
+    "build-web": "shx rm -rf dist-web && parcel build web/index.html --dist-dir ./dist-web"
   },
   "author": "king-mob",
   "license": "GPL-3.0-or-later",
@@ -17,7 +19,23 @@
     "matrix-appservice": "^2.0.0",
     "matrix-js-sdk": "^31.2.0",
     "node-fetch": "^3.3.1",
+    "parcel": "^2.11.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "uuid": "^9.0.0"
   },
-  "type": "module"
+  "devDependecies": {
+    "shx": "^0.3.4"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "vm-browserify": "^1.1.2"
+  }
 }
