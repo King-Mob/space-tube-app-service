@@ -97,28 +97,6 @@ const app = express();
 app.use(express.json());
 app.use(express.static("dist-web"));
 
-insertEnv(process.env);
-
-app.get("/", function (req, res) {
-  res.sendFile(path.resolve("web/index.html"));
-});
-
-app.get("/favicon.png", function (req, res) {
-  res.sendFile(path.resolve("web/favicon.png"));
-});
-
-app.get("/styles.css", (req, res) => {
-  res.sendFile(path.resolve("web/styles.css"));
-});
-
-app.get("/scripts.js", (req, res) => {
-  res.sendFile(path.resolve("web/scripts.js"));
-});
-
-app.get("/constants.js", (req, res) => {
-  res.sendFile(path.resolve("web/constants.js"));
-});
-
 app.post("/api/register", async (req, res) => {
   const linkEvent = await getItem(
     "linkToken",
