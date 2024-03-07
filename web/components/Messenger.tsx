@@ -74,7 +74,13 @@ const registerUser = async (userName, linkToken) => {
     return;
   }
 };
-const Messenger = ({ linkToken, userName }) => {
+
+type MessengerProps = {
+  linkToken: string;
+  userName: string;
+};
+
+const Messenger = ({ linkToken, userName }: MessengerProps) => {
   const [user, setUser] = useState();
   const [matrixRoom, setMatrixRoom] = useState();
   const [tubeRoom, setTubeRoom] = useState();
