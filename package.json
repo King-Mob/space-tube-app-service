@@ -2,7 +2,6 @@
   "name": "space-tube-application-service",
   "version": "1.0.0",
   "description": "a matrix application service to run a space tube instance",
-  "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "register": "node registerService.js",
