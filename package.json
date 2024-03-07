@@ -24,9 +24,6 @@
     "react-dom": "^18.2.0",
     "uuid": "^9.0.0"
   },
-  "devDependecies": {
-    "shx": "^0.3.4"
-  },
   "type": "module",
   "devDependencies": {
     "@types/node": "^20.11.24",
@@ -36,6 +33,7 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
+    "shx": "^0.3.4",
     "stream-browserify": "^3.0.0",
     "vm-browserify": "^1.1.2"
   }
