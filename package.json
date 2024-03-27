@@ -7,7 +7,7 @@
     "register": "node registerService.js",
     "register-discord": "node discord/registerDiscord.js",
     "dev-web": "parcel web/index.html --dist-dir ./dist-web",
-    "build-web": "shx rm -rf dist-web && parcel build web/index.html --dist-dir ./dist-web"
+    "build-web": "shx rm -rf dist-web && parcel build web/index.html --dist-dir ./dist-web --no-cache"
   },
   "author": "king-mob",
   "license": "GPL-3.0-or-later",
