@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
-import path from "path";
 import { AppService, AppserviceHttpError } from "matrix-appservice";
+import { v4 as uuidv4 } from 'uuid';
 import {
   registerUser,
   invite,
@@ -13,11 +13,11 @@ import {
   handleInvite,
   handleRemoteOpen,
   handleForward,
+  createRoomsAndTube
 } from "./handler.js";
-import { getItem, getItemIncludes } from "./storage.js";
+import { getItem, getItemIncludes, storeItem } from "./storage.js";
 import { startDiscord } from "./discord/index.js";
 import { startWhatsapp } from "./whatsapp/index.js";
-import { insertEnv } from "./build.js";
 
 // listening
 const as = new AppService({
@@ -160,7 +160,58 @@ app.get("/api/tubeInfo", async (req, res) => {
   }
 });
 
-//starts discord service
+app.get("/api/invite", async (req, res) => {
+  const { inviteId } = req.query;
+
+  const invitation = await getItem("inviteId", inviteId);
+
+  if (invitation)
+    res.send({ success: true, invitation });
+  else
+    res.send({ success: false, message: "No invite with that id found." })
+})
+
+app.post("/api/invite/create", async (req, res) => {
+
+  const { myMatrixId, groupName, contactMatrixId } = req.body;
+
+  const inviteId = uuidv4();
+
+  storeItem({
+    type: "spacetube.create.invite",
+    from: {
+      userId: myMatrixId,
+      groupName
+    },
+    to: {
+      userId: contactMatrixId
+    },
+    inviteId
+  });
+
+  const { URL } = process.env;
+
+  res.send({
+    success: true,
+    link: `${URL}/?invite=${inviteId}`
+  });
+})
+
+app.post("/api/invite/accept", async (req, res) => {
+  const { myMatrixId, groupName, invite } = req.body;
+
+  const invitation = await getItem("inviteId", invite);
+
+  if (invitation) {
+    invitation.content.to.userId = myMatrixId;
+    invitation.content.to.groupName = groupName;
+    createRoomsAndTube(invitation);
+    res.send({ success: true, invitation });
+  }
+  else
+    res.send({ success: false, message: "No invite with that id found." })
+})
+
 if (process.env.DISCORD_TOKEN) {
   startDiscord(app);
 }

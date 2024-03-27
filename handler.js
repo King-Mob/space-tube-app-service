@@ -25,6 +25,33 @@ import { sendMessageWhatsapp } from "./whatsapp/index.js";
 
 const { HOME_SERVER } = process.env;
 
+const createTubeUser = async (name, roomId, tubeIntermediary) => {
+  console.log("creating tube user")
+  console.log(name, roomId, tubeIntermediary)
+
+  const newUserResponse = await registerUser(name);
+  const user = await newUserResponse.json();
+
+  storeItem({
+    type: "spacetube.user",
+    userId: user.user_id,
+    user,
+    userRoomId: roomId,
+    name: name,
+  });
+
+  setDisplayName(user, name);
+
+  await invite(user, tubeIntermediary);
+  await join(user, tubeIntermediary);
+  await invite(user, roomId);
+  await join(user, roomId);
+
+  console.log("it is done")
+
+  return user;
+}
+
 const createClone = async (name, roomId, originalUserId) => {
   const newCloneUserResponse = await registerUser(name);
   const newCloneUser = await newCloneUserResponse.json();
@@ -81,29 +108,37 @@ const connectSameInstance = async (event, connectionCode) => {
 
   await registerTube(event.room_id);
 
-  const connectedRooms = [event.room_id, otherRoomId].sort();
+  connectRooms(event.room_id, otherRoomId);
+}
+
+const connectRooms = async (roomId1, roomId2) => {
+  console.log("connecting rooms")
+
+  const connectedRooms = [roomId1, roomId2].sort();
   const tubeName = `open-${connectedRooms[0]}-${connectedRooms[1]}`;
 
   const existingTube = await getItem("name", tubeName);
 
   if (existingTube) {
-    sendMessage(event.room_id, "This tube is already active.");
+    sendMessage(roomId1, "This tube is already active.");
+
+    return existingTube;
   } else {
     const tubeRoomResponse = await createRoom();
     const tubeRoom = await tubeRoomResponse.json();
-    console.log(tubeRoom);
     storeItem({
       name: tubeName,
       type: "spacetube.open",
       tubeIntermediary: tubeRoom.room_id,
       connectedRooms,
     });
-    sendMessage(event.room_id, "I declare this tube is now open!");
-    sendMessage(otherRoomId, "I declare this tube is now open!");
-  }
+    sendMessage(roomId1, "I declare this tube is now open!");
+    sendMessage(roomId2, "I declare this tube is now open!");
 
-  return;
-};
+    return tubeRoom.room_id;
+  }
+}
+
 
 const connectOtherInstance = async (
   event,
@@ -269,25 +304,7 @@ const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
         newTubeUserName = roomEvent.content.name;
     }
 
-    const newUserResponse = await registerUser(newTubeUserName);
-    const newUser = await newUserResponse.json();
-
-    user = newUser;
-
-    storeItem({
-      type: "spacetube.user",
-      userId: newUser.user_id,
-      user: newUser,
-      userRoomId: event.room_id,
-      name: newTubeUserName,
-    });
-
-    setDisplayName(newUser, newTubeUserName);
-
-    await invite(newUser, tubeIntermediary);
-    await join(newUser, tubeIntermediary);
-    await invite(newUser, event.room_id);
-    await join(newUser, event.room_id);
+    user = await createTubeUser(newTubeUserName, event.room_id, tubeIntermediary);
   }
 
   sendMessageAsUser(user, tubeIntermediary, message);
@@ -450,4 +467,21 @@ export const handleForward = async (event) => {
   if (tubeOpen) {
     await forwardToTubeIntermediary(tubeOpen.content.tubeIntermediary, event);
   }
+}
+
+export const createRoomsAndTube = async (invitation) => {
+  const { content: { from, to } } = invitation;
+
+  const createFromRoomResponse = await createRoom(`to-${to.groupName}`);
+  const fromRoom = await createFromRoomResponse.json();
+  invite({ user_id: from.userId }, fromRoom.room_id);
+
+  const createToRoomResponse = await createRoom(`to-${from.groupName}`);
+  const toRoom = await createToRoomResponse.json();
+  invite({ user_id: to.userId }, toRoom.room_id);
+
+  const tubeIntermediary = await connectRooms(fromRoom.room_id, toRoom.room_id);
+
+  createTubeUser(from.groupName, fromRoom.room_id, tubeIntermediary);
+  createTubeUser(to.groupName, toRoom.room_id, tubeIntermediary);
 }

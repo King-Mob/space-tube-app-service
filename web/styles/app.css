@@ -8,6 +8,10 @@ body {
 
 #app {
   height: 100vh;
+}
+
+#messenger-container {
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -18,7 +22,7 @@ body {
 }
 
 @media only screen and (min-width: 1000px) {
-  #app {
+  #messenger-container {
     flex-direction: row-reverse;
   }
   .room-container {
@@ -85,6 +89,7 @@ p {
 input {
   font-size: 1.5rem;
   flex-grow: 1;
+  font-family: monospace;
 }
 
 #send-button {
@@ -95,4 +100,41 @@ input {
 .forwarded {
   font-size: 1.5rem;
   opacity: 0.5;
+}
+
+label {
+  font-size: 1.5rem;
+  font-family: monospace;
+  display: block;
+}
+
+#create-button {
+  display: block;
+}
+
+.home-input {
+  width: 50%;
+}
+
+.home-button {
+  display: block;
+  border: none;
+  font-family: monospace;
+  font-size: 1.5rem;
+  border-radius: 3px;
+}
+
+.home-button:hover {
+  background-color: black;
+  color: white;
+}
+
+.home-button:active {
+  background-color: grey;
+  color: white;
+}
+
+.home-button:disabled {
+  background-color: lightgrey;
+  color: grey;
 }

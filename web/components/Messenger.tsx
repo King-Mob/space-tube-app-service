@@ -1,8 +1,12 @@
 import "../styles/app.css";
 import { useState, useEffect, useRef } from "react";
-
-const { HOME_SERVER } = process.env;
-const url = `https://spacetube.${HOME_SERVER}`;
+import {
+  getTubeInfoRequest,
+  getRoomRequest,
+  registerRequest,
+  sendMessageRequest,
+  forwardMessageRequest,
+} from "../requests";
 
 const connectLinkedEvents = (events) => {
   const linkedEvents = {};
@@ -17,20 +21,10 @@ const connectLinkedEvents = (events) => {
 };
 
 const getRooms = async (user, linkToken) => {
-  const tubeInfoResponse = await fetch(
-    `${url}/api/tubeInfo?linkToken=${linkToken}`
-  );
+  const tubeInfoResponse = await getTubeInfoRequest(linkToken);
   const tubeInfo = await tubeInfoResponse.json();
 
-  const matrixRoomResponse = await fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${tubeInfo.matrixRoomId}/messages?limit=1000`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.accessToken}`,
-      },
-    }
-  );
+  const matrixRoomResponse = await getRoomRequest(user, tubeInfo);
   const eventsList = await matrixRoomResponse.json();
   const connectedEvents = connectLinkedEvents(eventsList.chunk);
 
@@ -47,13 +41,7 @@ const getRooms = async (user, linkToken) => {
 };
 
 const registerUser = async (userName, linkToken) => {
-  const response = await fetch(`${url}/api/register`, {
-    method: "post",
-    body: JSON.stringify({ linkToken, userName }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  const response = await registerRequest(linkToken, userName);
   const registration = await response.json();
 
   if (registration.success) {
@@ -75,15 +63,14 @@ const registerUser = async (userName, linkToken) => {
   }
 };
 
-type MessengerProps = {
-  linkToken: string;
-  userName: string;
-};
+type User = { name: ""; userId: ""; accessToken: "" };
+type MatrixRoom = { roomId: ""; events: [any] };
+type TubeRoom = { name: ""; events: [any] };
 
-const Messenger = ({ linkToken, userName }: MessengerProps) => {
-  const [user, setUser] = useState();
-  const [matrixRoom, setMatrixRoom] = useState();
-  const [tubeRoom, setTubeRoom] = useState();
+const Messenger = ({ linkToken, userName }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [matrixRoom, setMatrixRoom] = useState<MatrixRoom | null>(null);
+  const [tubeRoom, setTubeRoom] = useState<TubeRoom | null>(null);
   const [message, setMessage] = useState("");
   const [sendDisabled, setSendDisabled] = useState(true);
   const tubeMessageEnd = useRef();
@@ -136,20 +123,7 @@ const Messenger = ({ linkToken, userName }: MessengerProps) => {
   }, []);
 
   const sendEvent = async () => {
-    fetch(
-      `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${matrixRoom.roomId}/send/m.room.message`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          body: message,
-          msgtype: "m.text",
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.accessToken}`,
-        },
-      }
-    );
+    sendMessageRequest(matrixRoom, message, user);
 
     setMessage("");
     setUpRooms();
@@ -159,21 +133,7 @@ const Messenger = ({ linkToken, userName }: MessengerProps) => {
     if (confirm("Send this message to the tube?")) {
       const txnId = self.crypto.randomUUID();
 
-      await fetch(
-        `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${matrixRoom.roomId}/send/spacetube.forward/${txnId}?user_id=@${user.userId}`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            type: "spacetube.forward",
-            body: event.content.body,
-            originalEventId: event.event_id,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.accessToken}`,
-          },
-        }
-      );
+      await forwardMessageRequest(matrixRoom, txnId, event, user);
 
       setTimeout(setUpRooms, 200);
     }
@@ -243,7 +203,7 @@ const Messenger = ({ linkToken, userName }: MessengerProps) => {
   const tubeRoomTitle = "🛸" + roomParticipants.join(",");
 
   return (
-    <>
+    <div id="messenger-container">
       <div id="tube-room-container" className="room-container">
         <h1 id="tube-room-title">{tubeRoomTitle || "Tube Room"}</h1>
         <div id="tube-room-events-container" className="room-events-container">
@@ -279,7 +239,7 @@ const Messenger = ({ linkToken, userName }: MessengerProps) => {
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -5,7 +5,8 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
 const linkToken = urlParams.get("linkToken");
-const displayName = urlParams.get("name");
+const userName = urlParams.get("name");
+const invite = urlParams.get("invite");
 
 const App = () => {
   const storedLinkTokens = localStorage.getItem("linkTokens");
@@ -21,10 +22,9 @@ const App = () => {
       localStorage.setItem("linkTokens", JSON.stringify([linkToken]));
   }
 
-  if (linkToken)
-    return <Messenger linkToken={linkToken} displayName={displayName} />;
+  if (linkToken) return <Messenger linkToken={linkToken} userName={userName} />;
 
-  return <Home storedLinkTokens={storedLinkTokens} />;
+  return <Home storedLinkTokens={storedLinkTokens} invite={invite} />;
 };
 
 export default App;
