@@ -17,7 +17,7 @@ import {
   invite,
   join,
   joinAsSpaceTube,
-  getRoomsList
+  getRoomsList,
 } from "./matrixClientRequests.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendMessageDiscord } from "./discord/index.js";
@@ -26,8 +26,8 @@ import { sendMessageWhatsapp } from "./whatsapp/index.js";
 const { HOME_SERVER } = process.env;
 
 const createTubeUser = async (name, roomId, tubeIntermediary) => {
-  console.log("creating tube user")
-  console.log(name, roomId, tubeIntermediary)
+  console.log("creating tube user");
+  console.log(name, roomId, tubeIntermediary);
 
   const newUserResponse = await registerUser(name);
   const user = await newUserResponse.json();
@@ -47,10 +47,10 @@ const createTubeUser = async (name, roomId, tubeIntermediary) => {
   await invite(user, roomId);
   await join(user, roomId);
 
-  console.log("it is done")
+  console.log("it is done");
 
   return user;
-}
+};
 
 const createClone = async (name, roomId, originalUserId) => {
   const newCloneUserResponse = await registerUser(name);
@@ -61,7 +61,7 @@ const createClone = async (name, roomId, originalUserId) => {
   storeItem({
     type: "spacetube.user.clone",
     clone: newCloneUser,
-    originalUserId
+    originalUserId,
   });
 
   setDisplayName(newCloneUser, name);
@@ -70,7 +70,7 @@ const createClone = async (name, roomId, originalUserId) => {
   await join(newCloneUser, roomId);
 
   return newCloneUser;
-}
+};
 
 const registerTube = async (roomId) => {
   const tubeOpening = await getItem("name", `registration-${roomId}`);
@@ -89,7 +89,7 @@ const registerTube = async (roomId) => {
   }
 
   return tubeCode;
-}
+};
 
 const connectSameInstance = async (event, connectionCode) => {
   const otherTube = await getItem("tubeCode", connectionCode);
@@ -102,17 +102,20 @@ const connectSameInstance = async (event, connectionCode) => {
   const otherRoomId = otherTube.content.roomId;
 
   if (otherRoomId === event.room_id) {
-    sendMessage(event.room_id, "That's the creation code for this space, that you would share with another group.");
+    sendMessage(
+      event.room_id,
+      "That's the creation code for this space, that you would share with another group."
+    );
     return;
   }
 
   await registerTube(event.room_id);
 
   connectRooms(event.room_id, otherRoomId);
-}
+};
 
 const connectRooms = async (roomId1, roomId2) => {
-  console.log("connecting rooms")
+  console.log("connecting rooms");
 
   const connectedRooms = [roomId1, roomId2].sort();
   const tubeName = `open-${connectedRooms[0]}-${connectedRooms[1]}`;
@@ -137,8 +140,7 @@ const connectRooms = async (roomId1, roomId2) => {
 
     return tubeRoom.room_id;
   }
-}
-
+};
 
 const connectOtherInstance = async (
   event,
@@ -233,10 +235,14 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
   let cloneUser;
 
   if (clones) {
-    clones.forEach(clone => {
-      if (tubeIntermediary.content.connectedRooms.includes(clone.content.clone.roomId))
+    clones.forEach((clone) => {
+      if (
+        tubeIntermediary.content.connectedRooms.includes(
+          clone.content.clone.roomId
+        )
+      )
         cloneUser = clone.content.clone;
-    })
+    });
   }
   if (!cloneUser) {
     const cloneUserRoomId = tubeIntermediary.content.connectedRooms.find(
@@ -279,11 +285,7 @@ const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
 
   const message = event.content.body;
 
-  const tubeUser = await getItem(
-    "userRoomId",
-    event.room_id,
-    "spacetube.user"
-  );
+  const tubeUser = await getItem("userRoomId", event.room_id, "spacetube.user");
 
   if (tubeUser) {
     user = tubeUser.content.user;
@@ -304,13 +306,17 @@ const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
         newTubeUserName = roomEvent.content.name;
     }
 
-    user = await createTubeUser(newTubeUserName, event.room_id, tubeIntermediary);
+    user = await createTubeUser(
+      newTubeUserName,
+      event.room_id,
+      tubeIntermediary
+    );
   }
 
   sendMessageAsUser(user, tubeIntermediary, message);
 
   return user;
-}
+};
 
 export const handleMessage = async (event) => {
   //Check if the event comes from a bridged room
@@ -397,14 +403,16 @@ export const handleMessage = async (event) => {
 
       const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
 
-      if (event.sender.includes("@_space-tube") && !bridgeUserEvent)
-        return;
+      if (event.sender.includes("@_space-tube") && !bridgeUserEvent) return;
 
       if (bridgeUserEvent && event.sender !== bridgeUserEvent.content.userId) {
         return;
       }
 
-      user = await forwardToTubeIntermediary(tubeOpen.content.tubeIntermediary, event);
+      user = await forwardToTubeIntermediary(
+        tubeOpen.content.tubeIntermediary,
+        event
+      );
     }
     sendMessageAsUser(user, event.room_id, message);
   }
@@ -467,10 +475,12 @@ export const handleForward = async (event) => {
   if (tubeOpen) {
     await forwardToTubeIntermediary(tubeOpen.content.tubeIntermediary, event);
   }
-}
+};
 
 export const createRoomsAndTube = async (invitation) => {
-  const { content: { from, to } } = invitation;
+  const {
+    content: { from, to },
+  } = invitation;
 
   const createFromRoomResponse = await createRoom(`to-${to.groupName}`);
   const fromRoom = await createFromRoomResponse.json();
@@ -484,4 +494,4 @@ export const createRoomsAndTube = async (invitation) => {
 
   createTubeUser(from.groupName, fromRoom.room_id, tubeIntermediary);
   createTubeUser(to.groupName, toRoom.room_id, tubeIntermediary);
-}
+};

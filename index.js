@@ -1,19 +1,20 @@
 import "dotenv/config";
 import express from "express";
 import { AppService, AppserviceHttpError } from "matrix-appservice";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import {
   registerUser,
   invite,
   join,
   setDisplayName,
+  sync,
 } from "./matrixClientRequests.js";
 import {
   handleMessage,
   handleInvite,
   handleRemoteOpen,
   handleForward,
-  createRoomsAndTube
+  createRoomsAndTube,
 } from "./handler.js";
 import { getItem, getItemIncludes, storeItem } from "./storage.js";
 import { startDiscord } from "./discord/index.js";
@@ -160,19 +161,42 @@ app.get("/api/tubeInfo", async (req, res) => {
   }
 });
 
+app.get("/api/tubeInfo/sync", async (req, res) => {
+  const { linkToken, nextBatch } = req.query;
+
+  const linkEvent = await getItem("linkToken", linkToken, "spacetube.link");
+
+  if (linkEvent) {
+    const matrixRoomId = linkEvent.content.roomId;
+
+    const {
+      content: { user },
+    } = await getItem("userRoomId", matrixRoomId, "spacetube.user");
+
+    const syncData = await sync(user, nextBatch);
+
+    res.send({
+      success: true,
+      ...syncData,
+    });
+  } else {
+    res.send({
+      success: false,
+      message: "No room active with that link token",
+    });
+  }
+});
+
 app.get("/api/invite", async (req, res) => {
   const { inviteId } = req.query;
 
   const invitation = await getItem("inviteId", inviteId);
 
-  if (invitation)
-    res.send({ success: true, invitation });
-  else
-    res.send({ success: false, message: "No invite with that id found." })
-})
+  if (invitation) res.send({ success: true, invitation });
+  else res.send({ success: false, message: "No invite with that id found." });
+});
 
 app.post("/api/invite/create", async (req, res) => {
-
   const { myMatrixId, groupName, contactMatrixId } = req.body;
 
   const inviteId = uuidv4();
@@ -181,21 +205,21 @@ app.post("/api/invite/create", async (req, res) => {
     type: "spacetube.create.invite",
     from: {
       userId: myMatrixId,
-      groupName
+      groupName,
     },
     to: {
-      userId: contactMatrixId
+      userId: contactMatrixId,
     },
-    inviteId
+    inviteId,
   });
 
   const { URL } = process.env;
 
   res.send({
     success: true,
-    link: `${URL}/?invite=${inviteId}`
+    link: `${URL}/?invite=${inviteId}`,
   });
-})
+});
 
 app.post("/api/invite/accept", async (req, res) => {
   const { myMatrixId, groupName, invite } = req.body;
@@ -207,10 +231,8 @@ app.post("/api/invite/accept", async (req, res) => {
     invitation.content.to.groupName = groupName;
     createRoomsAndTube(invitation);
     res.send({ success: true, invitation });
-  }
-  else
-    res.send({ success: false, message: "No invite with that id found." })
-})
+  } else res.send({ success: false, message: "No invite with that id found." });
+});
 
 if (process.env.DISCORD_TOKEN) {
   startDiscord(app);

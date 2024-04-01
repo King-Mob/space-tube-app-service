@@ -6,6 +6,8 @@ import {
   registerRequest,
   sendMessageRequest,
   forwardMessageRequest,
+  syncRequest,
+  syncTubeRequest,
 } from "../requests";
 
 const connectLinkedEvents = (events) => {
@@ -20,13 +22,24 @@ const connectLinkedEvents = (events) => {
   });
 };
 
-const getRooms = async (user, linkToken) => {
+const getTubeRoom = async (linkToken) => {
   const tubeInfoResponse = await getTubeInfoRequest(linkToken);
   const tubeInfo = await tubeInfoResponse.json();
 
+  return tubeInfo;
+};
+
+const getMatrixRoom = async (user, tubeInfo) => {
   const matrixRoomResponse = await getRoomRequest(user, tubeInfo);
   const eventsList = await matrixRoomResponse.json();
   const connectedEvents = connectLinkedEvents(eventsList.chunk);
+
+  return connectedEvents;
+};
+
+const getRooms = async (user, linkToken) => {
+  const tubeInfo = await getTubeRoom(linkToken);
+  const connectedEvents = await getMatrixRoom(user, tubeInfo);
 
   return {
     matrixRoom: {
@@ -76,6 +89,29 @@ const Messenger = ({ linkToken, userName }) => {
   const tubeMessageEnd = useRef();
   const matrixMessageEnd = useRef();
 
+  const syncLoopTube = async (linkToken, nextBatch = null) => {
+    const syncTubeResponse = await syncTubeRequest(linkToken, nextBatch);
+    const syncData = await syncTubeResponse.json();
+
+    if (syncData.rooms) {
+      setUpRooms();
+    }
+
+    syncLoopTube(linkToken, syncData.next_batch);
+  };
+
+  const syncLoop = async (user, nextBatch) => {
+    const syncResponse = await syncRequest(user, nextBatch);
+    const syncData = await syncResponse.json();
+
+    if (syncData.rooms && matrixRoom)
+      if (syncData.rooms.join[matrixRoom.roomId]) {
+        setUpRooms();
+      }
+
+    syncLoop(user, syncData.next_batch);
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem(`spacetube-user-${linkToken}`);
     if (storedUser) {
@@ -84,6 +120,13 @@ const Messenger = ({ linkToken, userName }) => {
       registerUser(userName, linkToken).then((user) => setUser(user));
     }
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      syncLoop(user, "");
+      syncLoopTube(linkToken);
+    }
+  }, [user]);
 
   const scrollToBottom = () => {
     tubeMessageEnd.current.scrollIntoView({
@@ -115,12 +158,14 @@ const Messenger = ({ linkToken, userName }) => {
     }
   }, [matrixRoom]);
 
+  /*
   useEffect(() => {
     const intervalId = setInterval(() => {
       setUpRooms(false);
     }, 2000);
     return () => clearInterval(intervalId);
   }, []);
+  */
 
   const sendEvent = async () => {
     sendMessageRequest(matrixRoom, message, user);
@@ -135,7 +180,7 @@ const Messenger = ({ linkToken, userName }) => {
 
       await forwardMessageRequest(matrixRoom, txnId, event, user);
 
-      setTimeout(setUpRooms, 200);
+      //setTimeout(setUpRooms, 200);
     }
   };
 
