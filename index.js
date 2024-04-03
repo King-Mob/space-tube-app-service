@@ -14,6 +14,7 @@ import {
   handleInvite,
   handleRemoteOpen,
   handleForward,
+  createLink,
   createRoomsAndTube,
 } from "./handler.js";
 import { getItem, getItemIncludes, storeItem } from "./storage.js";
@@ -229,8 +230,9 @@ app.post("/api/invite/accept", async (req, res) => {
   if (invitation) {
     invitation.content.to.userId = myMatrixId;
     invitation.content.to.groupName = groupName;
-    createRoomsAndTube(invitation);
-    res.send({ success: true, invitation });
+    const { toRoom } = await createRoomsAndTube(invitation);
+    const { linkToken } = await createLink(toRoom.room_id, myMatrixId);
+    res.send({ success: true, invitation, linkToken });
   } else res.send({ success: false, message: "No invite with that id found." });
 });
 

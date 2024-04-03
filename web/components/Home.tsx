@@ -5,6 +5,7 @@ import {
   getInviteRequest,
   acceptInviteRequest,
 } from "../requests";
+import Stars from "./Stars";
 
 const InviteCreate = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -12,6 +13,7 @@ const InviteCreate = () => {
   const [myMatrixId, setMyMatrixId] = useState("");
   const [myGroupName, setMyGroupName] = useState("");
   const [contactMatrixId, setContactMatrixId] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const create = () => {
     console.log(myMatrixId, myGroupName, contactMatrixId);
@@ -25,12 +27,9 @@ const InviteCreate = () => {
       });
   };
 
-  const reset = () => {
-    setMyMatrixId("");
-    setMyGroupName("");
-    setContactMatrixId("");
-    setLink("");
-    setSubmitted(false);
+  const copy = () => {
+    navigator.clipboard.writeText(link);
+    setCopied(true);
   };
 
   if (!submitted)
@@ -84,35 +83,17 @@ const InviteCreate = () => {
   if (submitted && link)
     return (
       <>
-        <p>Send this link to your contact to finish the tube! {link}</p>
-        <button onClick={reset} className="home-button">
-          Make another tube!
+        <p>
+          Send this link to your contact to finish the tube!{" "}
+          <a href={link}>{link}</a>
+        </p>
+        <button onClick={copy} className="home-button">
+          Copy link
         </button>
+        {copied && <p>Copied!</p>}
       </>
     );
 };
-
-const randomXY = () => {
-  return {
-    x: Math.round(Math.random() * 90) + 5,
-    y: Math.round(Math.random() * 90) + 5,
-  };
-};
-
-const stars = [
-  randomXY(),
-  randomXY(),
-  randomXY(),
-  randomXY(),
-  randomXY(),
-  randomXY(),
-  randomXY(),
-  randomXY(),
-  randomXY(),
-  randomXY(),
-  randomXY(),
-  randomXY(),
-];
 
 const InviteAccept = ({ invite }) => {
   const [myMatrixId, setMyMatrixId] = useState("");
@@ -121,6 +102,7 @@ const InviteAccept = ({ invite }) => {
   const [contactGroupName, setContactGroupName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [accepted, setAccepted] = useState(false);
+  const [linkToken, setLinkToken] = useState("");
 
   useEffect(() => {
     getInviteRequest(invite)
@@ -139,12 +121,20 @@ const InviteAccept = ({ invite }) => {
 
   const accept = () => {
     if (myMatrixId && myGroupName) {
+      setAccepted(true);
       acceptInviteRequest(invite, myMatrixId, myGroupName)
         .then((res) => res.json())
         .then((result) => {
-          if (result.success) setAccepted(true);
+          console.log(result);
+          if (result.success) {
+            setLinkToken(result.linkToken);
+          }
         });
     }
+  };
+
+  const justName = (matrixId) => {
+    return matrixId.split("@")[1].split(":")[0];
   };
 
   return (
@@ -152,16 +142,28 @@ const InviteAccept = ({ invite }) => {
       {errorMessage ? (
         <p>{errorMessage}</p>
       ) : accepted ? (
-        <>
-          <p>You have accepted the invite, check out your matrix client</p>
-        </>
+        linkToken ? (
+          <meta
+            http-equiv="Refresh"
+            content={`0; url='/?linkToken=${linkToken}&name=${justName(
+              myMatrixId
+            )}'`}
+          />
+        ) : (
+          <>
+            <p>
+              Accepting invite, building rooms, inviting users, this takes a few
+              seconds...
+            </p>
+          </>
+        )
       ) : (
         <>
           <p>
             {contactMatrixId} is inviting you to create a spacetube, connecting{" "}
-            {contactGroupName} with your group
+            {contactGroupName} with your group.
           </p>
-          <p>to accept, enter your matrix id and your group name below</p>
+          <p>Enter your matrix id and your group name below to accept</p>
           <label htmlFor="myMatrixId">My Matrix Id*</label>
           <input
             id="myMatrixId"
@@ -194,17 +196,13 @@ const Home = ({ storedLinkTokens, invite }) => {
 
   return (
     <div id="home-container">
-      {stars.map((star) => (
-        <p className="star" style={{ left: `${star.x}%`, top: `${star.y}%` }}>
-          ⭐
-        </p>
-      ))}
+      <Stars />
       <h1 id="title">Space tube</h1>
       {linkTokens.length > 0 && (
         <div>
           <h2>My Tubes</h2>
           {linkTokens.map((token) => (
-            <a href={`/?linkToken=${token}`}>
+            <a href={`/?linkToken=${token}`} key={token}>
               <h3>{token}</h3>
             </a>
           ))}

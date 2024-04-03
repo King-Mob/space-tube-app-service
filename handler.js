@@ -372,7 +372,7 @@ export const handleMessage = async (event) => {
   }
 
   if (message.includes("!spacetube link")) {
-    handleLink(event);
+    createLink(event.room_id, event.sender);
     return;
   }
 
@@ -446,27 +446,29 @@ export const handleInvite = async (event) => {
   }
 };
 
-export const handleLink = async (event) => {
-  let linkEvent = await getItem("roomId", event.room_id, "spacetube.link");
+export const createLink = async (roomId, sender) => {
+  let linkEvent = await getItem("roomId", roomId, "spacetube.link");
   let linkToken;
   if (!linkEvent) {
     const newLinkToken = uuidv4();
     await storeItem({
       type: "spacetube.link",
       linkToken: newLinkToken,
-      roomId: event.room_id,
+      roomId: roomId,
     });
     linkToken = newLinkToken;
   } else {
     linkToken = linkEvent.content.linkToken;
   }
 
-  const name = await getDisplayName(event.room_id, event.sender);
+  const name = await getDisplayName(roomId, sender);
 
   sendMessage(
-    event.room_id,
+    roomId,
     `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${name}`
   );
+
+  return { homeServer: HOME_SERVER, linkToken };
 };
 
 export const handleForward = async (event) => {
@@ -494,4 +496,6 @@ export const createRoomsAndTube = async (invitation) => {
 
   createTubeUser(from.groupName, fromRoom.room_id, tubeIntermediary);
   createTubeUser(to.groupName, toRoom.room_id, tubeIntermediary);
+
+  return { toRoom };
 };
