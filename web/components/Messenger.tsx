@@ -180,7 +180,7 @@ const Messenger = ({ linkToken, userName }) => {
     tubeRoom.events.map((event) => {
       if (event.type === "m.room.message") {
         return (
-          <div className="message-container">
+          <div className="message-container" key={event.event_id}>
             <p className="name">
               {tubeRoomNames[event.sender] || event.sender}
             </p>
@@ -206,7 +206,11 @@ const Messenger = ({ linkToken, userName }) => {
       }
       if (event.type === "m.room.message") {
         return (
-          <div className="message-container" onClick={() => forward(event)}>
+          <div
+            className="message-container"
+            onClick={() => forward(event)}
+            key={event.event_id}
+          >
             <p className="name">
               {matrixRoomNames[event.sender] || event.sender}
             </p>
