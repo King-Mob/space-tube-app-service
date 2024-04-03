@@ -266,7 +266,7 @@ const Messenger = ({ linkToken, userName }) => {
           <input
             type="text"
             id="new-message-text"
-            placeholder="..."
+            placeholder="new message here, click on prev messages to forward"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyUp={(e) => {
