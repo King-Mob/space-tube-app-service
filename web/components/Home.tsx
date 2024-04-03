@@ -200,14 +200,16 @@ const Home = ({ storedLinkTokens, invite }) => {
         </p>
       ))}
       <h1 id="title">Space tube</h1>
-      <div>
-        <h2>My Tubes</h2>
-        {linkTokens.map((token) => (
-          <a href={`/?linkToken=${token}`}>
-            <h3>{token}</h3>
-          </a>
-        ))}
-      </div>
+      {linkTokens.length > 0 && (
+        <div>
+          <h2>My Tubes</h2>
+          {linkTokens.map((token) => (
+            <a href={`/?linkToken=${token}`}>
+              <h3>{token}</h3>
+            </a>
+          ))}
+        </div>
+      )}
       <div id="form-container">
         <h2>Create a tube</h2>
         {invite ? <InviteAccept invite={invite} /> : <InviteCreate />}
