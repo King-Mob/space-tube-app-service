@@ -1,13 +1,38 @@
+@font-face {
+  font-family: Astropolis;
+  src: url(Astropolis.ttf);
+}
+
 html {
   font-size: 1.25vh;
 }
 
 body {
   margin: 0;
+  background-color: #272727;
+  color: white;
 }
 
 #app {
   height: 100vh;
+}
+
+#home-container {
+  height: 100%;
+  width: 100%;
+  margin-left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  text-align: center;
+}
+
+@media only screen and (min-width: 600px) {
+  #home-container {
+    width: 70%;
+    margin-left: 15%;
+  }
 }
 
 #messenger-container {
@@ -31,24 +56,60 @@ body {
   }
 }
 
+.star {
+  z-index: -3;
+  position: absolute;
+  font-size: 1rem;
+  filter: drop-shadow(0 0 0.2rem yellow);
+}
+
 h1 {
-  color: black;
-  background-color: rgba(0, 0, 0, 0.2);
   font-family: monospace;
-  font-size: 3rem;
   margin: 0;
+  font-size: 6rem;
+}
+
+#title {
+  font-size: 8rem;
+  font-family: Astropolis;
+  animation: glow 4s infinite;
+}
+
+@keyframes glow {
+  0% {
+    filter: drop-shadow(0 0 0.25rem green);
+  }
+
+  50% {
+    filter: drop-shadow(0 0 1.1rem green);
+  }
+  100% {
+    filter: drop-shadow(0 0 0.25rem green);
+  }
 }
 
 h2 {
-  color: black;
-  background-color: rgba(0, 0, 0, 0.2);
   font-family: monospace;
-  font-size: 2.5rem;
+  font-size: 5rem;
   margin: 0;
+}
+
+h3 {
+  font-family: monospace;
+  font-size: 3rem;
+  margin: 0;
+  font-weight: normal;
+}
+
+.room-title {
+  font-size: 3rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: black;
 }
 
 .message-container {
   padding: 10px 5px;
+  color: black;
 }
 
 .name {
@@ -88,8 +149,11 @@ p {
 
 input {
   font-size: 1.5rem;
-  flex-grow: 1;
   font-family: monospace;
+}
+
+#new-message-text {
+  flex-grow: 1;
 }
 
 #send-button {
@@ -102,8 +166,16 @@ input {
   opacity: 0.5;
 }
 
+#form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+}
+
 label {
-  font-size: 1.5rem;
+  font-size: 3rem;
   font-family: monospace;
   display: block;
 }
@@ -113,15 +185,18 @@ label {
 }
 
 .home-input {
-  width: 50%;
+  font-size: 3rem;
+  width: 90%;
+  text-align: center;
 }
 
 .home-button {
   display: block;
   border: none;
   font-family: monospace;
-  font-size: 1.5rem;
+  font-size: 3rem;
   border-radius: 3px;
+  margin-top: 1rem;
 }
 
 .home-button:hover {

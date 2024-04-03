@@ -6,8 +6,6 @@ import {
   acceptInviteRequest,
 } from "../requests";
 
-const { URL } = process.env;
-
 const InviteCreate = () => {
   const [submitted, setSubmitted] = useState(false);
   const [link, setLink] = useState("");
@@ -56,7 +54,7 @@ const InviteCreate = () => {
           value={myGroupName}
           onChange={(e) => setMyGroupName(e.target.value)}
         ></input>
-        <label htmlFor="contactMatrixId">Contact's Matrix Id</label>
+        <label htmlFor="contactMatrixId">Contact's Matrix Id (optional)</label>
         <input
           id="contactMatrixId"
           className="home-input"
@@ -93,6 +91,28 @@ const InviteCreate = () => {
       </>
     );
 };
+
+const randomXY = () => {
+  return {
+    x: Math.round(Math.random() * 90) + 5,
+    y: Math.round(Math.random() * 90) + 5,
+  };
+};
+
+const stars = [
+  randomXY(),
+  randomXY(),
+  randomXY(),
+  randomXY(),
+  randomXY(),
+  randomXY(),
+  randomXY(),
+  randomXY(),
+  randomXY(),
+  randomXY(),
+  randomXY(),
+  randomXY(),
+];
 
 const InviteAccept = ({ invite }) => {
   const [myMatrixId, setMyMatrixId] = useState("");
@@ -173,19 +193,25 @@ const Home = ({ storedLinkTokens, invite }) => {
   const linkTokens = storedLinkTokens ? JSON.parse(storedLinkTokens) : [];
 
   return (
-    <div>
-      <h1>Welcome to Spacetube</h1>
-      <p>You can create your own spacetube here, or join your existing ones</p>
-      <h2>Existing Tubes</h2>
+    <div id="home-container">
+      {stars.map((star) => (
+        <p className="star" style={{ left: `${star.x}%`, top: `${star.y}%` }}>
+          ⭐
+        </p>
+      ))}
+      <h1 id="title">Space tube</h1>
       <div>
+        <h2>My Tubes</h2>
         {linkTokens.map((token) => (
-          <a href={`${URL}?linkToken=${token}`}>
-            <p>{token}</p>
+          <a href={`/?linkToken=${token}`}>
+            <h3>{token}</h3>
           </a>
         ))}
       </div>
-      <h2>New tube</h2>
-      <div>{invite ? <InviteAccept invite={invite} /> : <InviteCreate />}</div>
+      <div id="form-container">
+        <h2>Create a tube</h2>
+        {invite ? <InviteAccept invite={invite} /> : <InviteCreate />}
+      </div>
     </div>
   );
 };

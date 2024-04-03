@@ -158,15 +158,6 @@ const Messenger = ({ linkToken, userName }) => {
     }
   }, [matrixRoom]);
 
-  /*
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setUpRooms(false);
-    }, 2000);
-    return () => clearInterval(intervalId);
-  }, []);
-  */
-
   const sendEvent = async () => {
     sendMessageRequest(matrixRoom, message, user);
 
@@ -179,8 +170,6 @@ const Messenger = ({ linkToken, userName }) => {
       const txnId = self.crypto.randomUUID();
 
       await forwardMessageRequest(matrixRoom, txnId, event, user);
-
-      //setTimeout(setUpRooms, 200);
     }
   };
 
@@ -250,14 +239,18 @@ const Messenger = ({ linkToken, userName }) => {
   return (
     <div id="messenger-container">
       <div id="tube-room-container" className="room-container">
-        <h1 id="tube-room-title">{tubeRoomTitle || "Tube Room"}</h1>
+        <h1 id="tube-room-title" className="room-title">
+          {tubeRoomTitle || "Tube Room"}
+        </h1>
         <div id="tube-room-events-container" className="room-events-container">
           {tubeRoomEvents}
           <div ref={tubeMessageEnd} />
         </div>
       </div>
       <div id="matrix-room-container" className="room-container">
-        <h1 id="matrix-room-title">{matrixRoomTitle || "Matrix Room"}</h1>
+        <h1 id="matrix-room-title" className="room-title">
+          {matrixRoomTitle || "Matrix Room"}
+        </h1>
         <div
           id="matrix-room-events-container"
           className="room-events-container"
