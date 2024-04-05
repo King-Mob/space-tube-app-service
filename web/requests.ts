@@ -4,9 +4,9 @@ export const getTubeInfoRequest = async (linkToken) => {
   return fetch(`${URL}/api/tubeInfo?linkToken=${linkToken}`);
 };
 
-export const getRoomRequest = async (user, tubeInfo) => {
+export const getRoomRequest = async (user, matrixRoomId) => {
   return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${tubeInfo.matrixRoomId}/messages?limit=1000`,
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${matrixRoomId}/messages?limit=1000`,
     {
       headers: {
         "Content-Type": "application/json",
@@ -91,8 +91,7 @@ export const acceptInviteRequest = async (invite, myMatrixId, groupName) => {
 
 export const syncRequest = async (user, nextBatch = "") => {
   return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/sync?timeout=30000${
-      nextBatch ? `&since=${nextBatch}` : ""
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/sync?timeout=30000${nextBatch ? `&since=${nextBatch}` : ""
     }`,
     {
       headers: {
@@ -105,8 +104,11 @@ export const syncRequest = async (user, nextBatch = "") => {
 
 export const syncTubeRequest = async (linkToken, nextBatch) => {
   return fetch(
-    `${URL}/api/tubeInfo/sync?linkToken=${linkToken}${
-      nextBatch ? `&nextBatch=${nextBatch}` : ""
+    `${URL}/api/tubeInfo/sync?linkToken=${linkToken}${nextBatch ? `&nextBatch=${nextBatch}` : ""
     }`
   );
 };
+
+export const getTubeUserIdsRequest = async (linkToken) => {
+  return fetch(`${URL}/api/tubeInfo/userIds?linkToken=${linkToken}`)
+}

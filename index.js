@@ -17,7 +17,7 @@ import {
   createLink,
   createRoomsAndTube,
 } from "./handler.js";
-import { getItem, getItemIncludes, storeItem } from "./storage.js";
+import { getItem, getItemIncludes, getAllItems, storeItem } from "./storage.js";
 import { startDiscord } from "./discord/index.js";
 import { startWhatsapp } from "./whatsapp/index.js";
 
@@ -36,16 +36,12 @@ as.on("event", (event) => {
   switch (event.type) {
     case "m.room.message":
       handleMessage(event);
-      break;
     case "m.room.member":
       handleInvite(event);
-      break;
     case "spacetube.remote.open":
       handleRemoteOpen(event);
     case "spacetube.forward":
       handleForward(event);
-    default:
-      break;
   }
 });
 
@@ -170,6 +166,8 @@ app.get("/api/tubeInfo/sync", async (req, res) => {
   if (linkEvent) {
     const matrixRoomId = linkEvent.content.roomId;
 
+    //and an if for the user, or change the link part so there's already a user, like how there is one for
+    //web created tubes
     const {
       content: { user },
     } = await getItem("userRoomId", matrixRoomId, "spacetube.user");
@@ -179,6 +177,7 @@ app.get("/api/tubeInfo/sync", async (req, res) => {
     res.send({
       success: true,
       ...syncData,
+      matrixRoomId
     });
   } else {
     res.send({
@@ -187,6 +186,37 @@ app.get("/api/tubeInfo/sync", async (req, res) => {
     });
   }
 });
+
+app.get("/api/tubeInfo/userIds", async (req, res) => {
+  const { linkToken } = req.query;
+
+  const linkEvent = await getItem("linkToken", linkToken, "spacetube.link");
+
+  if (linkEvent) {
+    const matrixRoomId = linkEvent.content.roomId;
+
+    const {
+      content: { user },
+    } = await getItem("userRoomId", matrixRoomId, "spacetube.user");
+
+    const cloneEvents = await getAllItems("roomId", matrixRoomId, "spacetube.user.clone");
+    console.log(cloneEvents)
+    const cloneIds = cloneEvents.map(event => {
+      console.log(event);
+      return "dave"
+    })
+
+    res.send({
+      success: true,
+      tubeUserIds: [user.user_id, ...cloneIds]
+    });
+  } else {
+    res.send({
+      success: false,
+      message: "No room active with that link token",
+    });
+  }
+})
 
 app.get("/api/invite", async (req, res) => {
   const { inviteId } = req.query;

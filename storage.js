@@ -125,7 +125,7 @@ export const getAllItems = async (key, value, type) => {
         }
     }
 
-    return matchingEvents.length > 0 ? matchingEvents : null;
+    return matchingEvents;
 }
 
 export const getItemIncludes = async (key, value) => {

@@ -25,6 +25,20 @@ import { sendMessageWhatsapp } from "./whatsapp/index.js";
 
 const { HOME_SERVER } = process.env;
 
+const getRoomName = async (roomId) => {
+  const roomStateResponse = await getRoomState(roomId);
+  const roomState = await roomStateResponse.json();
+
+  let roomName = "default";
+
+  for (const roomEvent of roomState) {
+    if (roomEvent.type === "m.room.name")
+      roomName = roomEvent.content.name;
+  }
+
+  return roomName;
+}
+
 const createTubeUser = async (name, roomId, tubeIntermediary) => {
   console.log("creating tube user");
   console.log(name, roomId, tubeIntermediary);
@@ -62,6 +76,7 @@ const createClone = async (name, roomId, originalUserId) => {
     type: "spacetube.user.clone",
     clone: newCloneUser,
     originalUserId,
+    roomId
   });
 
   setDisplayName(newCloneUser, name);
@@ -296,15 +311,7 @@ const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
       await join(user, tubeIntermediary);
     }
   } else {
-    const roomStateResponse = await getRoomState(event.room_id);
-    const roomState = await roomStateResponse.json();
-
-    let newTubeUserName = "default";
-
-    for (const roomEvent of roomState) {
-      if (roomEvent.type === "m.room.name")
-        newTubeUserName = roomEvent.content.name;
-    }
+    const newTubeUserName = await getRoomName(event.room_id);
 
     user = await createTubeUser(
       newTubeUserName,
@@ -459,6 +466,20 @@ export const createLink = async (roomId, sender) => {
     linkToken = newLinkToken;
   } else {
     linkToken = linkEvent.content.linkToken;
+  }
+
+  const user = await getItem("userRoomId", matrixRoomId, "spacetube.user");
+
+  if (!user) {
+    const newTubeUserName = await getRoomName(roomId);
+
+    const tubeIntermediary = await getItem("tubeIntermediary", roomId);
+
+    await createTubeUser(
+      newTubeUserName,
+      roomId,
+      tubeIntermediary
+    );
   }
 
   const name = await getDisplayName(roomId, sender);

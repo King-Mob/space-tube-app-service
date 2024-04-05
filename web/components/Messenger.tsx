@@ -8,6 +8,7 @@ import {
   forwardMessageRequest,
   syncRequest,
   syncTubeRequest,
+  getTubeUserIdsRequest,
 } from "../requests";
 
 const connectLinkedEvents = (events) => {
@@ -22,35 +23,34 @@ const connectLinkedEvents = (events) => {
   });
 };
 
+const getMatrixRoom = async (user, matrixRoomId) => {
+  const matrixRoomResponse = await getRoomRequest(user, matrixRoomId);
+  const eventsList = await matrixRoomResponse.json();
+  const connectedEvents = connectLinkedEvents(eventsList.chunk);
+
+  return {
+    roomId: matrixRoomId,
+    events: connectedEvents,
+  };
+};
+
 const getTubeRoom = async (linkToken) => {
   const tubeInfoResponse = await getTubeInfoRequest(linkToken);
   const tubeInfo = await tubeInfoResponse.json();
 
-  return tubeInfo;
-};
-
-const getMatrixRoom = async (user, tubeInfo) => {
-  const matrixRoomResponse = await getRoomRequest(user, tubeInfo);
-  const eventsList = await matrixRoomResponse.json();
-  const connectedEvents = connectLinkedEvents(eventsList.chunk);
-
-  return connectedEvents;
-};
-
-const getRooms = async (user, linkToken) => {
-  const tubeInfo = await getTubeRoom(linkToken);
-  const connectedEvents = await getMatrixRoom(user, tubeInfo);
-
   return {
-    matrixRoom: {
-      roomId: tubeInfo.matrixRoomId,
-      events: connectedEvents,
-    },
-    tubeRoom: {
-      name: tubeInfo.tubeRoomName,
-      events: tubeInfo.tubeRoomEvents,
-    },
+    name: tubeInfo.tubeRoomName,
+    events: tubeInfo.tubeRoomEvents,
   };
+};
+
+const getTubeUserIds = async (linkToken) => {
+  const tubeUserIdsResponse = await getTubeUserIdsRequest(linkToken);
+  const { tubeUserIds } = await tubeUserIdsResponse.json();
+
+  console.log(tubeUserIds);
+
+  return tubeUserIds;
 };
 
 const registerUser = async (userName, linkToken) => {
@@ -77,24 +77,33 @@ const registerUser = async (userName, linkToken) => {
 };
 
 type User = { name: ""; userId: ""; accessToken: "" };
-type MatrixRoom = { roomId: ""; events: [any] };
-type TubeRoom = { name: ""; events: [any] };
+type MatrixRoom = { roomId: ""; events: any[] };
+type TubeRoom = { name: ""; events: any[] };
 
 const Messenger = ({ linkToken, userName }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [matrixRoomId, setMatrixRoomId] = useState<string | null>(null);
   const [matrixRoom, setMatrixRoom] = useState<MatrixRoom | null>(null);
   const [tubeRoom, setTubeRoom] = useState<TubeRoom | null>(null);
+  const [tubeUserIds, setTubeUserIds] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [sendDisabled, setSendDisabled] = useState(true);
   const tubeMessageEnd = useRef();
   const matrixMessageEnd = useRef();
 
+  console.log(tubeUserIds);
+
   const syncLoopTube = async (linkToken, nextBatch = null) => {
     const syncTubeResponse = await syncTubeRequest(linkToken, nextBatch);
     const syncData = await syncTubeResponse.json();
 
+    if (syncData.matrixRoomId !== matrixRoomId) {
+      setMatrixRoomId(syncData.matrixRoomId);
+    }
+
     if (syncData.rooms) {
-      setUpRooms();
+      getTubeRoom(linkToken).then((tubeRoom) => setTubeRoom(tubeRoom));
+      getTubeUserIds(linkToken).then((ids) => setTubeUserIds(ids));
     }
 
     syncLoopTube(linkToken, syncData.next_batch);
@@ -104,9 +113,11 @@ const Messenger = ({ linkToken, userName }) => {
     const syncResponse = await syncRequest(user, nextBatch);
     const syncData = await syncResponse.json();
 
-    if (syncData.rooms && matrixRoom)
-      if (syncData.rooms.join[matrixRoom.roomId]) {
-        setUpRooms();
+    if (syncData.rooms)
+      if (syncData.rooms.join[matrixRoomId]) {
+        getMatrixRoom(user, matrixRoomId).then((matrixRoom) =>
+          setMatrixRoom(matrixRoom)
+        );
       }
 
     syncLoop(user, syncData.next_batch);
@@ -123,46 +134,35 @@ const Messenger = ({ linkToken, userName }) => {
 
   useEffect(() => {
     if (user) {
-      syncLoop(user, "");
       syncLoopTube(linkToken);
+      if (matrixRoomId) {
+        syncLoop(user, "");
+        setSendDisabled(false);
+      }
     }
-  }, [user]);
-
-  const scrollToBottom = () => {
-    tubeMessageEnd.current.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-    matrixMessageEnd.current.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  };
-
-  const setUpRooms = async (scroll = true) => {
-    if (user) {
-      const { tubeRoom, matrixRoom } = await getRooms(user, linkToken);
-      setTubeRoom(tubeRoom);
-      setMatrixRoom(matrixRoom);
-      if (scroll) setTimeout(scrollToBottom, 500);
-    }
-  };
+  }, [user, matrixRoomId]);
 
   useEffect(() => {
-    setUpRooms();
-  }, [user]);
+    if (tubeMessageEnd) {
+      tubeMessageEnd.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [tubeRoom]);
 
   useEffect(() => {
-    if (matrixRoom) {
-      setSendDisabled(false);
+    if (matrixMessageEnd) {
+      matrixMessageEnd.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
     }
   }, [matrixRoom]);
 
   const sendEvent = async () => {
     sendMessageRequest(matrixRoom, message, user);
-
     setMessage("");
-    setUpRooms();
   };
 
   const forward = async (event) => {
@@ -204,7 +204,10 @@ const Messenger = ({ linkToken, userName }) => {
       if (event.type === "m.room.name") {
         matrixRoomTitle = "🏠" + event.content.name;
       }
-      if (event.type === "m.room.message") {
+      if (
+        event.type === "m.room.message" &&
+        !tubeUserIds.includes(event.sender)
+      ) {
         return (
           <div
             className="message-container"
