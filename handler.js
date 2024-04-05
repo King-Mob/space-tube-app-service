@@ -468,7 +468,7 @@ export const createLink = async (roomId, sender) => {
     linkToken = linkEvent.content.linkToken;
   }
 
-  const user = await getItem("userRoomId", matrixRoomId, "spacetube.user");
+  const user = await getItem("userRoomId", roomId, "spacetube.user");
 
   if (!user) {
     const newTubeUserName = await getRoomName(roomId);
