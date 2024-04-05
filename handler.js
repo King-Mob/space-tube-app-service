@@ -76,7 +76,7 @@ const createClone = async (name, roomId, originalUserId) => {
     type: "spacetube.user.clone",
     clone: newCloneUser,
     originalUserId,
-    roomId
+    cloneRoomId: roomId
   });
 
   setDisplayName(newCloneUser, name);
