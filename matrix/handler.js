@@ -414,7 +414,7 @@ export const handleMessage = async (event) => {
 
   if (message.includes("!spacetube forward")) {
     console.log("forwarding message");
-    commands.forward(event);
+    //commands.forward(event);
     return;
   }
 
