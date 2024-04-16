@@ -13,7 +13,6 @@ import {
   handleMessage,
   handleInvite,
   handleRemoteOpen,
-  handleForward,
   createRoomsAndTube,
 } from "./matrix/handler.js";
 import commands from "./matrix/commands.js";
@@ -41,7 +40,7 @@ as.on("event", (event) => {
     case "spacetube.remote.open":
       handleRemoteOpen(event);
     case "spacetube.forward":
-      handleForward(event);
+      commands.forward(event);
   }
 });
 

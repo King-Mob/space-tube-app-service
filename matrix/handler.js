@@ -294,7 +294,7 @@ const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
   }
 };
 
-const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
+export const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
   console.log("passing message to tube intermediary");
 
   let user;
@@ -356,7 +356,10 @@ const handleTubeIntermediaryMessage = async (tubeIntermediary, event) => {
   }
 }
 
-const handleTubeMessage = async (tubesOpen, event) => {
+export const handleTubeMessage = async (tubesOpen, event) => {
+  event.content.body = event.content.body.replace("!spacetube forward", "");
+  const message = event.content.body;
+
   let user;
 
   for (const tubeOpen of tubesOpen) {
@@ -411,17 +414,15 @@ export const handleMessage = async (event) => {
     return;
   }
 
+  if (message.includes("!spacetube forward")) {
+    commands.forward(event);
+    return;
+  }
+
   const tubeIntermediary = await getItem("tubeIntermediary", event.room_id);
 
   if (tubeIntermediary) {
     handleTubeIntermediaryMessage(tubeIntermediary, event);
-    return;
-  }
-
-  const tubesOpen = await getAllItemIncludes("connectedRooms", event.room_id);
-
-  if (tubesOpen) {
-    handleTubeMessage(tubesOpen, event);
     return;
   }
 };
@@ -451,14 +452,6 @@ export const handleInvite = async (event) => {
         });
       }
     }
-  }
-};
-
-export const handleForward = async (event) => {
-  const tubeOpen = await getItemIncludes("connectedRooms", event.room_id);
-
-  if (tubeOpen) {
-    await forwardToTubeIntermediary(tubeOpen.content.tubeIntermediary, event);
   }
 };
 

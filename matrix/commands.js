@@ -1,6 +1,6 @@
 import { sendMessage } from './matrixClientRequests';
-import { registerTube, connectSameInstance, connectOtherInstance, getRoomName, getDisplayName } from './handler';
-import { getItem, storeItem } from '../storage';
+import { registerTube, connectSameInstance, connectOtherInstance, getRoomName, getDisplayName, handleTubeMessage } from './handler';
+import { getItem, storeItem, getAllItemIncludes } from '../storage';
 
 const { HOME_SERVER } = process.env;
 
@@ -71,11 +71,29 @@ const link = async (roomId, sender) => {
     return { homeServer: HOME_SERVER, linkToken };
 };
 
+const forward = async (event) => {
+    /*
+    const tubeOpen = await getItemIncludes("connectedRooms", event.room_id);
+
+    if (tubeOpen) {
+        await forwardToTubeIntermediary(tubeOpen.content.tubeIntermediary, event);
+    }
+    */
+
+    const tubesOpen = await getAllItemIncludes("connectedRooms", event.room_id);
+
+    if (tubesOpen) {
+        handleTubeMessage(tubesOpen, event);
+        return;
+    }
+};
+
 const commands = {
-    echo: echo,
-    create: create,
-    connect: connect,
-    link: link
+    echo,
+    create,
+    connect,
+    link,
+    forward
 }
 
 export default commands;
