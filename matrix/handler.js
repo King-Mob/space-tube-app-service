@@ -365,7 +365,7 @@ export const handleTubeMessage = async (tubesOpen, event) => {
 
     const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
 
-    if (event.sender.includes("@_space-tube") && !bridgeUserEvent) return;
+    //if (event.sender.includes("@_space-tube") && !bridgeUserEvent) return;
 
     if (bridgeUserEvent && event.sender !== bridgeUserEvent.content.userId) {
       return;
