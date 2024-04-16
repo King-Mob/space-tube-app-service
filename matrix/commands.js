@@ -93,7 +93,7 @@ const commands = {
     create,
     connect,
     link,
-    //forward
+    forward
 }
 
 export default commands;
