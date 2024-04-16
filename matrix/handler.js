@@ -6,7 +6,7 @@ import {
   getAllItemIncludes,
   storeItemShared,
   getDisplayName,
-} from "./storage.js";
+} from "../storage.js";
 import {
   sendMessage,
   sendMessageAsUser,
@@ -19,13 +19,14 @@ import {
   joinAsSpaceTube,
   getRoomsList,
 } from "./matrixClientRequests.js";
+import commands from "./commands.js";
 import { v4 as uuidv4 } from "uuid";
-import { sendMessageDiscord } from "./discord/index.js";
-import { sendMessageWhatsapp } from "./whatsapp/index.js";
+import { sendMessageDiscord } from "../discord/index.js";
+import { sendMessageWhatsapp } from "../whatsapp/index.js";
 
 const { HOME_SERVER } = process.env;
 
-const getRoomName = async (roomId) => {
+export const getRoomName = async (roomId) => {
   const roomStateResponse = await getRoomState(roomId);
   const roomState = await roomStateResponse.json();
 
@@ -87,7 +88,7 @@ const createClone = async (name, roomId, originalUserId) => {
   return newCloneUser;
 };
 
-const registerTube = async (roomId) => {
+export const registerTube = async (roomId) => {
   const tubeOpening = await getItem("name", `registration-${roomId}`);
 
   const tubeCode = tubeOpening
@@ -106,7 +107,7 @@ const registerTube = async (roomId) => {
   return tubeCode;
 };
 
-const connectSameInstance = async (event, connectionCode) => {
+export const connectSameInstance = async (event, connectionCode) => {
   const otherTube = await getItem("tubeCode", connectionCode);
 
   if (!otherTube) {
@@ -157,7 +158,7 @@ const connectRooms = async (roomId1, roomId2) => {
   }
 };
 
-const connectOtherInstance = async (
+export const connectOtherInstance = async (
   event,
   remoteConnectionCode,
   otherInstance
@@ -325,21 +326,63 @@ const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
   return user;
 };
 
+const handleBridgeMessage = async (event, bridgeRoomEvent) => {
+  const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
+  const bridgeUser = bridgeUserEvent.content;
+
+  if (event.sender !== bridgeUser.userId) {
+    if (bridgeRoomEvent.content.service === "discord") {
+      sendMessageDiscord(event, bridgeRoomEvent.content);
+    }
+    if (bridgeRoomEvent.content.service === "whatsapp") {
+      sendMessageWhatsapp(event, bridgeRoomEvent.content);
+    }
+  }
+}
+
+const handleTubeIntermediaryMessage = async (tubeIntermediary, event) => {
+  console.log("message in tube intermediary");
+
+  const tubeName = tubeIntermediary.content.name;
+  const message = event.content.body;
+
+  //later when we use connection codes throughout, test if the instances are the same
+  if (tubeName.includes("~")) {
+    handleMessageRemoteTube(tubeIntermediary, event, message);
+    return;
+  } else {
+    handleMessageLocalTube(tubeIntermediary, event, message);
+    return;
+  }
+}
+
+const handleTubeMessage = async (tubesOpen, event) => {
+  let user;
+
+  for (const tubeOpen of tubesOpen) {
+    console.log("there was a message in an open tube");
+
+    const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
+
+    if (event.sender.includes("@_space-tube") && !bridgeUserEvent) return;
+
+    if (bridgeUserEvent && event.sender !== bridgeUserEvent.content.userId) {
+      return;
+    }
+
+    user = await forwardToTubeIntermediary(
+      tubeOpen.content.tubeIntermediary,
+      event
+    );
+  }
+
+  sendMessageAsUser(user, event.room_id, message);
+}
+
 export const handleMessage = async (event) => {
-  //Check if the event comes from a bridged room
   const bridgeRoomEvent = await getItem("bridgeRoomId", event.room_id);
   if (bridgeRoomEvent) {
-    const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
-    const bridgeUser = bridgeUserEvent.content;
-
-    if (event.sender !== bridgeUser.userId) {
-      if (bridgeRoomEvent.content.service === "discord") {
-        sendMessageDiscord(event, bridgeRoomEvent.content);
-      }
-      if (bridgeRoomEvent.content.service === "whatsapp") {
-        sendMessageWhatsapp(event, bridgeRoomEvent.content);
-      }
-    }
+    handleBridgeMessage(event, bridgeRoomEvent);
   }
 
   if (event.sender === `@space-tube-bot:${HOME_SERVER}`) return;
@@ -349,79 +392,37 @@ export const handleMessage = async (event) => {
   const message = event.content.body;
 
   if (message.includes("!spacetube echo")) {
-    const newMessage = "you said: " + message.split("!spacetube echo")[1];
-
-    sendMessage(event.room_id, newMessage);
-
+    commands.echo(event)
     return;
   }
 
   if (message.includes("!spacetube create")) {
-    const tubeCode = await registerTube(event.room_id);
-
-    sendMessage(event.room_id, "The code for this room is:");
-    setTimeout(() => sendMessage(event.room_id, tubeCode), 500);
-
+    commands.create(event);
     return;
   }
 
   if (message.includes("!spacetube connect")) {
-    const connectionCode = message.split("!spacetube connect")[1].trim();
-    const spaceTubeInstance = connectionCode.split("~")[1];
-
-    if (spaceTubeInstance === `@space-tube-bot:${HOME_SERVER}`) {
-      await connectSameInstance(event, connectionCode);
-      return;
-    } else {
-      await connectOtherInstance(event, connectionCode, spaceTubeInstance);
-      return;
-    }
+    commands.connect(event);
+    return;
   }
 
   if (message.includes("!spacetube link")) {
-    createLink(event.room_id, event.sender);
+    commands.link(event.room_id, event.sender);
     return;
   }
 
   const tubeIntermediary = await getItem("tubeIntermediary", event.room_id);
 
   if (tubeIntermediary) {
-    console.log("message in tube intermediary");
-
-    const tubeName = tubeIntermediary.content.name;
-
-    //later when we use connection codes throughout, test if the instances are the same
-    if (tubeName.includes("~")) {
-      handleMessageRemoteTube(tubeIntermediary, event, message);
-      return;
-    } else {
-      handleMessageLocalTube(tubeIntermediary, event, message);
-      return;
-    }
+    handleTubeIntermediaryMessage(tubeIntermediary, event);
+    return;
   }
 
   const tubesOpen = await getAllItemIncludes("connectedRooms", event.room_id);
 
   if (tubesOpen) {
-    let user;
-
-    for (const tubeOpen of tubesOpen) {
-      console.log("there was a message in an open tube");
-
-      const bridgeUserEvent = await getItem("bridgeUserRoomId", event.room_id);
-
-      if (event.sender.includes("@_space-tube") && !bridgeUserEvent) return;
-
-      if (bridgeUserEvent && event.sender !== bridgeUserEvent.content.userId) {
-        return;
-      }
-
-      user = await forwardToTubeIntermediary(
-        tubeOpen.content.tubeIntermediary,
-        event
-      );
-    }
-    sendMessageAsUser(user, event.room_id, message);
+    handleTubeMessage(tubesOpen, event);
+    return;
   }
 };
 
@@ -451,45 +452,6 @@ export const handleInvite = async (event) => {
       }
     }
   }
-};
-
-export const createLink = async (roomId, sender) => {
-  let linkEvent = await getItem("roomId", roomId, "spacetube.link");
-  let linkToken;
-  if (!linkEvent) {
-    const newLinkToken = uuidv4();
-    await storeItem({
-      type: "spacetube.link",
-      linkToken: newLinkToken,
-      roomId: roomId,
-    });
-    linkToken = newLinkToken;
-  } else {
-    linkToken = linkEvent.content.linkToken;
-  }
-
-  const user = await getItem("userRoomId", roomId, "spacetube.user");
-
-  if (!user) {
-    const newTubeUserName = await getRoomName(roomId);
-
-    const tubeIntermediary = await getItem("tubeIntermediary", roomId);
-
-    await createTubeUser(
-      newTubeUserName,
-      roomId,
-      tubeIntermediary
-    );
-  }
-
-  const name = await getDisplayName(roomId, sender);
-
-  sendMessage(
-    roomId,
-    `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${name}`
-  );
-
-  return { homeServer: HOME_SERVER, linkToken };
 };
 
 export const handleForward = async (event) => {

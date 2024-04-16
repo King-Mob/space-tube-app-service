@@ -11,7 +11,7 @@ import {
   join,
   registerUser,
   sendMessageAsUser,
-} from "../matrixClientRequests.js";
+} from "../matrix/matrixClientRequests.js";
 
 export async function DiscordRequest(endpoint, options) {
   // append endpoint to root API URL

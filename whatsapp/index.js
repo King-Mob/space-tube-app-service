@@ -1,7 +1,7 @@
 import * as sdk from "matrix-js-sdk";
 import { RoomMemberEvent, RoomEvent, ClientEvent } from "matrix-js-sdk";
 import { getDisplayName, getItem, storeItem } from "../storage.js";
-import { joinAsSpaceTube, getRoomState, registerUser, join, invite } from "../matrixClientRequests.js";
+import { joinAsSpaceTube, getRoomState, registerUser, join, invite } from "../matrix/matrixClientRequests.js";
 
 const { HOME_SERVER, WHATSAPP_HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_PASSWORD } = process.env;
 

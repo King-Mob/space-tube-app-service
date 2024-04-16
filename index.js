@@ -8,15 +8,15 @@ import {
   join,
   setDisplayName,
   sync,
-} from "./matrixClientRequests.js";
+} from "./matrix/matrixClientRequests.js";
 import {
   handleMessage,
   handleInvite,
   handleRemoteOpen,
   handleForward,
-  createLink,
   createRoomsAndTube,
-} from "./handler.js";
+} from "./matrix/handler.js";
+import commands from "./matrix/commands.js";
 import { getItem, getItemIncludes, getAllItems, storeItem } from "./storage.js";
 import { startDiscord } from "./discord/index.js";
 import { startWhatsapp } from "./whatsapp/index.js";
@@ -261,7 +261,7 @@ app.post("/api/invite/accept", async (req, res) => {
     invitation.content.to.userId = myMatrixId;
     invitation.content.to.groupName = groupName;
     const { toRoom } = await createRoomsAndTube(invitation);
-    const { linkToken } = await createLink(toRoom.room_id, myMatrixId);
+    const { linkToken } = await commands.link(toRoom.room_id, myMatrixId);
     res.send({ success: true, invitation, linkToken });
   } else res.send({ success: false, message: "No invite with that id found." });
 });
