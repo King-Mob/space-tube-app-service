@@ -355,7 +355,7 @@ const handleTubeIntermediaryMessage = async (tubeIntermediary, event) => {
 }
 
 export const handleTubeMessage = async (tubesOpen, event) => {
-  event.content.body = event.content.body.replace("!spacetube forward", "");
+  event.content.body = event.content.body.replace("!spacetube forward ", "");
   const message = event.content.body;
 
   let user;
