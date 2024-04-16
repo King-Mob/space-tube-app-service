@@ -1,6 +1,6 @@
-import { sendMessage } from './matrixClientRequests';
-import { registerTube, connectSameInstance, connectOtherInstance, getRoomName, getDisplayName, handleTubeMessage } from './handler';
-import { getItem, storeItem, getAllItemIncludes } from '../storage';
+import { sendMessage } from './matrixClientRequests.js';
+import { registerTube, connectSameInstance, connectOtherInstance, getRoomName, handleTubeMessage } from './handler.js';
+import { getItem, storeItem, getAllItemIncludes, getDisplayName } from '../storage.js';
 
 const { HOME_SERVER } = process.env;
 

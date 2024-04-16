@@ -2,8 +2,6 @@ import {
   storeItem,
   getItem,
   getAllItems,
-  getItemIncludes,
-  getAllItemIncludes,
   storeItemShared,
   getDisplayName,
 } from "../storage.js";
