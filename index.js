@@ -35,12 +35,16 @@ as.on("event", (event) => {
   switch (event.type) {
     case "m.room.message":
       handleMessage(event);
+      break;
     case "m.room.member":
       handleInvite(event);
+      break;
     case "spacetube.remote.open":
       handleRemoteOpen(event);
+      break;
     case "spacetube.forward":
       commands.forward(event);
+      break;
   }
 });
 
