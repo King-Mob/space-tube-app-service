@@ -18,7 +18,11 @@ const Invite = ({ user, roomId }) => {
     matrixRoomInviteRequest(user, userInviteId, roomId);
   };
 
-  return <button onClick={openInvitePrompt}>🧍+</button>;
+  return (
+    <button onClick={openInvitePrompt} title="invite other matrix users">
+      🧍+
+    </button>
+  );
 };
 
 const connectLinkedEvents = (events) => {
