@@ -196,7 +196,7 @@ const Messenger = ({ linkToken, userName }) => {
     });
 
   const matrixRoomNames = {};
-  let matrixRoomTitle;
+  let matrixRoomTitle: string;
 
   const matrixRoomEvents =
     matrixRoom &&
