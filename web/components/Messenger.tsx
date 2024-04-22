@@ -9,7 +9,17 @@ import {
   syncRequest,
   syncTubeRequest,
   getTubeUserIdsRequest,
+  matrixRoomInviteRequest,
 } from "../requests";
+
+const Invite = ({ user, roomId }) => {
+  const openInvitePrompt = () => {
+    const userInviteId = window.prompt("Enter user id to invite:");
+    matrixRoomInviteRequest(user, userInviteId, roomId);
+  };
+
+  return <button onClick={openInvitePrompt}>🧍+</button>;
+};
 
 const connectLinkedEvents = (events) => {
   const linkedEvents = {};
@@ -255,9 +265,13 @@ const Messenger = ({ linkToken, userName }) => {
         </div>
       </div>
       <div id="matrix-room-container" className="room-container">
-        <h1 id="matrix-room-title" className="room-title">
-          {matrixRoomTitle || "Matrix Room"}
-        </h1>
+        <div id="matrix-room-title-container">
+          <h1 id="matrix-room-title" className="room-title">
+            {matrixRoomTitle || "Matrix Room"}
+          </h1>
+          <Invite user={user} roomId={matrixRoomId} />
+        </div>
+
         <div
           id="matrix-room-events-container"
           className="room-events-container"

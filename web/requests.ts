@@ -112,3 +112,17 @@ export const syncTubeRequest = async (linkToken, nextBatch) => {
 export const getTubeUserIdsRequest = async (linkToken) => {
   return fetch(`${URL}/api/tubeInfo/userIds?linkToken=${linkToken}`)
 }
+
+export const matrixRoomInviteRequest = async (user, inviteUserId, roomId) => {
+  return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: inviteUserId
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.accessToken}`,
+      },
+    })
+}
