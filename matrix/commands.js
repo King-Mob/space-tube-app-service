@@ -1,7 +1,7 @@
 import { sendMessage } from './matrixClientRequests.js';
 import { registerTube, connectSameInstance, connectOtherInstance, getRoomName, handleTubeMessage } from './handler.js';
 import { getItem, storeItem, getAllItemIncludes, getDisplayName } from '../storage.js';
-import uuidv4 from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 const { HOME_SERVER } = process.env;
 
