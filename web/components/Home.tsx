@@ -1,11 +1,57 @@
 import "../styles/app.css";
 import { useState, useEffect } from "react";
 import {
+  createGroupUserRequest,
   createInviteRequest,
   getInviteRequest,
   acceptInviteRequest,
 } from "../requests";
 import Stars from "./Stars";
+
+const GroupUserCreate = () => {
+  const [groupName, setGroupName] = useState("");
+  const [inProgress, setInProgress] = useState(false);
+  const [created, setCreated] = useState(false);
+  const [groupMatrixId, setGroupMatrixId] = useState("");
+  const [groupCloneMatrixId, setGroupCloneMatrixId] = useState("");
+
+  const createUser = async () => {
+    if (groupName) {
+      setInProgress(true);
+      const createGroupUserResponse = await createGroupUserRequest(groupName);
+      const { groupId, groupCloneId } = await createGroupUserResponse.json();
+      setGroupMatrixId(groupId);
+      setGroupCloneMatrixId(groupCloneId);
+      setCreated(true);
+      setInProgress(false);
+    }
+  };
+
+  return (
+    <>
+      {inProgress ? (
+        <p>Creating group user...</p>
+      ) : created ? (
+        <p>
+          Your group user has been created. Invite {groupMatrixId} to your chat
+          and give {groupCloneMatrixId} to other groups you want to talk to.
+        </p>
+      ) : (
+        <>
+          <input
+            type="text"
+            placeholder="Group Name"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+          ></input>
+          <button onClick={createUser} disabled={!groupName}>
+            Create
+          </button>
+        </>
+      )}
+    </>
+  );
+};
 
 const InviteCreate = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -208,7 +254,11 @@ const Home = ({ storedLinkTokens, invite }) => {
           ))}
         </div>
       )}
-      <div id="form-container">
+      <div className="form-container">
+        <h2>Create a group user</h2>
+        <GroupUserCreate />
+      </div>
+      <div className="form-container">
         <h2>Create a tube</h2>
         {invite ? <InviteAccept invite={invite} /> : <InviteCreate />}
       </div>

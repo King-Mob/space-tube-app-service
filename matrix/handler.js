@@ -38,6 +38,39 @@ export const getRoomName = async (roomId) => {
   return roomName;
 }
 
+export const createGroupUser = async (name) => {
+  const newUserResponse = await registerUser(name);
+  const user = await newUserResponse.json();
+
+  storeItem({
+    type: "spacetube.group.user",
+    userId: user.user_id,
+    user,
+    name: name
+  })
+
+  setDisplayName(user, name);
+
+  return user;
+}
+
+export const creatGroupCloneUser = async (name, groupUserId) => {
+  const newUserResponse = await registerUser(name);
+  const user = await newUserResponse.json();
+
+  storeItem({
+    type: "spacetube.group.clone",
+    originalUserId: groupUserId,
+    userId: user.user_id,
+    user,
+    name: name
+  })
+
+  setDisplayName(user, name);
+
+  return user;
+}
+
 const createTubeUser = async (name, roomId, tubeIntermediary) => {
   console.log("creating tube user");
   console.log(name, roomId, tubeIntermediary);
@@ -427,6 +460,8 @@ export const handleMessage = async (event) => {
 };
 
 export const handleInvite = async (event) => {
+  console.log("invite event", event)
+
   if (event.content.membership === "invite") {
     await joinAsSpaceTube(event.room_id);
 

@@ -126,3 +126,13 @@ export const matrixRoomInviteRequest = async (user, inviteUserId, roomId) => {
       },
     })
 }
+
+export const createGroupUserRequest = async (groupName: string) => {
+  return fetch(`${URL}/api/groupuser/create`, {
+    method: "post",
+    body: JSON.stringify({ groupName }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};

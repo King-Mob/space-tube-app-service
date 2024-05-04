@@ -14,6 +14,8 @@ import {
   handleInvite,
   handleRemoteOpen,
   createRoomsAndTube,
+  createGroupUser,
+  creatGroupCloneUser
 } from "./matrix/handler.js";
 import commands from "./matrix/commands.js";
 import { getItem, getItemIncludes, getAllItems, storeItem } from "./storage.js";
@@ -267,6 +269,19 @@ app.post("/api/invite/accept", async (req, res) => {
     const { linkToken } = await commands.link(toRoom.room_id, myMatrixId);
     res.send({ success: true, invitation, linkToken });
   } else res.send({ success: false, message: "No invite with that id found." });
+});
+
+app.post("/api/groupuser/create", async (req, res) => {
+  const { groupName } = req.body;
+
+  const groupUser = await createGroupUser(groupName);
+  const groupCloneUser = await creatGroupCloneUser(groupName, groupUser.user_id);
+
+  res.send({
+    success: true,
+    groupId: groupUser.user_id,
+    groupCloneId: groupCloneUser.user_id
+  });
 });
 
 if (process.env.DISCORD_TOKEN) {
