@@ -460,9 +460,19 @@ export const handleMessage = async (event) => {
 };
 
 export const handleInvite = async (event) => {
-  console.log("invite event", event)
+  console.log("invite event", event);
+
+
 
   if (event.content.membership === "invite") {
+    const invitedUserId = event.state_key;
+    const invitedUser = await getItem("userId", invitedUserId);
+
+    if (invitedUser) {
+      await join(invitedUser.content.user, event.room_id);
+      return;
+    }
+
     await joinAsSpaceTube(event.room_id);
 
     if (
