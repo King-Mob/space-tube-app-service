@@ -13,15 +13,13 @@ const GroupUserCreate = () => {
   const [inProgress, setInProgress] = useState(false);
   const [created, setCreated] = useState(false);
   const [groupMatrixId, setGroupMatrixId] = useState("");
-  const [groupCloneMatrixId, setGroupCloneMatrixId] = useState("");
 
   const createUser = async () => {
     if (groupName) {
       setInProgress(true);
       const createGroupUserResponse = await createGroupUserRequest(groupName);
-      const { groupId, groupCloneId } = await createGroupUserResponse.json();
+      const { groupId } = await createGroupUserResponse.json();
       setGroupMatrixId(groupId);
-      setGroupCloneMatrixId(groupCloneId);
       setCreated(true);
       setInProgress(false);
     }
@@ -33,8 +31,7 @@ const GroupUserCreate = () => {
         <p>Creating group user...</p>
       ) : created ? (
         <p>
-          Your group user has been created. Invite {groupMatrixId} to your chat
-          and give {groupCloneMatrixId} to other groups you want to talk to.
+          Your group user has been created. Invite {groupMatrixId} to your chat.
         </p>
       ) : (
         <>

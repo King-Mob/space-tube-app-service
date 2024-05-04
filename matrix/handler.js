@@ -54,7 +54,7 @@ export const createGroupUser = async (name) => {
   return user;
 }
 
-export const creatGroupCloneUser = async (name, groupUserId) => {
+export const creatGroupCloneUser = async (name, groupUserId, roomId) => {
   const newUserResponse = await registerUser(name);
   const user = await newUserResponse.json();
 
@@ -63,7 +63,8 @@ export const creatGroupCloneUser = async (name, groupUserId) => {
     originalUserId: groupUserId,
     userId: user.user_id,
     user,
-    name: name
+    name: name,
+    roomId
   })
 
   setDisplayName(user, name);
@@ -419,6 +420,8 @@ export const handleMessage = async (event) => {
     handleBridgeMessage(event, bridgeRoomEvent);
   }
 
+
+
   if (event.sender === `@space-tube-bot:${HOME_SERVER}`) return;
 
   if (event.sender === `@spacetube-whatsapp:${HOME_SERVER}`) return;
@@ -460,16 +463,19 @@ export const handleMessage = async (event) => {
 };
 
 export const handleInvite = async (event) => {
-  console.log("invite event", event);
-
-
-
   if (event.content.membership === "invite") {
     const invitedUserId = event.state_key;
     const invitedUser = await getItem("userId", invitedUserId);
 
     if (invitedUser) {
       await join(invitedUser.content.user, event.room_id);
+
+      if (invitedUser.type === "spacetube.group.user") {
+        const groupClone = await creatGroupCloneUser(invitedUser.content.name, invitedUserId, event.room_id);
+        const joinMesage = `Give other groups ${groupClone.user_id} to connect to this group`
+        sendMessage(event.room_id, joinMesage);
+      }
+
       return;
     }
 
