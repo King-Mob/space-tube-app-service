@@ -488,7 +488,7 @@ export const handleInvite = async (event) => {
     if (invitedUser) {
       await join(invitedUser.content.user, event.room_id);
 
-      console.log(invitedUser)
+      console.log("invited user", invitedUser)
 
       if (invitedUser.type === "spacetube.group.user") {
         const roomInviteUser = await creatGroupCloneUser(invitedUser.content.name, invitedUserId, event.room_id);
