@@ -26,8 +26,8 @@ import { sendMessageWhatsapp } from "../whatsapp/index.js";
 
 const { HOME_SERVER } = process.env;
 
-export const getRoomName = async (roomId) => {
-  const roomStateResponse = await getRoomState(roomId);
+export const getRoomName = async (roomId, token) => {
+  const roomStateResponse = await getRoomState(roomId, token);
   const roomState = await roomStateResponse.json();
 
   console.log(roomState);
@@ -541,7 +541,7 @@ export const handleInvite = async (event) => {
       }
 
       if (invitedUser.type === "spacetube.group.clone") {
-        const groupName = await getRoomName(event.room_id, invitedUserId)
+        const groupName = await getRoomName(event.room_id, invitedUser.content.user.access_token);
         const groupUser = await createGroupUser(groupName);
         inviteAsUser(invitedUser.content.user, groupUser, event.room_id);
 

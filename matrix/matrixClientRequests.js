@@ -53,14 +53,14 @@ export const createRoom = (name) => {
   );
 };
 
-export const getRoomState = (roomId) => {
+export const getRoomState = (roomId, token = APPLICATION_TOKEN) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/state`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${APPLICATION_TOKEN}`,
+        Authorization: `Bearer ${token}`,
       },
     }
   );
