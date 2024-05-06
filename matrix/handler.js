@@ -314,8 +314,8 @@ export const handleRemoteOpen = async (event) => {
 
 const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
   const {
-    content: { userRoomId, name },
-  } = await getItem("userId", event.sender);
+    content: { name },
+  } = await getItem("userId", event.sender, "spacetube.group.user");
 
   const clones = await getAllItems("originalUserId", event.sender, "spacetube.group.clone");
 
@@ -327,21 +327,23 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
     clones.forEach((clone) => {
       if (
         tubeIntermediary.content.connectedRooms.includes(
-          clone.content.clone.roomId
+          clone.content.roomId
         )
       )
         cloneUser = clone.content.clone;
     });
   }
   if (!cloneUser) {
+    const senderInviteUser = await getItem("originalUserId", event.sender, "spacetube.group.invite");
+
     const cloneUserRoomId = tubeIntermediary.content.connectedRooms.find(
-      (roomId) => roomId !== userRoomId
+      (roomId) => roomId !== senderInviteUser.content.roomId
     );
 
     cloneUser = await createGroupCloneUser(name, event.sender, cloneUserRoomId);
 
-    const inviteUser = await getItem("roomId", cloneUserRoomId, "spacetube.group.invite");
-    const groupUser = await getItem("userId", inviteUser.content.originalUserId);
+    const receiverInviteUser = await getItem("roomId", cloneUserRoomId, "spacetube.group.invite");
+    const groupUser = await getItem("userId", receiverInviteUser.content.originalUserId);
 
     await inviteAsUser(groupUser, cloneUser, cloneUserRoomId);
     await join(cloneUser, cloneUserRoomId);
