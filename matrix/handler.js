@@ -86,7 +86,7 @@ export const createRoomInviteUser = async (name, groupUserId, roomId) => {
     originalUserId: groupUserId,
     userId: user.user_id,
     user,
-    name: name,
+    name: `${name} (invite user)`,
     roomId
   })
 
@@ -330,7 +330,7 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
           clone.content.roomId
         )
       )
-        cloneUser = clone.content.clone;
+        cloneUser = clone.content;
     });
   }
   if (!cloneUser) {
@@ -349,7 +349,13 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
     cloneUser = await createGroupCloneUser(name, event.sender, cloneUserRoomId);
 
     const receiverInviteUser = await getItem("roomId", cloneUserRoomId, "spacetube.group.invite");
+
+    console.log("receiver", receiverInviteUser)
+
     const groupUser = await getItem("userId", receiverInviteUser.content.originalUserId);
+
+
+    console.log("groupuser", groupUser)
 
     await inviteAsUser(groupUser, cloneUser, cloneUserRoomId);
     await join(cloneUser, cloneUserRoomId);
