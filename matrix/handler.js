@@ -338,6 +338,8 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
 
     console.log("sender invite user", senderInviteUser);
 
+    console.log(tubeIntermediary)
+
     const cloneUserRoomId = tubeIntermediary.content.connectedRooms.find(
       (roomId) => roomId !== senderInviteUser.content.roomId
     );
