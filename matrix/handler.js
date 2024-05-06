@@ -4,6 +4,7 @@ import {
   getAllItems,
   storeItemShared,
   getDisplayName,
+  getItemIncludes,
 } from "../storage.js";
 import {
   sendMessage,
@@ -455,17 +456,23 @@ export const handleTubeMessage = async (tubesOpen, event) => {
 const handleFormat = async (event) => {
   console.log(event);
 
+  //someone's been tagged. we're assuming clone user
+
   const { formattedBody } = event.content;
 
   const userId = formattedBody.split("href=")[1].split("\"")[1].split("/")[4];
 
   const user = await getItem("userId", userId);
 
-  const originalUser = await getItem("originalUserId", user.content.originalUserId);
+  const originalUser = await getItem("userId", user.content.originalUserId);
 
+  const message = formattedBody.split("</a>")[1];
 
+  sendMessageAsUser(originalUser, event.room_id, message);
 
+  const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
 
+  sendMessageAsUser(originalUser, tubeIntermediary.content.tubeIntermediary, message);
 }
 
 export const handleMessage = async (event) => {
