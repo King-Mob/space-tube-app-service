@@ -466,17 +466,19 @@ const handleFormat = async (event) => {
 
   console.log("user", user)
 
-  const originalUser = await getItem("userId", user.content.originalUserId);
+  const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
 
-  console.log("original user", originalUser);
+  const groupUser = await getItem("userId", inviteUser.content.originalUserId);
+
+  console.log("group user", groupUser);
 
   const message = body.split("</a>")[1];
 
-  sendMessageAsUser(originalUser.content.user, event.room_id, message);
+  sendMessageAsUser(groupUser.content.user, event.room_id, message);
 
   const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
 
-  sendMessageAsUser(originalUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
+  sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
 }
 
 export const handleMessage = async (event) => {
