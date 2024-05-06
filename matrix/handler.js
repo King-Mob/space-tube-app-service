@@ -539,7 +539,7 @@ export const handleInvite = async (event) => {
       }
 
       if (invitedUser.type === "spacetube.group.clone") {
-        const groupName = await getDisplayName(event.room_id, invitedUserId)
+        const groupName = await getRoomName(event.room_id, invitedUserId)
         const groupUser = await createGroupUser(groupName);
         inviteAsUser(invitedUser.content.user, groupUser, event.room_id);
 
