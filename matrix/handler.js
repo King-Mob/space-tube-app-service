@@ -472,11 +472,11 @@ const handleFormat = async (event) => {
 
   const message = body.split("</a>")[1];
 
-  sendMessageAsUser(originalUser, event.room_id, message);
+  sendMessageAsUser(originalUser.content.user, event.room_id, message);
 
   const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
 
-  sendMessageAsUser(originalUser, tubeIntermediary.content.tubeIntermediary, message);
+  sendMessageAsUser(originalUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
 }
 
 export const handleMessage = async (event) => {
