@@ -330,7 +330,7 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
           clone.content.roomId
         )
       )
-        cloneUser = clone.content;
+        cloneUser = clone.content.user;
     });
   }
   if (!cloneUser) {
