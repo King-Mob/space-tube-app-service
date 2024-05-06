@@ -30,6 +30,8 @@ export const getRoomName = async (roomId) => {
   const roomStateResponse = await getRoomState(roomId);
   const roomState = await roomStateResponse.json();
 
+  console.log(roomState);
+
   let roomName = "default";
 
   for (const roomEvent of roomState) {
