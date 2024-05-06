@@ -331,7 +331,8 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
           clone.content.roomId
         )
       )
-        cloneUser = clone.content;
+        cloneUser = clone.content.user;
+      cloneUser.roomId = clone.content.roomId
     });
   }
   if (!cloneUser) {
@@ -348,13 +349,13 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
     console.log("clone user room id", cloneUserRoomId)
 
     cloneUser = await createGroupCloneUser(name, event.sender, cloneUserRoomId);
+    cloneUser.roomId = cloneUserRoomId;
 
     const receiverInviteUser = await getItem("roomId", cloneUserRoomId, "spacetube.group.invite");
 
     console.log("receiver", receiverInviteUser)
 
     const groupUser = await getItem("userId", receiverInviteUser.content.originalUserId);
-
 
     console.log("groupuser", groupUser)
 
@@ -366,7 +367,7 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
   console.log(message)
   console.log("anything at all")
 
-  sendMessageAsUser(cloneUser.user, cloneUser.roomId, message);
+  sendMessageAsUser(cloneUser, cloneUser.roomId, message);
 };
 
 const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
