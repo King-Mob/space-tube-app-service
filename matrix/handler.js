@@ -572,23 +572,24 @@ export const handleInvite = async (event) => {
       if (invitedUser.type === "spacetube.group.invite") {
         const groupCloneUser = await createGroupCloneUser(invitedUser.content.name, invitedUser.content.originalUserId, event.room_id);
         inviteAsUser(invitedUser.content.user, groupCloneUser, event.room_id);
-        leaveRoom(invitedUser.content.user, event.room_id);
-      }
 
-      if (invitedUser.type === "spacetube.group.clone") {
         const groupName = await getRoomName(event.room_id, invitedUser.content.user.access_token);
         const groupUser = await createGroupUser(groupName);
         inviteAsUser(invitedUser.content.user, groupUser, event.room_id);
 
         const originalGroupUser = await getItem("userId", invitedUser.content.originalUserId);
-        console.log("orggroupuser", originalGroupUser)
-        const originalInviteUser = await getItem("originalUserId", originalGroupUser.content.userId, "spacetube.group.invite");
-        console.log("originviteuser", originalInviteUser)
-        const tubeIntermediary = await createTubeIntermediary(event.room_id, originalInviteUser.content.roomId);
+
+        const tubeIntermediary = await createTubeIntermediary(event.room_id, invitedUser.content.roomId);
         invite(groupUser, tubeIntermediary);
         invite(originalGroupUser, tubeIntermediary);
 
-        const joinMessage = `Hello! Use @${invitedUser.content.name} to send messages to them. Other messages in this room remain private.`
+        const leaveResult = await leaveRoom(invitedUser.content.user, event.room_id);
+        const leave = await leaveResult.json();
+        console.log(leave);
+      }
+
+      if (invitedUser.type === "spacetube.group.clone") {
+        const joinMessage = `Hello! Use @${invitedUser.content.name} to send messages through the spacetube. Other messages in this room remain private.`
         sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
       }
 
