@@ -339,6 +339,12 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
     );
 
     cloneUser = await createGroupCloneUser(name, event.sender, cloneUserRoomId);
+
+    const inviteUser = await getItem("roomId", cloneUserRoomId, "spacetube.group.invite");
+    const groupUser = await getItem("userId", inviteUser.content.originalUserId);
+
+    await inviteAsUser(groupUser, cloneUser, cloneUserRoomId);
+    await join(cloneUser, cloneUserRoomId);
   }
 
   sendMessageAsUser(cloneUser, cloneUser.roomId, message);
