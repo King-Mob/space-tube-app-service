@@ -330,7 +330,7 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
           clone.content.roomId
         )
       )
-        cloneUser = clone.content.user;
+        cloneUser = clone.content;
     });
   }
   if (!cloneUser) {
@@ -365,7 +365,7 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
   console.log(message)
   console.log("anything at all")
 
-  sendMessageAsUser(cloneUser, cloneUser.roomId, message);
+  sendMessageAsUser(cloneUser.user, cloneUser.roomId, message);
 };
 
 const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
