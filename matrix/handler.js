@@ -317,7 +317,7 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
     content: { userRoomId, name },
   } = await getItem("userId", event.sender);
 
-  const clones = await getAllItems("originalUserId", event.sender);
+  const clones = await getAllItems("originalUserId", event.sender, "spacetube.group.clone");
 
   console.log(clones)
 
@@ -338,7 +338,7 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
       (roomId) => roomId !== userRoomId
     );
 
-    cloneUser = await createClone(name, cloneUserRoomId, event.sender);
+    cloneUser = await createGroupCloneUser(name, event.sender, cloneUserRoomId);
   }
 
   sendMessageAsUser(cloneUser, cloneUser.roomId, message);
