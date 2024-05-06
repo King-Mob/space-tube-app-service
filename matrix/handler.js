@@ -472,7 +472,7 @@ const handleFormat = async (event) => {
 
   console.log("group user", groupUser);
 
-  const message = body.split("</a>")[1];
+  const message = body.split("</a>: ")[1];
 
   sendMessageAsUser(groupUser.content.user, event.room_id, message);
 
