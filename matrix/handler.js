@@ -485,7 +485,7 @@ export const handleMessage = async (event) => {
     handleBridgeMessage(event, bridgeRoomEvent);
   }
 
-  if (event.content.formattedBody) {
+  if (event.content.formatted_body) {
     handleFormat(event);
   }
 
