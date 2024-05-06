@@ -361,6 +361,10 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
     await join(cloneUser, cloneUserRoomId);
   }
 
+  console.log(cloneUser)
+  console.log(message)
+  console.log("anything at all")
+
   sendMessageAsUser(cloneUser, cloneUser.roomId, message);
 };
 
