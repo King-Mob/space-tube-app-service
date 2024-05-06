@@ -550,6 +550,8 @@ export const handleInvite = async (event) => {
     const invitedUserId = event.state_key;
     const invitedUser = await getItem("userId", invitedUserId);
 
+    const humanInviter = !event.sender.includes("@_space-tube") && !event.sender.includes("@space-tube");
+
     if (invitedUser) {
       await join(invitedUser.content.user, event.room_id);
 
@@ -557,8 +559,10 @@ export const handleInvite = async (event) => {
 
       if (invitedUser.type === "spacetube.group.user") {
         const roomInviteUser = await createRoomInviteUser(invitedUser.content.name, invitedUserId, event.room_id);
-        const joinMessage = `Hello! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to connect them with this room.`
-        sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
+        if (humanInviter) {
+          const joinMessage = `Hello! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to connect them with this room.`
+          sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
+        }
       }
 
       if (invitedUser.type === "spacetube.group.invite") {
