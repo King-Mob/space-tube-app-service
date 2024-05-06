@@ -492,7 +492,7 @@ export const handleInvite = async (event) => {
 
       if (invitedUser.type === "spacetube.group.user") {
         const roomInviteUser = await creatGroupCloneUser(invitedUser.content.name, invitedUserId, event.room_id);
-        const joinMesage = `Give other groups ${roomInviteUser.user_id} to connect to this group`
+        const joinMesage = `Welcome to spacetube! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to connect them with this room.`
         sendMessage(event.room_id, joinMesage);
       }
 
