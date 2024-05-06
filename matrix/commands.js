@@ -73,14 +73,6 @@ const link = async (roomId, sender) => {
 };
 
 const forward = async (event) => {
-    /*
-    const tubeOpen = await getItemIncludes("connectedRooms", event.room_id);
-
-    if (tubeOpen) {
-        await forwardToTubeIntermediary(tubeOpen.content.tubeIntermediary, event);
-    }
-    */
-
     const tubesOpen = await getAllItemIncludes("connectedRooms", event.room_id);
 
     if (tubesOpen) {
