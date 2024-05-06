@@ -84,6 +84,7 @@ export const createRoomInviteUser = async (name, groupUserId, roomId) => {
   storeItem({
     type: "spacetube.group.invite",
     originalUserId: groupUserId,
+    originalName: name,
     userId: user.user_id,
     user,
     name: `${name} (invite user)`,
@@ -580,7 +581,7 @@ export const handleInvite = async (event) => {
       }
 
       if (invitedUser.type === "spacetube.group.invite") {
-        const groupCloneUser = await createGroupCloneUser(invitedUser.content.name, invitedUser.content.originalUserId, event.room_id);
+        const groupCloneUser = await createGroupCloneUser(invitedUser.content.originalName, invitedUser.content.originalUserId, event.room_id);
         inviteAsUser(invitedUser.content.user, groupCloneUser, event.room_id);
 
         const groupName = await getRoomName(event.room_id, invitedUser.content.user.access_token);
