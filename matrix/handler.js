@@ -458,9 +458,9 @@ const handleFormat = async (event) => {
 
   //someone's been tagged. we're assuming clone user
 
-  const { formattedBody } = event.content;
+  const body = event.content.formatted_body;
 
-  const userId = formattedBody.split("href=")[1].split("\"")[1].split("/")[4];
+  const userId = body.split("href=")[1].split("\"")[1].split("/")[4];
 
   const user = await getItem("userId", userId);
 
@@ -470,7 +470,7 @@ const handleFormat = async (event) => {
 
   console.log("original user", originalUser);
 
-  const message = formattedBody.split("</a>")[1];
+  const message = body.split("</a>")[1];
 
   sendMessageAsUser(originalUser, event.room_id, message);
 
