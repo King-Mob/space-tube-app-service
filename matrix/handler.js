@@ -336,9 +336,13 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
   if (!cloneUser) {
     const senderInviteUser = await getItem("originalUserId", event.sender, "spacetube.group.invite");
 
+    console.log("sender invite user", senderInviteUser);
+
     const cloneUserRoomId = tubeIntermediary.content.connectedRooms.find(
       (roomId) => roomId !== senderInviteUser.content.roomId
     );
+
+    console.log("clone user room id", cloneUserRoomId)
 
     cloneUser = await createGroupCloneUser(name, event.sender, cloneUserRoomId);
 
