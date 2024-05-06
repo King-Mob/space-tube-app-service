@@ -13,9 +13,11 @@ import {
   registerUser,
   setDisplayName,
   invite,
+  inviteAsUser,
   join,
   joinAsSpaceTube,
   getRoomsList,
+  leaveRoom
 } from "./matrixClientRequests.js";
 import commands from "./commands.js";
 import { v4 as uuidv4 } from "uuid";
@@ -54,12 +56,30 @@ export const createGroupUser = async (name) => {
   return user;
 }
 
-export const creatGroupCloneUser = async (name, groupUserId, roomId) => {
+export const createGroupCloneUser = async (name, groupUserId, roomId) => {
   const newUserResponse = await registerUser(name);
   const user = await newUserResponse.json();
 
   storeItem({
     type: "spacetube.group.clone",
+    originalUserId: groupUserId,
+    userId: user.user_id,
+    user,
+    name: name,
+    roomId
+  })
+
+  setDisplayName(user, name);
+
+  return user;
+}
+
+export const createRoomInviteUser = async (name, groupUserId, roomId) => {
+  const newUserResponse = await registerUser(name);
+  const user = await newUserResponse.json();
+
+  storeItem({
+    type: "spacetube.group.invite",
     originalUserId: groupUserId,
     userId: user.user_id,
     user,
@@ -189,6 +209,22 @@ const connectRooms = async (roomId1, roomId2) => {
     return tubeRoom.room_id;
   }
 };
+
+const createTubeIntermediary = async (roomId1, roomId2) => {
+  const connectedRooms = [roomId1, roomId2].sort();
+  const tubeName = `open-${connectedRooms[0]}-${connectedRooms[1]}`;
+
+  const tubeRoomResponse = await createRoom();
+  const tubeRoom = await tubeRoomResponse.json();
+  storeItem({
+    name: tubeName,
+    type: "spacetube.open",
+    tubeIntermediary: tubeRoom.room_id,
+    connectedRooms,
+  });
+
+  return tubeRoom.room_id;
+}
 
 export const connectOtherInstance = async (
   event,
@@ -491,9 +527,29 @@ export const handleInvite = async (event) => {
       console.log("invited user", invitedUser)
 
       if (invitedUser.type === "spacetube.group.user") {
-        const roomInviteUser = await creatGroupCloneUser(invitedUser.content.name, invitedUserId, event.room_id);
-        const joinMesage = `Welcome to spacetube! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to connect them with this room.`
-        sendMessageAsUser(invitedUser.content.user, event.room_id, joinMesage);
+        const roomInviteUser = await createRoomInviteUser(invitedUser.content.name, invitedUserId, event.room_id);
+        const joinMessage = `Hello! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to connect them with this room.`
+        sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
+      }
+
+      if (invitedUser.type === "spacetube.group.invite") {
+        const groupCloneUser = await createGroupCloneUser(invitedUser.content.name, invitedUser.content.originalUserId, event.room_id);
+        inviteAsUser(invitedUser.content.user, groupCloneUser, event.room_id);
+        leaveRoom(invitedUser.content.user, event.room_id);
+      }
+
+      if (invitedUser.type === "spacetube.group.clone") {
+        const groupName = getDisplayName(event.room_id, invitedUserId)
+        const groupUser = await createGroupUser(groupName);
+        inviteAsUser(invitedUser.content.user, groupUser, event.room_id);
+
+        const originalGroupUser = await getItem("userId", invitedUser.content.originalUserId);
+        const tubeIntermediary = await createTubeIntermediary(event.room_id, originalGroupUser.roomId);
+        invite(groupUser, tubeIntermediary);
+        invite(originalGroupUser, tubeIntermediary);
+
+        const joinMessage = `Hello! Use @${invitedUser.content.name} to send messages to them. Other messages in this room remain private.`
+        sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
       }
 
       return;

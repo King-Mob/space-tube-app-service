@@ -112,6 +112,22 @@ export const invite = (user, roomId) => {
   );
 };
 
+export const inviteAsUser = (inviter, invitee, roomId) => {
+  return fetch(
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@space-tube-bot:${HOME_SERVER}`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: invitee.user_id,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${inviter.access_token}`,
+      },
+    }
+  );
+};
+
 export const join = (user, roomId) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/join/${roomId}`,
@@ -157,8 +173,7 @@ export const getRoomsList = async (user) => {
 
 export const sync = async (user, nextBatch = null) => {
   const response = await fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/sync?timeout=30000${
-      nextBatch ? `&since=${nextBatch}` : ""
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/sync?timeout=30000${nextBatch ? `&since=${nextBatch}` : ""
     }`,
     {
       method: "GET",
@@ -171,3 +186,17 @@ export const sync = async (user, nextBatch = null) => {
 
   return response.json();
 };
+
+export const leaveRoom = async (user, roomId) => {
+  return fetch(
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/leave`,
+    {
+      method: "POST",
+      body: JSON.stringify({}),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.access_token}`,
+      },
+    }
+  );
+}
