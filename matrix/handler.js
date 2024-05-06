@@ -464,7 +464,11 @@ const handleFormat = async (event) => {
 
   const user = await getItem("userId", userId);
 
+  console.log("user", user)
+
   const originalUser = await getItem("userId", user.content.originalUserId);
+
+  console.log("original user", originalUser);
 
   const message = formattedBody.split("</a>")[1];
 
