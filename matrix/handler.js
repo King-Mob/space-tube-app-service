@@ -579,7 +579,7 @@ export const handleInvite = async (event) => {
         inviteAsUser(invitedUser.content.user, groupUser, event.room_id);
 
         const originalGroupUser = await getItem("userId", invitedUser.content.originalUserId);
-        const tubeIntermediary = await createTubeIntermediary(event.room_id, originalGroupUser.roomId);
+        const tubeIntermediary = await createTubeIntermediary(event.room_id, originalGroupUser.content.roomId);
         invite(groupUser, tubeIntermediary);
         invite(originalGroupUser, tubeIntermediary);
 
