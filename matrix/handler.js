@@ -319,6 +319,8 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
 
   const clones = await getAllItems("originalUserId", event.sender);
 
+  console.log(clones)
+
   let cloneUser;
 
   if (clones) {
