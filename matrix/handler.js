@@ -339,34 +339,21 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
   if (!cloneUser) {
     const senderInviteUser = await getItem("originalUserId", event.sender, "spacetube.group.invite");
 
-    console.log("sender invite user", senderInviteUser);
-
-    console.log(tubeIntermediary)
-
     const cloneUserRoomId = tubeIntermediary.content.connectedRooms.find(
       (roomId) => roomId !== senderInviteUser.content.roomId
     );
-
-    console.log("clone user room id", cloneUserRoomId)
 
     cloneUser = await createGroupCloneUser(name, event.sender, cloneUserRoomId);
     cloneUser.roomId = cloneUserRoomId;
 
     const receiverInviteUser = await getItem("roomId", cloneUserRoomId, "spacetube.group.invite");
 
-    console.log("receiver", receiverInviteUser)
-
     const groupUser = await getItem("userId", receiverInviteUser.content.originalUserId);
 
-    console.log("groupuser", groupUser)
 
     await inviteAsUser(groupUser.content.user, cloneUser, cloneUserRoomId);
     await join(cloneUser, cloneUserRoomId);
   }
-
-  console.log(cloneUser)
-  console.log(message)
-  console.log("anything at all")
 
   sendMessageAsUser(cloneUser, cloneUser.roomId, message);
 };
@@ -493,21 +480,15 @@ const handleFormat = async (event) => {
 
   const user = await getItem("userId", userId);
 
-  console.log("user", user)
-
   const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
 
   const groupUser = await getItem("userId", inviteUser.content.originalUserId);
-
-  console.log("group user", groupUser);
 
   const message = body.split("</a>: ")[1];
 
   sendMessageAsUser(groupUser.content.user, event.room_id, message);
 
   const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
-
-  console.log(tubeIntermediary)
 
   sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
 }
@@ -572,8 +553,6 @@ export const handleInvite = async (event) => {
     if (invitedUser) {
       await join(invitedUser.content.user, event.room_id);
 
-      console.log("invited user", invitedUser)
-
       if (invitedUser.type === "spacetube.group.user") {
         const roomInviteUser = await createRoomInviteUser(invitedUser.content.name, invitedUserId, event.room_id);
         if (humanInviter) {
@@ -596,9 +575,7 @@ export const handleInvite = async (event) => {
         invite(groupUser, tubeIntermediary);
         invite(originalGroupUser.content.user, tubeIntermediary);
 
-        const leaveResult = await leaveRoom(invitedUser.content.user, event.room_id);
-        const leave = await leaveResult.json();
-        console.log(leave);
+        leaveRoom(invitedUser.content.user, event.room_id);
       }
 
       if (invitedUser.type === "spacetube.group.clone") {
