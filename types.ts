@@ -1,5 +1,3 @@
-import { StringSelect } from "discord-interactions";
-
 export type user = { user_id: string };
 export type item = {
     type: string;

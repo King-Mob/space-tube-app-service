@@ -1,10 +1,9 @@
-import fetch from 'node-fetch';
 import { v4 as uuidv4 } from 'uuid';
 import {
     item,
     room,
     event
-} from "../types";
+} from "../types.js";
 
 const { HOME_SERVER, APPLICATION_TOKEN } = process.env
 

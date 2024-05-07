@@ -2,7 +2,7 @@ import {
   user,
   room,
   event
-} from "../types";
+} from "../types.js";
 import {
   storeItem,
   getItem,

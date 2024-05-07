@@ -4,7 +4,7 @@ import { AppService, AppserviceHttpError } from "matrix-appservice";
 import { v4 as uuidv4 } from "uuid";
 import {
   user
-} from "./types";
+} from "./types.js";
 import {
   registerUser,
   invite,
