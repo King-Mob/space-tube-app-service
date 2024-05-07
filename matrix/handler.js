@@ -5,7 +5,7 @@ import {
   storeItemShared,
   getDisplayName,
   getItemIncludes,
-} from "../storage.js";
+} from "./storage.js";
 import {
   sendMessage,
   sendMessageAsUser,

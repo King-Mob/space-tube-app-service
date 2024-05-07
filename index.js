@@ -17,7 +17,7 @@ import {
   createGroupUser
 } from "./matrix/handler.js";
 import commands from "./matrix/commands.js";
-import { getItem, getItemIncludes, getAllItems, storeItem } from "./storage.js";
+import { getItem, getItemIncludes, getAllItems, storeItem } from "./matrix/storage.js";
 import { startDiscord } from "./discord/index.js";
 import { startWhatsapp } from "./whatsapp/index.js";
 

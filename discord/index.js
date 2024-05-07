@@ -4,7 +4,7 @@ import {
   InteractionType,
   InteractionResponseType,
 } from "discord-interactions";
-import { storeItem, getItem, getDisplayName } from "../storage.js";
+import { storeItem, getItem, getDisplayName } from "../matrix/storage.js";
 import {
   createRoom,
   invite,
