@@ -69,7 +69,7 @@ as.onAliasQuery = async function (alias) {
 const asApp = as.expressApp;
 asApp.post("/_matrix/app/v1/ping", (req, res) => {
   console.log(req);
-  res.send({ message: "yo how's it going on 8133!" });
+  res.send("yo how's it going on 8133!");
 });
 
 console.log("spacetube is listening on 8133")
