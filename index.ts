@@ -72,6 +72,7 @@ asApp.post("/_matrix/app/v1/ping", (req, res) => {
   res.send({ message: "yo how's it going on 8133!" });
 });
 
+console.log("spacetube is listening on 8133")
 asApp.listen(8133);
 
 //spacetube service on 8134
