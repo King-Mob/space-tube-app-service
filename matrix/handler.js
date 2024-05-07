@@ -330,9 +330,10 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
         tubeIntermediary.content.connectedRooms.includes(
           clone.content.roomId
         )
-      )
+      ) {
         cloneUser = clone.content.user;
-      cloneUser.roomId = clone.content.roomId
+        cloneUser.roomId = clone.content.roomId;
+      }
     });
   }
   if (!cloneUser) {
