@@ -359,7 +359,7 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
 
     console.log("groupuser", groupUser)
 
-    await inviteAsUser(groupUser, cloneUser, cloneUserRoomId);
+    await inviteAsUser(groupUser.content.user, cloneUser, cloneUserRoomId);
     await join(cloneUser, cloneUserRoomId);
   }
 

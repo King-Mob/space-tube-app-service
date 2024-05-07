@@ -114,7 +114,7 @@ export const invite = (user, roomId) => {
 
 export const inviteAsUser = (inviter, invitee, roomId) => {
   return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@space-tube-bot:${HOME_SERVER}`,
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite`,
     {
       method: "POST",
       body: JSON.stringify({
