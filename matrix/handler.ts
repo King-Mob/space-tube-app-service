@@ -1,4 +1,9 @@
 import {
+  user,
+  room,
+  event
+} from "../types";
+import {
   storeItem,
   getItem,
   getAllItems,
@@ -27,9 +32,9 @@ import { sendMessageWhatsapp } from "../whatsapp/index.js";
 
 const { HOME_SERVER } = process.env;
 
-export const getRoomName = async (roomId, token) => {
+export const getRoomName = async (roomId: string, token: string | null = null) => {
   const roomStateResponse = await getRoomState(roomId, token);
-  const roomState = await roomStateResponse.json();
+  const roomState = await roomStateResponse.json() as event[];
 
   console.log(roomState);
 
@@ -43,9 +48,9 @@ export const getRoomName = async (roomId, token) => {
   return roomName;
 }
 
-export const createGroupUser = async (name) => {
+export const createGroupUser = async (name: string) => {
   const newUserResponse = await registerUser(name);
-  const user = await newUserResponse.json();
+  const user: user = await newUserResponse.json() as user;
 
   storeItem({
     type: "spacetube.group.user",
@@ -59,9 +64,9 @@ export const createGroupUser = async (name) => {
   return user;
 }
 
-export const createGroupCloneUser = async (name, groupUserId, roomId) => {
+export const createGroupCloneUser = async (name: string, groupUserId: string, roomId: string) => {
   const newUserResponse = await registerUser(name);
-  const user = await newUserResponse.json();
+  const user = await newUserResponse.json() as user;
 
   storeItem({
     type: "spacetube.group.clone",
@@ -77,9 +82,9 @@ export const createGroupCloneUser = async (name, groupUserId, roomId) => {
   return user;
 }
 
-export const createRoomInviteUser = async (name, groupUserId, roomId) => {
+export const createRoomInviteUser = async (name: string, groupUserId: string, roomId: string) => {
   const newUserResponse = await registerUser(name);
-  const user = await newUserResponse.json();
+  const user = await newUserResponse.json() as user;
 
   storeItem({
     type: "spacetube.group.invite",
@@ -96,12 +101,12 @@ export const createRoomInviteUser = async (name, groupUserId, roomId) => {
   return user;
 }
 
-const createTubeUser = async (name, roomId, tubeIntermediary) => {
+export const createTubeUser = async (name, roomId, tubeIntermediary) => {
   console.log("creating tube user");
   console.log(name, roomId, tubeIntermediary);
 
   const newUserResponse = await registerUser(name);
-  const user = await newUserResponse.json();
+  const user = await newUserResponse.json() as user;
 
   storeItem({
     type: "spacetube.user",
@@ -125,7 +130,7 @@ const createTubeUser = async (name, roomId, tubeIntermediary) => {
 
 const createClone = async (name, roomId, originalUserId) => {
   const newCloneUserResponse = await registerUser(name);
-  const newCloneUser = await newCloneUserResponse.json();
+  const newCloneUser = await newCloneUserResponse.json() as user & { roomId: string };
 
   newCloneUser.roomId = roomId;
 
@@ -200,7 +205,7 @@ const connectRooms = async (roomId1, roomId2) => {
     return existingTube;
   } else {
     const tubeRoomResponse = await createRoom();
-    const tubeRoom = await tubeRoomResponse.json();
+    const tubeRoom = await tubeRoomResponse.json() as room;
     storeItem({
       name: tubeName,
       type: "spacetube.open",
@@ -218,8 +223,8 @@ const createTubeIntermediary = async (roomId1, roomId2) => {
   const connectedRooms = [roomId1, roomId2].sort();
   const tubeName = `open-${connectedRooms[0]}-${connectedRooms[1]}`;
 
-  const tubeRoomResponse = await createRoom();
-  const tubeRoom = await tubeRoomResponse.json();
+  const tubeRoomResponse = await createRoom("Tube Intermediary");
+  const tubeRoom = await tubeRoomResponse.json() as room;
   storeItem({
     name: tubeName,
     type: "spacetube.open",
@@ -250,7 +255,7 @@ export const connectOtherInstance = async (
   } else {
     console.log("creating shared room");
     const createRoomResponse = await createRoom();
-    const createdRoom = await createRoomResponse.json();
+    const createdRoom = await createRoomResponse.json() as room;
     sharedTubeManagementRoom = createdRoom.room_id;
 
     await invite({ user_id: otherInstance }, sharedTubeManagementRoom);
@@ -272,7 +277,7 @@ export const connectOtherInstance = async (
     sendMessage(event.room_id, "This tube is already active.");
   } else {
     const createRoomResponse = await createRoom();
-    const createdRoom = await createRoomResponse.json();
+    const createdRoom = await createRoomResponse.json() as room;
 
     await invite({ user_id: otherInstance }, createdRoom.room_id);
 
@@ -393,7 +398,7 @@ export const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
   if (tubeUser) {
     user = tubeUser.content.user;
 
-    const roomsList = await getRoomsList(user);
+    const roomsList = await getRoomsList(user) as { joined_rooms: string[] };
     if (!roomsList.joined_rooms.includes(tubeIntermediary)) {
       await invite(user, tubeIntermediary);
       await join(user, tubeIntermediary);
@@ -618,11 +623,11 @@ export const createRoomsAndTube = async (invitation) => {
   } = invitation;
 
   const createFromRoomResponse = await createRoom(`to-${to.groupName}`);
-  const fromRoom = await createFromRoomResponse.json();
+  const fromRoom: room = await createFromRoomResponse.json() as room;
   invite({ user_id: from.userId }, fromRoom.room_id);
 
   const createToRoomResponse = await createRoom(`to-${from.groupName}`);
-  const toRoom = await createToRoomResponse.json();
+  const toRoom: room = await createToRoomResponse.json() as room;
   invite({ user_id: to.userId }, toRoom.room_id);
 
   const tubeIntermediary = await connectRooms(fromRoom.room_id, toRoom.room_id);

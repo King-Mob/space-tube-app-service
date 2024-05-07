@@ -1,17 +1,21 @@
 import fetch from 'node-fetch';
 import { v4 as uuidv4 } from 'uuid';
+import {
+    item,
+    room,
+    event
+} from "../types";
 
 const { HOME_SERVER, APPLICATION_TOKEN } = process.env
 
 const createManagementRoom = async () => {
-
     const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms?user_id=@space-tube-bot:${HOME_SERVER}`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
         }
     })
-    const roomsList = await response.json();
+    const roomsList = await response.json() as { joined_rooms: string[] };
 
     for (const roomId of roomsList.joined_rooms) {
         const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/state??user_id=@space-tube-bot:${HOME_SERVER}`, {
@@ -20,7 +24,7 @@ const createManagementRoom = async () => {
                 "Authorization": `Bearer ${APPLICATION_TOKEN}`
             }
         })
-        const roomStateEvents = await response.json();
+        const roomStateEvents = await response.json() as event[];
 
         for (const event of roomStateEvents) {
             if (event.type === "m.room.canonical_alias")
@@ -42,14 +46,16 @@ const createManagementRoom = async () => {
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
         }
     });
-    const room = await createRoomResponse.json();
+    const room = await createRoomResponse.json() as room;
 
     return room.room_id;
 }
 
-const managementRoom = { id: await createManagementRoom() };
+const managementRoom = { id: "" };
 
-export const storeItem = (item) => {
+createManagementRoom().then(id => managementRoom.id = id);
+
+export const storeItem = (item: item) => {
     console.log("mgmtroom id", managementRoom.id);
     const txnId = uuidv4();
 
@@ -63,7 +69,7 @@ export const storeItem = (item) => {
     });
 }
 
-export const storeItemShared = (sharedRoomId, item) => {
+export const storeItemShared = (sharedRoomId, item: item) => {
     console.log("shared mgmtroom id", sharedRoomId);
     const txnId = uuidv4();
 
@@ -77,7 +83,7 @@ export const storeItemShared = (sharedRoomId, item) => {
     });
 }
 
-export const getItem = async (key, value, type) => {
+export const getItem = async (key: string, value: string, type: null | string = null) => {
 
     const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
         headers: {
@@ -85,7 +91,7 @@ export const getItem = async (key, value, type) => {
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
         }
     });
-    const eventsList = await response.json();
+    const eventsList = await response.json() as { chunk: event[] };
 
     for (const event of eventsList.chunk) {
         if (event.content[key] === value) {
@@ -110,7 +116,7 @@ export const getAllItems = async (key, value, type) => {
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
         }
     });
-    const eventsList = await response.json();
+    const eventsList = await response.json() as { chunk: event[] };
 
     const matchingEvents = [];
 
@@ -136,7 +142,7 @@ export const getItemIncludes = async (key, value) => {
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
         }
     });
-    const eventsList = await response.json();
+    const eventsList = await response.json() as { chunk: event[] };
 
     for (const event of eventsList.chunk) {
         const possibleItem = event.content[key];
@@ -155,7 +161,7 @@ export const getAllItemIncludes = async (key, value) => {
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
         }
     });
-    const eventsList = await response.json();
+    const eventsList = await response.json() as { chunk: event[] };
 
     const matchingEvents = [];
 
@@ -176,7 +182,7 @@ export const getItemShared = async (sharedRoomId, key, value) => {
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
         }
     });
-    const eventsList = await response.json();
+    const eventsList = await response.json() as { chunk: event[] };
 
     for (const event of eventsList.chunk) {
         if (event.content[key] === value)
@@ -186,14 +192,14 @@ export const getItemShared = async (sharedRoomId, key, value) => {
     return null;
 }
 
-export const getDisplayName = async (sharedRoomId, userId) => {
+export const getDisplayName = async (sharedRoomId: string, userId: string) => {
     const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/messages?limit=1000`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
         }
     });
-    const eventsList = await response.json();
+    const eventsList = await response.json() as { chunk: event[] };
 
     for (const event of eventsList.chunk) {
         if (event.type === "m.room.member" && event.sender === userId && event.content.displayname)

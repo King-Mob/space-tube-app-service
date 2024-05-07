@@ -1,0 +1,12 @@
+{
+    "exclude": ["./web", "./dist-web"],
+    "compilerOptions": {
+      "jsx": "react-jsx",
+      "target": "ES2016",
+      "outDir": "./dist-server",
+      "skipLibCheck": true,
+      "esModuleInterop": true,
+      "module": "CommonJS"
+    }
+  }
+  

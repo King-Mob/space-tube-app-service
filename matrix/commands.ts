@@ -1,5 +1,5 @@
 import { sendMessage } from './matrixClientRequests.js';
-import { registerTube, connectSameInstance, connectOtherInstance, getRoomName, handleTubeMessage } from './handler.js';
+import { createTubeUser, registerTube, connectSameInstance, connectOtherInstance, getRoomName, handleTubeMessage } from './handler.js';
 import { getItem, storeItem, getAllItemIncludes, getDisplayName } from './storage.js';
 import { v4 as uuidv4 } from "uuid";
 

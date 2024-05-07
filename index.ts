@@ -3,6 +3,9 @@ import express from "express";
 import { AppService, AppserviceHttpError } from "matrix-appservice";
 import { v4 as uuidv4 } from "uuid";
 import {
+  user
+} from "./types";
+import {
   registerUser,
   invite,
   join,
@@ -53,32 +56,6 @@ as.on("ephemeral", (event) => {
   console.log(event);
 });
 
-as.onUserQuery = function (userId, callback) {
-  // handle the incoming user query then respond
-  console.log("RECV %s", userId);
-
-  console.log("is this the invite function???");
-  console.log(callback);
-
-  /*
-  // if this userId cannot be created, or if some error
-  // conditions occur, throw AppserviceHttpError exception.
-  // The underlying appservice code will send the HTTP status,
-  // Matrix errorcode and error message back as a response.
- 
-  if (userCreationOrQueryFailed) {
-    throw new AppserviceHttpError(
-      {
-        errcode: "M_FORBIDDEN",
-        error: "User query or creation failed.",
-      },
-      403, // Forbidden, or an appropriate HTTP status
-    )
-  }
-  */
-
-  callback();
-};
 // can also do this as a promise
 as.onAliasQuery = async function (alias) {
   console.log("RECV %s", alias);
@@ -91,7 +68,7 @@ asApp.post("/_matrix/app/v1/ping", (req, res) => {
   res.send({ message: "yo how's it going on 8133!" });
 });
 
-as.listen(8133);
+as.listen(8133, "localhost", 99999);
 
 //spacetube service on 8134
 
@@ -107,7 +84,7 @@ app.post("/api/register", async (req, res) => {
   );
   if (linkEvent) {
     const userRegistration = await registerUser(req.body.userName);
-    const user = await userRegistration.json();
+    const user = await userRegistration.json() as user;
 
     await setDisplayName(user, req.body.userName);
     await invite(user, linkEvent.content.roomId);
@@ -170,13 +147,14 @@ app.get("/api/tubeInfo/sync", async (req, res) => {
   if (linkEvent) {
     const matrixRoomId = linkEvent.content.roomId;
 
-    //and an if for the user, or change the link part so there's already a user, like how there is one for
-    //web created tubes
+    //and an if for the user, or change the link part so there's already a user,
+    //like how there is one for web created tubes
+
     const {
       content: { user },
     } = await getItem("userRoomId", matrixRoomId, "spacetube.user");
 
-    const syncData = await sync(user, nextBatch);
+    const syncData = await sync(user, nextBatch) as object;
 
     res.send({
       success: true,

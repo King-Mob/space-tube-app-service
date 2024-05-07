@@ -37,13 +37,13 @@ export const sendMessageAsUser = (user, roomId, message) => {
   );
 };
 
-export const createRoom = (name) => {
+export const createRoom = (name: string = "no room name") => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/createRoom?user_id=@space-tube-bot:${HOME_SERVER}`,
     {
       method: "POST",
       body: JSON.stringify({
-        name: name ? name : "no-name",
+        name: name
       }),
       headers: {
         "Content-Type": "application/json",
@@ -53,25 +53,25 @@ export const createRoom = (name) => {
   );
 };
 
-export const getRoomState = (roomId, token = APPLICATION_TOKEN) => {
+export const getRoomState = (roomId, token: string | null) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/state`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token ? token : APPLICATION_TOKEN}`,
       },
     }
   );
 };
 
-export const registerUser = (userId) => {
+export const registerUser = (name: string) => {
   return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/register`, {
     method: "POST",
     body: JSON.stringify({
       type: "m.login.application_service",
-      username: `_space-tube-${userId}-${uuidv4()}`,
+      username: `_space-tube-${name}-${uuidv4()}`,
     }),
     headers: {
       "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export const registerUser = (userId) => {
   });
 };
 
-export const setDisplayName = (user, displayName) => {
+export const setDisplayName = (user, displayName: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/profile/${user.user_id}/displayname`,
     {
