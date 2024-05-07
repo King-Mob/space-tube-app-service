@@ -50,9 +50,7 @@ const createManagementRoom = async () => {
     return room.room_id;
 }
 
-const managementRoom = { id: "" };
-
-createManagementRoom().then(id => managementRoom.id = id);
+const managementRoom = { id: createManagementRoom() };
 
 export const storeItem = (item: item) => {
     console.log("mgmtroom id", managementRoom.id);
