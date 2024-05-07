@@ -7,6 +7,7 @@ export type room = { room_id: string };
 export type event = {
     type: string;
     sender: string;
+    room_id: string;
     content: {
         [key: string]: any;
     }

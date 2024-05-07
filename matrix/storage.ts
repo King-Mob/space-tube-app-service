@@ -1,62 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
     item,
-    room,
     event
 } from "../types.js";
 
-const { HOME_SERVER, APPLICATION_TOKEN } = process.env
-
-const createManagementRoom = async () => {
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms?user_id=@space-tube-bot:${HOME_SERVER}`, {
-        headers: {
-            'Content-Type': 'application/json',
-            "Authorization": `Bearer ${APPLICATION_TOKEN}`
-        }
-    })
-    const roomsList = await response.json() as { joined_rooms: string[] };
-
-    for (const roomId of roomsList.joined_rooms) {
-        const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/state??user_id=@space-tube-bot:${HOME_SERVER}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                "Authorization": `Bearer ${APPLICATION_TOKEN}`
-            }
-        })
-        const roomStateEvents = await response.json() as event[];
-
-        for (const event of roomStateEvents) {
-            if (event.type === "m.room.canonical_alias")
-                if (event.content.alias == `#_space-tube-management:${HOME_SERVER}`) {
-                    console.log("space-tube-management room exists");
-                    return roomId;
-                }
-        }
-    }
-
-    console.log("creating space-tube-management room");
-    const createRoomResponse = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/createRoom?user_id=@space-tube-bot:${HOME_SERVER}`, {
-        method: "POST",
-        body: JSON.stringify({
-            room_alias_name: "_space-tube-management"
-        }),
-        headers: {
-            'Content-Type': 'application/json',
-            "Authorization": `Bearer ${APPLICATION_TOKEN}`
-        }
-    });
-    const room = await createRoomResponse.json() as room;
-
-    return room.room_id;
-}
-
-const managementRoom = { id: createManagementRoom() };
+const { HOME_SERVER, APPLICATION_TOKEN, MANAGEMENT_ROOM_ID } = process.env
 
 export const storeItem = (item: item) => {
-    console.log("mgmtroom id", managementRoom.id);
     const txnId = uuidv4();
 
-    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/send/${item.type}/${txnId}?user_id=@space-tube-bot:${HOME_SERVER}`, {
+    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/send/${item.type}/${txnId}?user_id=@space-tube-bot:${HOME_SERVER}`, {
         method: "PUT",
         body: JSON.stringify(item),
         headers: {
@@ -81,8 +34,8 @@ export const storeItemShared = (sharedRoomId, item: item) => {
 }
 
 export const getItem = async (key: string, value: string, type: null | string = null) => {
-    console.log("mgmtroom id", managementRoom.id);
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
+    console.log("mgmtroom id", MANAGEMENT_ROOM_ID);
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=1000`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -107,7 +60,7 @@ export const getItem = async (key: string, value: string, type: null | string = 
 
 export const getAllItems = async (key, value, type) => {
 
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=1000`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -133,7 +86,7 @@ export const getAllItems = async (key, value, type) => {
 
 export const getItemIncludes = async (key, value) => {
 
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=1000`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -152,7 +105,7 @@ export const getItemIncludes = async (key, value) => {
 
 export const getAllItemIncludes = async (key, value) => {
 
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=1000`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`

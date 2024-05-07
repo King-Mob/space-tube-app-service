@@ -71,9 +71,12 @@ For a normal synapse instance add the path to `registration.yaml` to the [server
 `app_service_config_files: - /root/space-tube-app-service/registration.yaml`
 
 8. Set-up and restart your homeserver.
-9. Start the app service using `npm start`. To have it run indefinitely, you'll need a process runner like systemd or pm2. [SystemD](https://nodesource.com/blog/running-your-node-js-app-with-systemd-part-1/) is a standard linux way to run processes. [PM2](https://www.digitalocean.com/community/tutorials/how-to-use-pm2-to-setup-a-node-js-production-environment-on-an-ubuntu-vps) is an easy to use node solution.
+9. Build the app service using `npm run build-server`.
+10. Create the management room using `npm run setup`. Copy the room id e.g. `!someletters:domain.com`
+11. Paste the room id in the `.env` file under MANAGEMENT_ROOM_ID.
+12. Start the app service using `npm run build`. To have it run indefinitely, you'll need a process runner like systemd or pm2. [SystemD](https://nodesource.com/blog/running-your-node-js-app-with-systemd-part-1/) is a standard linux way to run processes. [PM2](https://www.digitalocean.com/community/tutorials/how-to-use-pm2-to-setup-a-node-js-production-environment-on-an-ubuntu-vps) is an easy to use node solution.
 
-10. Start talking to space tube
+13. Start talking to space tube
     invite `@space-tube-bot:<your domain>` to your chat e.g. @space-tube-bot:example.com
     `!spacetube echo <some test text>`
 
