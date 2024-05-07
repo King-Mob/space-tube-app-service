@@ -33,10 +33,6 @@ as.on("http-log", (event) => {
   console.log("http-log", event);
 });
 
-as.on("type:m.room.message", event => {
-  console.log(event);
-})
-
 as.on("event", (event) => {
   console.log("event received", event);
 
