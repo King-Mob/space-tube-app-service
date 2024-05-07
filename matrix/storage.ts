@@ -81,7 +81,7 @@ export const storeItemShared = (sharedRoomId, item: item) => {
 }
 
 export const getItem = async (key: string, value: string, type: null | string = null) => {
-
+    console.log("mgmtroom id", managementRoom.id);
     const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${managementRoom.id}/messages?limit=1000`, {
         headers: {
             'Content-Type': 'application/json',
