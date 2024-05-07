@@ -593,7 +593,7 @@ export const handleInvite = async (event) => {
 
         const tubeIntermediary = await createTubeIntermediary(event.room_id, invitedUser.content.roomId);
         invite(groupUser, tubeIntermediary);
-        invite(originalGroupUser, tubeIntermediary);
+        invite(originalGroupUser.content.user, tubeIntermediary);
 
         const leaveResult = await leaveRoom(invitedUser.content.user, event.room_id);
         const leave = await leaveResult.json();
