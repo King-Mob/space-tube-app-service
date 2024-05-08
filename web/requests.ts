@@ -142,7 +142,7 @@ export const getDisplayNameRequest = async (token: string) => {
 }
 
 export const changeNameRequest = async (token: string, name: string) => {
-  return fetch(`${URL}/api/groupser/?token=${token}`, {
+  return fetch(`${URL}/api/groupuser/?token=${token}`, {
     method: "PUT",
     body: JSON.stringify({ name }),
     headers: {
