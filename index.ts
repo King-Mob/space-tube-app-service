@@ -249,7 +249,7 @@ app.post("/api/invite/accept", async (req, res) => {
   } else res.send({ success: false, message: "No invite with that id found." });
 });
 
-app.post("/api/groupuser/create", async (req, res) => {
+app.post("/api/groupuser", async (req, res) => {
   const { groupName } = req.body;
 
   const groupUser = await createGroupUser(groupName);
@@ -259,6 +259,47 @@ app.post("/api/groupuser/create", async (req, res) => {
     groupId: groupUser.user_id
   });
 });
+
+app.get("/api/groupuser", async (req, res) => {
+  const { token } = req.query;
+
+  const groupUser = await getItem("editToken", token, "spacetube.group.user");
+
+  if (groupUser) {
+    res.send({ name: groupUser.content.name });
+  }
+  else {
+    res.send({ success: false, message: "No user with matching edit token" });
+  }
+})
+
+app.put("/api/groupuser", async (req, res) => {
+  const { token } = req.query;
+  const { name } = req.body;
+
+  const groupUser = await getItem("editToken", token, "spacetube.group.user");
+
+  if (groupUser) {
+    setDisplayName(groupUser.content.user, name);
+
+    const inviteUsers = await getAllItems("originalUserId", groupUser.content.user.user_id, "spacetube.group.invite");
+
+    inviteUsers.forEach(inviteUser => {
+      setDisplayName(inviteUser.content.user, `${name} (invite)`);
+    })
+
+    const cloneUsers = await getAllItems("originalUserId", groupUser.content.user.user_id, "spacetube.group.clone");
+
+    cloneUsers.forEach(cloneUser => {
+      setDisplayName(cloneUser.content.user, name);
+    })
+
+    res.send({ success: true });
+  }
+  else {
+    res.send({ success: false, message: "No user with matching edit token" });
+  }
+})
 
 if (process.env.DISCORD_TOKEN) {
   startDiscord(app);

@@ -95,7 +95,7 @@ export const createRoomInviteUser = async (name: string, groupUserId: string, ro
     roomId
   })
 
-  setDisplayName(user, name);
+  setDisplayName(user, `${name} (invite user)`);
 
   return user;
 }

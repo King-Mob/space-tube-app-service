@@ -18,7 +18,7 @@ export const getRoomRequest = async (user, matrixRoomId) => {
 
 export const registerRequest = async (linkToken, userName) => {
   return fetch(`${URL}/api/register`, {
-    method: "post",
+    method: "POST",
     body: JSON.stringify({ linkToken, userName }),
     headers: {
       "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export const createInviteRequest = async (
   contactMatrixId = null
 ) => {
   return fetch(`${URL}/api/invite/create`, {
-    method: "post",
+    method: "POST",
     body: JSON.stringify({ myMatrixId, groupName, contactMatrixId }),
     headers: {
       "Content-Type": "application/json",
@@ -81,7 +81,7 @@ export const createInviteRequest = async (
 
 export const acceptInviteRequest = async (invite, myMatrixId, groupName) => {
   return fetch(`${URL}/api/invite/accept`, {
-    method: "post",
+    method: "POST",
     body: JSON.stringify({ myMatrixId, groupName, invite }),
     headers: {
       "Content-Type": "application/json",
@@ -128,11 +128,25 @@ export const matrixRoomInviteRequest = async (user, inviteUserId, roomId) => {
 }
 
 export const createGroupUserRequest = async (groupName: string) => {
-  return fetch(`${URL}/api/groupuser/create`, {
-    method: "post",
+  return fetch(`${URL}/api/groupuser`, {
+    method: "POST",
     body: JSON.stringify({ groupName }),
     headers: {
       "Content-Type": "application/json",
     },
   });
 };
+
+export const getDisplayNameRequest = async (token: string) => {
+  return fetch(`${URL}/api/groupuser/?token=${token}`);
+}
+
+export const changeNameRequest = async (token: string, name: string) => {
+  return fetch(`${URL}/api/groupser/?token=${token}`, {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+}
