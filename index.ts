@@ -269,6 +269,8 @@ app.get("/api/groupuser", async (req, res) => {
     const inviteUser = await getItem("originalUserId", groupUser.content.user.user_id, "spacetube.group.invite");
     const name = await getDisplayNameAsUser(groupUser.content.user, inviteUser.content.roomId, groupUser.content.user.user_id);
 
+    console.log(groupUser, inviteUser, name);
+
     res.send({ name });
   }
   else {
