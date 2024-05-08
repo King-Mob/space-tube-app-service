@@ -11,4 +11,5 @@ export type event = {
     content: {
         [key: string]: any;
     }
+    [key: string]: any;
 }
