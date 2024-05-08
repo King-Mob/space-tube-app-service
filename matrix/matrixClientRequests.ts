@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 
+import { user } from "../types";
+
 const { HOME_SERVER, APPLICATION_TOKEN } = process.env;
 
 export const sendMessage = (roomId, message) => {
@@ -52,7 +54,7 @@ export const createRoom = (name: string = "no room name") => {
   );
 };
 
-export const getRoomState = (roomId, token: string | null) => {
+export const getRoomState = (roomId: string, token: string | null) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/state`,
     {
@@ -79,7 +81,7 @@ export const registerUser = (name: string) => {
   });
 };
 
-export const setDisplayName = (user, displayName: string) => {
+export const setDisplayName = (user: user, displayName: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/profile/${user.user_id}/displayname`,
     {
@@ -95,7 +97,7 @@ export const setDisplayName = (user, displayName: string) => {
   );
 };
 
-export const invite = (user, roomId) => {
+export const invite = (user: user, roomId: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@space-tube-bot:${HOME_SERVER}`,
     {
@@ -111,7 +113,7 @@ export const invite = (user, roomId) => {
   );
 };
 
-export const inviteAsUser = (inviter, invitee, roomId) => {
+export const inviteAsUser = (inviter: user, invitee: user, roomId: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite`,
     {
@@ -127,7 +129,7 @@ export const inviteAsUser = (inviter, invitee, roomId) => {
   );
 };
 
-export const join = (user, roomId) => {
+export const join = (user: user, roomId: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/join/${roomId}`,
     {
@@ -141,7 +143,7 @@ export const join = (user, roomId) => {
   );
 };
 
-export const joinAsSpaceTube = (roomId) => {
+export const joinAsSpaceTube = (roomId: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/join/${roomId}?user_id=@space-tube-bot:${HOME_SERVER}`,
     {
@@ -155,7 +157,7 @@ export const joinAsSpaceTube = (roomId) => {
   );
 };
 
-export const getRoomsList = async (user) => {
+export const getRoomsList = async (user: user) => {
   const response = await fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms`,
     {
@@ -170,7 +172,7 @@ export const getRoomsList = async (user) => {
   return response.json();
 };
 
-export const sync = async (user, nextBatch = null) => {
+export const sync = async (user: user, nextBatch = null) => {
   const response = await fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/sync?timeout=30000${nextBatch ? `&since=${nextBatch}` : ""
     }`,
@@ -186,7 +188,7 @@ export const sync = async (user, nextBatch = null) => {
   return response.json();
 };
 
-export const leaveRoom = async (user, roomId) => {
+export const leaveRoom = async (user: user, roomId: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/leave`,
     {

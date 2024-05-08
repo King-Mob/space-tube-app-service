@@ -1,4 +1,4 @@
-export type user = { user_id: string };
+export type user = { user_id: string, access_token: string };
 export type item = {
     type: string;
     [key: string]: any;

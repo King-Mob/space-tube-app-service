@@ -1,7 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
     item,
-    event
+    event,
+    user
 } from "../types.js";
 
 const { HOME_SERVER, APPLICATION_TOKEN, MANAGEMENT_ROOM_ID } = process.env
@@ -147,6 +148,23 @@ export const getDisplayName = async (sharedRoomId: string, userId: string) => {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
+        }
+    });
+    const eventsList = await response.json() as { chunk: event[] };
+
+    for (const event of eventsList.chunk) {
+        if (event.type === "m.room.member" && event.sender === userId && event.content.displayname)
+            return event.content.displayname;
+    }
+
+    return null;
+}
+
+export const getDisplayNameAsUser = async (user: user, sharedRoomId: string, userId: string) => {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/messages?limit=1000`, {
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${user.access_token}`
         }
     });
     const eventsList = await response.json() as { chunk: event[] };

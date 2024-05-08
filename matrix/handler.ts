@@ -10,6 +10,7 @@ import {
   storeItemShared,
   getDisplayName,
   getItemIncludes,
+  getDisplayNameAsUser,
 } from "./storage.js";
 import {
   sendMessage,
@@ -257,7 +258,7 @@ export const connectOtherInstance = async (
     const createdRoom = await createRoomResponse.json() as room;
     sharedTubeManagementRoom = createdRoom.room_id;
 
-    await invite({ user_id: otherInstance }, sharedTubeManagementRoom);
+    await invite({ user_id: otherInstance, access_token: "" }, sharedTubeManagementRoom);
     await storeItem({
       type: "spacetube.shared.management",
       sharedWithInstance: otherInstance,
@@ -278,7 +279,7 @@ export const connectOtherInstance = async (
     const createRoomResponse = await createRoom();
     const createdRoom = await createRoomResponse.json() as room;
 
-    await invite({ user_id: otherInstance }, createdRoom.room_id);
+    await invite({ user_id: otherInstance, access_token: "" }, createdRoom.room_id);
 
     storeItem({
       name: tubeName,
@@ -554,7 +555,7 @@ export const handleInvite = async (event) => {
       await join(invitedUser.content.user, event.room_id);
 
       if (invitedUser.type === "spacetube.group.user") {
-        const name = await getDisplayName(event.room_id, invitedUserId);
+        const name = await getDisplayNameAsUser(invitedUser.content.user, event.room_id, invitedUserId);
         const roomInviteUser = await createRoomInviteUser(name, invitedUserId, event.room_id);
         if (!spacetubeBotInvited) {
           const joinMessage = `Hello! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to connect them with this room.`
@@ -566,7 +567,7 @@ export const handleInvite = async (event) => {
       }
 
       if (invitedUser.type === "spacetube.group.invite") {
-        const cloneName = await getDisplayName(invitedUser.content.roomId, invitedUser.content.originalUserId);
+        const cloneName = await getDisplayNameAsUser(invitedUser.content.user, invitedUser.content.roomId, invitedUser.content.originalUserId);
         const groupCloneUser = await createGroupCloneUser(cloneName, invitedUser.content.originalUserId, event.room_id);
         inviteAsUser(invitedUser.content.user, groupCloneUser, event.room_id);
 
@@ -624,11 +625,11 @@ export const createRoomsAndTube = async (invitation) => {
 
   const createFromRoomResponse = await createRoom(`to-${to.groupName}`);
   const fromRoom: room = await createFromRoomResponse.json() as room;
-  invite({ user_id: from.userId }, fromRoom.room_id);
+  invite(from, fromRoom.room_id);
 
   const createToRoomResponse = await createRoom(`to-${from.groupName}`);
   const toRoom: room = await createToRoomResponse.json() as room;
-  invite({ user_id: to.userId }, toRoom.room_id);
+  invite(to, toRoom.room_id);
 
   const tubeIntermediary = await connectRooms(fromRoom.room_id, toRoom.room_id);
 
