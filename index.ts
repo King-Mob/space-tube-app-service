@@ -20,7 +20,7 @@ import {
   createGroupUser
 } from "./matrix/handler.js";
 import commands from "./matrix/commands.js";
-import { getItem, getItemIncludes, getAllItems, storeItem } from "./matrix/storage.js";
+import { getItem, getItemIncludes, getAllItems, storeItem, getDisplayName } from "./matrix/storage.js";
 import { startDiscord } from "./discord/index.js";
 import { startWhatsapp } from "./whatsapp/index.js";
 
@@ -266,7 +266,10 @@ app.get("/api/groupuser", async (req, res) => {
   const groupUser = await getItem("editToken", token, "spacetube.group.user");
 
   if (groupUser) {
-    res.send({ name: groupUser.content.name });
+    const inviteUser = await getItem("originalUserId", groupUser.content.user.user_id, "spacetube.group.invite");
+    const name = await getDisplayName(inviteUser.content.roomId, groupUser.content.user.user_id);
+
+    res.send({ name });
   }
   else {
     res.send({ success: false, message: "No user with matching edit token" });
