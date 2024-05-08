@@ -252,7 +252,7 @@ app.post("/api/invite/accept", async (req, res) => {
 app.post("/api/groupuser/create", async (req, res) => {
   const { groupName } = req.body;
 
-  const groupUser = await createGroupUser(groupName)
+  const groupUser = await createGroupUser(groupName);
 
   res.send({
     success: true,

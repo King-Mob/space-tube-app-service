@@ -36,8 +36,6 @@ export const getRoomName = async (roomId: string, token: string | null = null) =
   const roomStateResponse = await getRoomState(roomId, token);
   const roomState = await roomStateResponse.json() as event[];
 
-  console.log(roomState);
-
   let roomName = "default";
 
   for (const roomEvent of roomState) {
@@ -56,7 +54,8 @@ export const createGroupUser = async (name: string) => {
     type: "spacetube.group.user",
     userId: user.user_id,
     user,
-    name: name
+    name: name,
+    editToken: uuidv4()
   })
 
   setDisplayName(user, name);
@@ -563,6 +562,9 @@ export const handleInvite = async (event) => {
         if (humanInviter) {
           const joinMessage = `Hello! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to connect them with this room.`
           sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
+          const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${invitedUser.content.editToken}`;
+          const editMessage = `Use ${editLink} to edit your display name`;
+          sendMessageAsUser(invitedUser.content.user, event.room_id, editMessage);
         }
       }
 
