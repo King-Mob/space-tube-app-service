@@ -155,7 +155,7 @@ export const getDisplayName = async (sharedRoomId: string, userId: string) => {
     let displayName = null;
 
     for (const event of eventsList.chunk) {
-        if (event.type === "m.room.member" && event.user_id === userId && event.content.displayname)
+        if (event.type === "m.room.member" && event.user_id === userId && event.content.displayname && event.content.membership === "join")
             displayName = event.content.displayname;
     }
 
@@ -176,7 +176,7 @@ export const getDisplayNameAsUser = async (user: user, sharedRoomId: string, use
     console.log(eventsList.chunk)
 
     for (const event of eventsList.chunk) {
-        if (event.type === "m.room.member" && event.user_id === userId && event.content.displayname)
+        if (event.type === "m.room.member" && event.user_id === userId && event.content.displayname && event.content.membership === "join")
             displayName = event.content.displayname;
     }
 
