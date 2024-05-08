@@ -318,9 +318,7 @@ export const handleRemoteOpen = async (event) => {
 };
 
 const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
-  const {
-    content: { name },
-  } = await getItem("userId", event.sender, "spacetube.group.user");
+  const name = await getDisplayName(event.room_id, event.sender);
 
   const clones = await getAllItems("originalUserId", event.sender, "spacetube.group.clone");
 
@@ -351,9 +349,7 @@ const handleMessageLocalTube = async (tubeIntermediary, event, message) => {
     cloneUser.roomId = cloneUserRoomId;
 
     const receiverInviteUser = await getItem("roomId", cloneUserRoomId, "spacetube.group.invite");
-
     const groupUser = await getItem("userId", receiverInviteUser.content.originalUserId);
-
 
     await inviteAsUser(groupUser.content.user, cloneUser, cloneUserRoomId);
     await join(cloneUser, cloneUserRoomId);
@@ -552,14 +548,15 @@ export const handleInvite = async (event) => {
     const invitedUserId = event.state_key;
     const invitedUser = await getItem("userId", invitedUserId);
 
-    const humanInviter = !event.sender.includes("@_space-tube") && !event.sender.includes("@space-tube");
+    const spacetubeBotInvited = event.sender.includes("@space-tube-bot");
 
     if (invitedUser) {
       await join(invitedUser.content.user, event.room_id);
 
       if (invitedUser.type === "spacetube.group.user") {
-        const roomInviteUser = await createRoomInviteUser(invitedUser.content.name, invitedUserId, event.room_id);
-        if (humanInviter) {
+        const name = await getDisplayName(event.room_id, invitedUserId);
+        const roomInviteUser = await createRoomInviteUser(name, invitedUserId, event.room_id);
+        if (!spacetubeBotInvited) {
           const joinMessage = `Hello! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to connect them with this room.`
           sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
           const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${invitedUser.content.editToken}`;
@@ -569,7 +566,8 @@ export const handleInvite = async (event) => {
       }
 
       if (invitedUser.type === "spacetube.group.invite") {
-        const groupCloneUser = await createGroupCloneUser(invitedUser.content.originalName, invitedUser.content.originalUserId, event.room_id);
+        const cloneName = await getDisplayName(invitedUser.content.roomId, invitedUser.content.originalUserId);
+        const groupCloneUser = await createGroupCloneUser(cloneName, invitedUser.content.originalUserId, event.room_id);
         inviteAsUser(invitedUser.content.user, groupCloneUser, event.room_id);
 
         const groupName = await getRoomName(event.room_id, invitedUser.content.user.access_token);
