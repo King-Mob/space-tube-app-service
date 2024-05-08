@@ -169,10 +169,14 @@ export const getDisplayNameAsUser = async (user: user, sharedRoomId: string, use
     });
     const eventsList = await response.json() as { chunk: event[] };
 
+    console.log(eventsList.chunk);
+
+    let displayName = null;
+
     for (const event of eventsList.chunk) {
         if (event.type === "m.room.member" && event.sender === userId && event.content.displayname)
-            return event.content.displayname;
+            displayName = event.content.displayname;
     }
 
-    return null;
+    return displayName;
 }
