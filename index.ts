@@ -1,7 +1,6 @@
 import "dotenv/config";
 import express from "express";
 import { AppService, AppserviceHttpError } from "matrix-appservice";
-import { v4 as uuidv4 } from "uuid";
 import {
   user
 } from "./types.js";
@@ -16,8 +15,9 @@ import {
   handleMessage,
   handleInvite,
   handleRemoteOpen,
-  createRoomsAndTube,
-  createGroupUser
+  createGroupUser,
+  createInvitationRoom,
+  createInvitationReceivedRoom
 } from "./matrix/handler.js";
 import commands from "./matrix/commands.js";
 import { getItem, getItemIncludes, getAllItems, storeItem, getDisplayNameAsUser } from "./matrix/storage.js";
@@ -202,51 +202,56 @@ app.get("/api/tubeInfo/userIds", async (req, res) => {
 })
 
 app.get("/api/invite", async (req, res) => {
-  const { inviteId } = req.query;
+  const { inviteUserId } = req.query;
 
-  const invitation = await getItem("inviteId", inviteId);
+  console.log(inviteUserId);
+
+  const invitation = await getItem("inviteUserId", inviteUserId);
+
+  console.log(invitation)
 
   if (invitation) res.send({ success: true, invitation });
   else res.send({ success: false, message: "No invite with that id found." });
 });
 
 app.post("/api/invite/create", async (req, res) => {
-  const { myMatrixId, groupName, contactMatrixId } = req.body;
+  const { name, groupUserId, groupName } = req.body;
 
-  const inviteId = uuidv4();
+  const { inviteUser, roomId } = await createInvitationRoom(groupUserId, groupName);
+  const { linkToken } = await commands.link(roomId, name);
 
   storeItem({
     type: "spacetube.create.invite",
     from: {
-      userId: myMatrixId,
-      groupName,
+      name,
+      groupUserId,
     },
-    to: {
-      userId: contactMatrixId,
-    },
-    inviteId,
+    inviteUserId: inviteUser.user_id,
   });
 
   const { URL } = process.env;
 
   res.send({
     success: true,
-    link: `${URL}/?invite=${inviteId}`,
+    inviteLink: `${URL}/?invite=${inviteUser.user_id}`,
+    linkToken
   });
 });
 
 app.post("/api/invite/accept", async (req, res) => {
-  const { myMatrixId, groupName, invite } = req.body;
+  const { myName, groupName, inviteUserId } = req.body;
 
-  const invitation = await getItem("inviteId", invite);
+  const invitation = await getItem("inviteUserId", inviteUserId);
 
   if (invitation) {
-    invitation.content.to.userId = myMatrixId;
-    invitation.content.to.groupName = groupName;
-    const { toRoom } = await createRoomsAndTube(invitation);
-    const { linkToken } = await commands.link(toRoom.room_id, myMatrixId);
+    const toRoom = await createInvitationReceivedRoom(groupName, invitation.content.inviteUserId);
+
+    const { linkToken } = await commands.link(toRoom.room_id, myName);
     res.send({ success: true, invitation, linkToken });
-  } else res.send({ success: false, message: "No invite with that id found." });
+  }
+  else {
+    res.send({ success: false, message: "No invite with that id found." });
+  }
 });
 
 app.post("/api/groupuser", async (req, res) => {

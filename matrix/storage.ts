@@ -36,7 +36,7 @@ export const storeItemShared = (sharedRoomId, item: item) => {
 
 export const getItem = async (key: string, value: string, type: null | string = null) => {
     console.log("mgmtroom id", MANAGEMENT_ROOM_ID);
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=1000`, {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=10000&dir=b`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -61,7 +61,7 @@ export const getItem = async (key: string, value: string, type: null | string = 
 
 export const getAllItems = async (key, value, type) => {
 
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=1000`, {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=10000&dir=b`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -86,8 +86,7 @@ export const getAllItems = async (key, value, type) => {
 }
 
 export const getItemIncludes = async (key, value) => {
-
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=1000`, {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=10000&dir=b`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -106,7 +105,7 @@ export const getItemIncludes = async (key, value) => {
 
 export const getAllItemIncludes = async (key, value) => {
 
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=1000`, {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=10000&dir=b`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -144,7 +143,7 @@ export const getItemShared = async (sharedRoomId, key, value) => {
 }
 
 export const getDisplayName = async (sharedRoomId: string, userId: string) => {
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/messages?limit=1000`, {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/messages?limit=10000`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -172,8 +171,6 @@ export const getDisplayNameAsUser = async (user: user, sharedRoomId: string, use
     const eventsList = await response.json() as { chunk: event[] };
 
     let displayName = null;
-
-    console.log(eventsList.chunk)
 
     for (const event of eventsList.chunk) {
         if (event.type === "m.room.member" && event.user_id === userId && event.content.displayname && event.content.membership === "join")

@@ -30,6 +30,7 @@ import commands from "./commands.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendMessageDiscord } from "../discord/index.js";
 import { sendMessageWhatsapp } from "../whatsapp/index.js";
+import { group } from "console";
 
 const { HOME_SERVER } = process.env;
 
@@ -576,8 +577,6 @@ export const handleInvite = async (event) => {
         const groupUser = await createGroupUser(groupName);
         inviteAsUser(invitedUser.content.user, groupUser, event.room_id);
 
-
-
         const tubeIntermediary = await createTubeIntermediary(event.room_id, invitedUser.content.roomId);
         invite(groupUser, tubeIntermediary);
         invite(originalGroupUser.content.user, tubeIntermediary);
@@ -619,6 +618,25 @@ export const handleInvite = async (event) => {
   }
 };
 
+export const createInvitationRoom = async (groupUserId: string, groupName: string) => {
+  const createFromRoomResponse = await createRoom(`to-other-group`);
+  const room: room = await createFromRoomResponse.json() as room;
+  invite({ user_id: groupUserId, access_token: "" }, room.room_id);
+
+  const inviteUser = await createRoomInviteUser(groupName, groupUserId, room.room_id);
+
+  return { inviteUser, roomId: room.room_id };
+}
+
+export const createInvitationReceivedRoom = async (groupName: string, inviteUserId: string) => {
+  const createToRoomResponse = await createRoom(groupName);
+  const toRoom: room = await createToRoomResponse.json() as room;
+  invite({ user_id: inviteUserId, access_token: "" }, toRoom.room_id);
+
+  return toRoom;
+}
+
+/*
 export const createRoomsAndTube = async (invitation) => {
   const {
     content: { from, to },
@@ -639,3 +657,4 @@ export const createRoomsAndTube = async (invitation) => {
 
   return { toRoom };
 };
+*/

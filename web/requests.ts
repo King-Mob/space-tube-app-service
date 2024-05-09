@@ -61,28 +61,24 @@ export const forwardMessageRequest = async (matrixRoom, txnId, event, user) => {
   );
 };
 
-export const getInviteRequest = async (inviteId: string) => {
-  return fetch(`${URL}/api/invite?inviteId=${inviteId}`);
+export const getInviteRequest = async (inviteUserId: string) => {
+  return fetch(`${URL}/api/invite?inviteUserId=${inviteUserId}`);
 };
 
-export const createInviteRequest = async (
-  myMatrixId,
-  groupName,
-  contactMatrixId = null
-) => {
+export const createInviteRequest = async (name: string, groupUserId: string, groupName: string) => {
   return fetch(`${URL}/api/invite/create`, {
     method: "POST",
-    body: JSON.stringify({ myMatrixId, groupName, contactMatrixId }),
+    body: JSON.stringify({ name, groupUserId, groupName }),
     headers: {
       "Content-Type": "application/json",
     },
   });
 };
 
-export const acceptInviteRequest = async (invite, myMatrixId, groupName) => {
+export const acceptInviteRequest = async (inviteUserId, myName: string, groupName: string) => {
   return fetch(`${URL}/api/invite/accept`, {
     method: "POST",
-    body: JSON.stringify({ myMatrixId, groupName, invite }),
+    body: JSON.stringify({ myName, groupName, inviteUserId }),
     headers: {
       "Content-Type": "application/json",
     },

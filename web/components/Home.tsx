@@ -27,12 +27,21 @@ const GroupUserCreate = () => {
 
   return (
     <>
+      <h2>Create a group user</h2>
       {inProgress ? (
         <p>Creating group user...</p>
       ) : created ? (
-        <p>
-          Your group user has been created. Invite {groupMatrixId} to your chat.
-        </p>
+        <>
+          <p>
+            Your group user has been created. To use spacetube on Matrix, invite{" "}
+            <a>{groupMatrixId}</a>to your chat.
+          </p>
+          <p>
+            Otherwise, to continue on web, enter your name and we'll create a
+            web invite.
+          </p>
+          {<InviteCreate groupUserId={groupMatrixId} groupName={groupName} />}
+        </>
       ) : (
         <>
           <input
@@ -40,6 +49,9 @@ const GroupUserCreate = () => {
             placeholder="Group Name"
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") createUser();
+            }}
           ></input>
           <button onClick={createUser} disabled={!groupName}>
             Create
@@ -50,22 +62,21 @@ const GroupUserCreate = () => {
   );
 };
 
-const InviteCreate = () => {
+const InviteCreate = ({ groupUserId, groupName }) => {
   const [submitted, setSubmitted] = useState(false);
   const [link, setLink] = useState("");
-  const [myMatrixId, setMyMatrixId] = useState("");
-  const [myGroupName, setMyGroupName] = useState("");
-  const [contactMatrixId, setContactMatrixId] = useState("");
+  const [linkToken, setLinkToken] = useState("");
+  const [myName, setMyName] = useState("");
   const [copied, setCopied] = useState(false);
 
   const create = () => {
-    console.log(myMatrixId, myGroupName, contactMatrixId);
     setSubmitted(true);
-    createInviteRequest(myMatrixId, myGroupName, contactMatrixId)
+    createInviteRequest(myName, groupUserId, groupName)
       .then((response) => response.json())
       .then((result) => {
-        if (result.link) {
-          setLink(result.link);
+        if (result.inviteLink) {
+          setLink(result.inviteLink);
+          setLinkToken(result.linkToken);
         }
       });
   };
@@ -78,38 +89,20 @@ const InviteCreate = () => {
   if (!submitted)
     return (
       <>
-        <label htmlFor="myMatrixId">My Matrix Id*</label>
+        <label htmlFor="myName">My Name</label>
         <input
-          id="myMatrixId"
+          id="myName"
           className="home-input"
           type="text"
-          placeholder="my matrix user id"
-          value={myMatrixId}
-          onChange={(e) => setMyMatrixId(e.target.value)}
-        ></input>
-        <label htmlFor="myGroupName">My Group Name*</label>
-        <input
-          id="myGroupName"
-          className="home-input"
-          type="text"
-          placeholder="my group's name"
-          value={myGroupName}
-          onChange={(e) => setMyGroupName(e.target.value)}
-        ></input>
-        <label htmlFor="contactMatrixId">Contact's Matrix Id (optional)</label>
-        <input
-          id="contactMatrixId"
-          className="home-input"
-          type="text"
-          placeholder="my contact's matrix user id (optional)"
-          value={contactMatrixId}
-          onChange={(e) => setContactMatrixId(e.target.value)}
+          placeholder="my name"
+          value={myName}
+          onChange={(e) => setMyName(e.target.value)}
         ></input>
         <button
           id="create-button"
           className="home-button"
           onClick={create}
-          disabled={!myMatrixId || !myGroupName}
+          disabled={!myName}
         >
           Create
         </button>
@@ -134,14 +127,18 @@ const InviteCreate = () => {
           Copy link
         </button>
         {copied && <p>Copied!</p>}
+        <p>
+          Use this link to view the room once they've accepted the invite:{" "}
+          <a href={`/?linkToken=${linkToken}&name=${myName}`}>view room</a>
+        </p>
       </>
     );
 };
 
 const InviteAccept = ({ invite }) => {
-  const [myMatrixId, setMyMatrixId] = useState("");
+  const [myName, setMyName] = useState("");
   const [myGroupName, setMyGroupName] = useState("");
-  const [contactMatrixId, setContactMatrixId] = useState("");
+  const [contactName, setContactName] = useState("");
   const [contactGroupName, setContactGroupName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [accepted, setAccepted] = useState(false);
@@ -153,9 +150,8 @@ const InviteAccept = ({ invite }) => {
       .then((result) => {
         if (result.success) {
           console.log(result);
-          setContactMatrixId(result.invitation.content.from.userId);
+          setContactName(result.invitation.content.from.name);
           setContactGroupName(result.invitation.content.from.groupName);
-          setMyMatrixId(result.invitation.content.to.userId);
         } else {
           setErrorMessage(result.message);
         }
@@ -163,9 +159,9 @@ const InviteAccept = ({ invite }) => {
   }, []);
 
   const accept = () => {
-    if (myMatrixId && myGroupName) {
+    if (myName && myGroupName) {
       setAccepted(true);
-      acceptInviteRequest(invite, myMatrixId, myGroupName)
+      acceptInviteRequest(invite, myName, myGroupName)
         .then((res) => res.json())
         .then((result) => {
           console.log(result);
@@ -176,10 +172,6 @@ const InviteAccept = ({ invite }) => {
     }
   };
 
-  const justName = (matrixId) => {
-    return matrixId.split("@")[1].split(":")[0];
-  };
-
   return (
     <div>
       {errorMessage ? (
@@ -188,9 +180,7 @@ const InviteAccept = ({ invite }) => {
         linkToken ? (
           <meta
             http-equiv="Refresh"
-            content={`0; url='/?linkToken=${linkToken}&name=${justName(
-              myMatrixId
-            )}'`}
+            content={`0; url='/?linkToken=${linkToken}&name=${myName}'`}
           />
         ) : (
           <>
@@ -203,20 +193,20 @@ const InviteAccept = ({ invite }) => {
       ) : (
         <>
           <p>
-            {contactMatrixId} is inviting you to create a spacetube, connecting{" "}
+            {contactName} is inviting you to create a spacetube, connecting{" "}
             {contactGroupName} with your group.
           </p>
-          <p>Enter your matrix id and your group name below to accept</p>
-          <label htmlFor="myMatrixId">My Matrix Id*</label>
+          <p>Enter your name and your group name below to accept</p>
+          <label htmlFor="myName">My Name</label>
           <input
-            id="myMatrixId"
+            id="myName"
             className="home-input"
             type="text"
-            placeholder="my matrix user id"
-            value={myMatrixId}
-            onChange={(e) => setMyMatrixId(e.target.value)}
+            placeholder="my name"
+            value={myName}
+            onChange={(e) => setMyName(e.target.value)}
           ></input>
-          <label htmlFor="myGroupName">My Group Name*</label>
+          <label htmlFor="myGroupName">My Group Name</label>
           <input
             id="myGroupName"
             className="home-input"
@@ -225,7 +215,11 @@ const InviteAccept = ({ invite }) => {
             value={myGroupName}
             onChange={(e) => setMyGroupName(e.target.value)}
           ></input>
-          <button onClick={accept} className="home-button">
+          <button
+            onClick={accept}
+            className="home-button"
+            disabled={!myName || !myGroupName}
+          >
             Accept Invite
           </button>
         </>
@@ -252,12 +246,7 @@ const Home = ({ storedLinkTokens, invite }) => {
         </div>
       )}
       <div className="form-container">
-        <h2>Create a group user</h2>
-        <GroupUserCreate />
-      </div>
-      <div className="form-container">
-        <h2>Create a tube</h2>
-        {invite ? <InviteAccept invite={invite} /> : <InviteCreate />}
+        {invite ? <InviteAccept invite={invite} /> : <GroupUserCreate />}
       </div>
     </div>
   );
