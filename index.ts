@@ -208,11 +208,7 @@ app.get("/api/tubeInfo/userIds", async (req, res) => {
 app.get("/api/invite", async (req, res) => {
   const { inviteUserId } = req.query;
 
-  console.log(inviteUserId);
-
   const invitation = await getItem("inviteUserId", inviteUserId);
-
-  console.log(invitation)
 
   if (invitation) res.send({ success: true, invitation });
   else res.send({ success: false, message: "No invite with that id found." });
@@ -300,8 +296,6 @@ app.get("/api/groupuser/picture", async (req, res) => {
     const imageResponse = await getImage(serverName, mediaId);
     const image = await imageResponse.blob();
 
-    console.log(image)
-
     res.type(image.type)
     image.arrayBuffer().then((buf) => {
       res.send(Buffer.from(buf))
@@ -326,11 +320,11 @@ app.put("/api/groupuser", imageUpload, async (req, res) => {
     if (req.files) {
       if (req.files.profilePicture) {
         const profilePicture = req.files.profilePicture[0];
-        const fileName = profilePicture.filename;
-        const filePath = path.resolve(`./uploads/${fileName}`);
+        const { filename, originalname } = profilePicture;
+        const filePath = path.resolve(`./uploads/${filename}`);
 
         fs.readFile(filePath, async (err, data) => {
-          const imageResponse = await uploadImage(fileName, data);
+          const imageResponse = await uploadImage(originalname, data);
           const { content_uri } = await imageResponse.json();
 
           setProfilePicture(groupUser.content.user, content_uri);

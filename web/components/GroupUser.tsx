@@ -37,6 +37,8 @@ const GroupUser = ({ token }) => {
   }, []);
 
   const update = async () => {
+    console.log(profilePicture);
+
     await changeGroupUserRequest(token, { displayName, profilePicture });
     refresh();
   };

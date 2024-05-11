@@ -219,12 +219,14 @@ export const leaveRoom = async (user: user, roomId: string) => {
 }
 
 export const uploadImage = async (fileName: string, image) => {
-  return fetch(`https://matrix.${HOME_SERVER}/_matrix/media/v3/upload?Content-Type=image&filename=${fileName}`,
+  const fileExtension = fileName.split(".")[1];
+
+  return fetch(`https://matrix.${HOME_SERVER}/_matrix/media/v3/upload?filename=${fileName}`,
     {
       method: "POST",
       body: image,
       headers: {
-        "Content-Type": "application/octet-stream",
+        "Content-Type": `image/${fileExtension}`,
         Authorization: `Bearer ${APPLICATION_TOKEN}`
       },
     })
