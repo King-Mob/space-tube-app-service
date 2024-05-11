@@ -188,6 +188,8 @@ app.get("/api/tubeInfo/userIds", async (req, res) => {
 
     const groupUser = await getItem("userId", inviteUser.content.originalUserId, "spacetube.group.user");
 
+    console.log(groupUser)
+
     res.send({
       success: true,
       tubeUserIds: [groupUser.content.user_id, ...cloneIds]
