@@ -192,7 +192,7 @@ app.get("/api/tubeInfo/userIds", async (req, res) => {
 
     res.send({
       success: true,
-      tubeUserIds: [groupUser.content.user_id, ...cloneIds]
+      tubeUserIds: [groupUser.content.userId, ...cloneIds]
     });
   } else {
     res.send({
