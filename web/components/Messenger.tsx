@@ -279,12 +279,11 @@ const Messenger = ({ linkToken, userName }) => {
           </h1>
           <Invite user={user} roomId={matrixRoomId} />
         </div>
-
         <div
           id="matrix-room-events-container"
           className="room-events-container"
         >
-          {matrixRoomEvents}
+          {tubeUserIds && matrixRoomEvents}
           <div ref={matrixMessageEnd} />
         </div>
         <div id="new-message-container">

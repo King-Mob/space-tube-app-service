@@ -179,16 +179,14 @@ app.get("/api/tubeInfo/userIds", async (req, res) => {
   if (linkEvent) {
     const matrixRoomId = linkEvent.content.roomId;
 
-    const {
-      content: { user },
-    } = await getItem("userRoomId", matrixRoomId, "spacetube.user");
-
     const cloneUsers = await getAllItems("roomId", matrixRoomId, "spacetube.group.clone");
     const cloneIds = cloneUsers.map(cloneUser => cloneUser.content.userId);
 
+    const groupUser = await getItem("userId", cloneUsers[0].content.originalUserId, "spacetube.group.user");
+
     res.send({
       success: true,
-      tubeUserIds: [user.user_id, ...cloneIds]
+      tubeUserIds: [groupUser.content.user_id, ...cloneIds]
     });
   } else {
     res.send({
