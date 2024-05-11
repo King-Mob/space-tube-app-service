@@ -134,15 +134,23 @@ export const createGroupUserRequest = async (groupName: string) => {
 };
 
 export const getDisplayNameRequest = async (token: string) => {
-  return fetch(`${URL}/api/groupuser/?token=${token}`);
+  return fetch(`${URL}/api/groupuser/name?token=${token}`);
 }
 
-export const changeNameRequest = async (token: string, name: string) => {
+export const getProfilePictureRequest = async (token: string) => {
+  return fetch(`${URL}/api/groupuser/picture?token=${token}`);
+}
+
+export const changeGroupUserRequest = async (token: string, groupUserInfo: { displayName: string, profilePicture: File }) => {
+  const body = new FormData();
+
+  body.append("profilePicture", groupUserInfo.profilePicture);
+  body.append("displayName", groupUserInfo.displayName);
+
+  console.log(body)
+
   return fetch(`${URL}/api/groupuser/?token=${token}`, {
     method: "PUT",
-    body: JSON.stringify({ name }),
-    headers: {
-      "Content-Type": "application/json",
-    },
+    body
   })
 }

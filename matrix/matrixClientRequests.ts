@@ -97,6 +97,22 @@ export const setDisplayName = (user: user, displayName: string) => {
   );
 };
 
+export const setProfilePicture = (user: user, avatar_url: string) => {
+  return fetch(
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/profile/${user.user_id}/avatar_url`,
+    {
+      method: "PUT",
+      body: JSON.stringify({
+        avatar_url,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.access_token}`,
+      },
+    }
+  );
+};
+
 export const invite = (user: user, roomId: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@space-tube-bot:${HOME_SERVER}`,
@@ -200,4 +216,32 @@ export const leaveRoom = async (user: user, roomId: string) => {
       },
     }
   );
+}
+
+export const uploadImage = async (fileName: string, image) => {
+  return fetch(`https://matrix.${HOME_SERVER}/_matrix/media/v3/upload?Content-Type=image&filename=${fileName}`,
+    {
+      method: "POST",
+      body: image,
+      headers: {
+        "Content-Type": "application/octet-stream",
+        Authorization: `Bearer ${APPLICATION_TOKEN}`
+      },
+    })
+}
+
+export const getProfile = async (userId: string) => {
+  return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/profile/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${APPLICATION_TOKEN}`
+    }
+  })
+}
+
+export const getImage = async (serverName: string, mediaId: string) => {
+  return fetch(`https://matrix.${HOME_SERVER}/_matrix/media/v3/download/${serverName}/${mediaId}`, {
+    headers: {
+      Authorization: `Bearer ${APPLICATION_TOKEN}`
+    }
+  })
 }

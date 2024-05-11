@@ -5,3 +5,4 @@ constants.js
 /dist-web
 /dist-server
 /.parcel-cache
+/uploads

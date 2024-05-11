@@ -1,5 +1,8 @@
 import "dotenv/config";
 import express from "express";
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
 import { AppService, AppserviceHttpError } from "matrix-appservice";
 import {
   user
@@ -10,6 +13,10 @@ import {
   join,
   setDisplayName,
   sync,
+  uploadImage,
+  setProfilePicture,
+  getProfile,
+  getImage
 } from "./matrix/matrixClientRequests.js";
 import {
   handleMessage,
@@ -17,8 +24,7 @@ import {
   handleRemoteOpen,
   createGroupUser,
   createInvitationRoom,
-  createInvitationReceivedRoom,
-  createGroupCloneUser
+  createInvitationReceivedRoom
 } from "./matrix/handler.js";
 import commands from "./matrix/commands.js";
 import { getItem, getItemIncludes, getAllItems, storeItem, getDisplayNameAsUser } from "./matrix/storage.js";
@@ -75,7 +81,9 @@ asApp.listen(8133);
 //spacetube service on 8134
 
 const app = express();
+const upload = multer({ dest: 'uploads/' })
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("dist-web"));
 
 app.post("/api/register", async (req, res) => {
@@ -261,46 +269,93 @@ app.post("/api/groupuser", async (req, res) => {
   });
 });
 
-app.get("/api/groupuser", async (req, res) => {
+app.get("/api/groupuser/name", async (req, res) => {
   const { token } = req.query;
 
   const groupUser = await getItem("editToken", token, "spacetube.group.user");
 
   if (groupUser) {
-    const inviteUser = await getItem("originalUserId", groupUser.content.user.user_id, "spacetube.group.invite");
-    const name = await getDisplayNameAsUser(groupUser.content.user, inviteUser.content.roomId, groupUser.content.user.user_id);
+    const profileResponse = await getProfile(groupUser.content.userId);
+    const profile = await profileResponse.json();
 
-    console.log(groupUser, inviteUser, name);
-
-    res.send({ name });
+    res.send({ name: profile.displayname });
   }
   else {
     res.send({ success: false, message: "No user with matching edit token" });
   }
 })
 
-app.put("/api/groupuser", async (req, res) => {
+app.get("/api/groupuser/picture", async (req, res) => {
   const { token } = req.query;
-  const { name } = req.body;
 
   const groupUser = await getItem("editToken", token, "spacetube.group.user");
 
   if (groupUser) {
-    setDisplayName(groupUser.content.user, name);
+    const profileResponse = await getProfile(groupUser.content.userId);
+    const profile = await profileResponse.json();
+
+    const serverName = profile.avatar_url.split("/")[2];
+    const mediaId = profile.avatar_url.split("/")[3];
+
+    const imageResponse = await getImage(serverName, mediaId);
+    const image = await imageResponse.blob();
+
+    console.log(image)
+
+    res.type(image.type)
+    image.arrayBuffer().then((buf) => {
+      res.send(Buffer.from(buf))
+    })
+  }
+  else {
+    res.send({ success: false, message: "No user with matching edit token" });
+  }
+})
+
+const imageUpload = upload.fields([{ name: 'displayName', maxCount: 1 }, { name: 'profilePicture', maxCount: 1 }])
+app.put("/api/groupuser", imageUpload, async (req, res) => {
+  const { token } = req.query;
+
+  const groupUser = await getItem("editToken", token, "spacetube.group.user");
+
+  if (groupUser) {
 
     const inviteUsers = await getAllItems("originalUserId", groupUser.content.user.user_id, "spacetube.group.invite");
-
-    inviteUsers.forEach(inviteUser => {
-      setDisplayName(inviteUser.content.user, `${name} (invite)`);
-    })
-
     const cloneUsers = await getAllItems("originalUserId", groupUser.content.user.user_id, "spacetube.group.clone");
 
-    cloneUsers.forEach(cloneUser => {
-      setDisplayName(cloneUser.content.user, name);
-    })
+    if (req.files) {
+      if (req.files.profilePicture) {
+        const profilePicture = req.files.profilePicture[0];
+        const fileName = profilePicture.filename;
+        const filePath = path.resolve(`./uploads/${fileName}`);
 
-    res.send({ success: true });
+        fs.readFile(filePath, async (err, data) => {
+          const imageResponse = await uploadImage(fileName, data);
+          const { content_uri } = await imageResponse.json();
+
+          setProfilePicture(groupUser.content.user, content_uri);
+          inviteUsers.forEach(inviteUser => {
+            setProfilePicture(inviteUser.content.user, content_uri);
+          })
+          cloneUsers.forEach(cloneUser => {
+            setProfilePicture(cloneUser.content.user, content_uri);
+          })
+        })
+      }
+      if (req.body.displayName) {
+        const displayName = req.body.displayName;
+
+        setDisplayName(groupUser.content.user, displayName);
+        inviteUsers.forEach(inviteUser => {
+          setDisplayName(inviteUser.content.user, `${displayName} (invite)`);
+        })
+        cloneUsers.forEach(cloneUser => {
+          setDisplayName(cloneUser.content.user, displayName);
+        })
+      }
+
+      res.send({ success: true });
+    }
   }
   else {
     res.send({ success: false, message: "No user with matching edit token" });
