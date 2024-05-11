@@ -390,27 +390,10 @@ export const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
 
   const message = event.content.body;
 
-  const tubeUser = await getItem("userRoomId", event.room_id, "spacetube.user");
+  const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
+  const groupUser = await getItem("originalUserId", inviteUser.content.originalUserId, "spacetube.group.user");
 
-  if (tubeUser) {
-    user = tubeUser.content.user;
-
-    const roomsList = await getRoomsList(user) as { joined_rooms: string[] };
-    if (!roomsList.joined_rooms.includes(tubeIntermediary)) {
-      await invite(user, tubeIntermediary);
-      await join(user, tubeIntermediary);
-    }
-  } else {
-    const newTubeUserName = await getRoomName(event.room_id);
-
-    user = await createTubeUser(
-      newTubeUserName,
-      event.room_id,
-      tubeIntermediary
-    );
-  }
-
-  sendMessageAsUser(user, tubeIntermediary, message);
+  sendMessageAsUser(groupUser.content.user, tubeIntermediary, message);
 
   return user;
 };
@@ -472,27 +455,28 @@ export const handleTubeMessage = async (tubesOpen, event) => {
 }
 
 const handleFormat = async (event) => {
-  console.log(event);
-
-  //someone's been tagged. we're assuming clone user
-
   const body = event.content.formatted_body;
 
   const userId = body.split("href=")[1].split("\"")[1].split("/")[4];
 
   const user = await getItem("userId", userId);
 
-  const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
+  if (user.type === "spacetube.group.clone") {
+    const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
 
-  const groupUser = await getItem("userId", inviteUser.content.originalUserId);
+    const groupUser = await getItem("userId", inviteUser.content.originalUserId);
 
-  const message = body.split("</a>: ")[1];
+    const message = body.split("</a>: ")[1];
 
-  sendMessageAsUser(groupUser.content.user, event.room_id, message);
+    sendMessageAsUser(groupUser.content.user, event.room_id, message);
 
-  const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
+    const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
 
-  sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
+    sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
+  }
+  if (user.type === "spacetube.group.user") {
+    //if it's the group user we need to do handle the command
+  }
 }
 
 export const handleMessage = async (event) => {
@@ -558,6 +542,7 @@ export const handleInvite = async (event) => {
       if (invitedUser.type === "spacetube.group.user") {
         const name = await getDisplayNameAsUser(invitedUser.content.user, event.room_id, invitedUserId);
         const roomInviteUser = await createRoomInviteUser(name, invitedUserId, event.room_id);
+
         if (!spacetubeBotInvited) {
           const joinMessage = `Hello! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to connect them with this room.`
           sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
