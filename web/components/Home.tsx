@@ -1,12 +1,49 @@
 import "../styles/app.css";
 import { useState, useEffect } from "react";
+import { event } from "../../types";
 import {
   createGroupUserRequest,
   createInviteRequest,
   getInviteRequest,
   acceptInviteRequest,
+  getTubeInfoRequest,
 } from "../requests";
 import Stars from "./Stars";
+
+const TubeLink = ({ token }) => {
+  const [tubeName, setTubeName] = useState("loading participants...");
+
+  const getTubeName = async () => {
+    const tubeInfoResponse = await getTubeInfoRequest(token);
+    const { tubeRoomEvents } = await tubeInfoResponse.json();
+
+    const groupUserNames = [];
+
+    tubeRoomEvents.map((event: event) => {
+      if (
+        event.type === "m.room.member" &&
+        event.content.displayname &&
+        !event.sender.includes("@space-tube-bot")
+      ) {
+        const displayName = event.content.displayname;
+        groupUserNames.push(displayName);
+      }
+      return null;
+    });
+
+    setTubeName(groupUserNames.join(","));
+  };
+
+  useEffect(() => {
+    getTubeName();
+  }, []);
+
+  return (
+    <a href={`/?linkToken=${token}`} key={token}>
+      <h3>{tubeName}</h3>
+    </a>
+  );
+};
 
 const GroupUserCreate = () => {
   const [groupName, setGroupName] = useState("");
@@ -239,9 +276,7 @@ const Home = ({ storedLinkTokens, invite }) => {
         <div>
           <h2>My Tubes</h2>
           {linkTokens.map((token) => (
-            <a href={`/?linkToken=${token}`} key={token}>
-              <h3>{token}</h3>
-            </a>
+            <TubeLink token={token} />
           ))}
         </div>
       )}
