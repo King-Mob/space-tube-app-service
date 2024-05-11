@@ -21,7 +21,7 @@ export const sendMessage = (roomId, message) => {
   );
 };
 
-export const sendMessageAsUser = (user, roomId, message) => {
+export const sendMessageAsUser = (user: user, roomId: string, message: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/send/m.room.message`,
     {

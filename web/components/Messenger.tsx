@@ -202,7 +202,11 @@ const Messenger = ({ linkToken, userName }) => {
           </div>
         );
       }
-      if (event.type === "m.room.member" && event.content.displayname) {
+      if (
+        event.type === "m.room.member" &&
+        event.content.displayname &&
+        !event.sender.includes("@space-tube-bot")
+      ) {
         const displayName = event.content.displayname;
         tubeRoomNames[event.sender] = displayName;
       }
