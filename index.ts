@@ -17,7 +17,8 @@ import {
   handleRemoteOpen,
   createGroupUser,
   createInvitationRoom,
-  createInvitationReceivedRoom
+  createInvitationReceivedRoom,
+  createGroupCloneUser
 } from "./matrix/handler.js";
 import commands from "./matrix/commands.js";
 import { getItem, getItemIncludes, getAllItems, storeItem, getDisplayNameAsUser } from "./matrix/storage.js";
@@ -182,12 +183,8 @@ app.get("/api/tubeInfo/userIds", async (req, res) => {
       content: { user },
     } = await getItem("userRoomId", matrixRoomId, "spacetube.user");
 
-    const cloneEvents = await getAllItems("cloneRoomId", matrixRoomId, "spacetube.user.clone");
-    console.log(cloneEvents)
-    const cloneIds = cloneEvents.map(event => {
-      console.log(event);
-      return "dave"
-    })
+    const cloneUsers = await getAllItems("roomId", matrixRoomId, "spacetube.group.clone");
+    const cloneIds = cloneUsers.map(cloneUser => cloneUser.content.userId);
 
     res.send({
       success: true,

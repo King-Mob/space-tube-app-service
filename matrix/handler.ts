@@ -604,7 +604,7 @@ export const handleInvite = async (event) => {
 };
 
 export const createInvitationRoom = async (groupUserId: string, groupName: string) => {
-  const createFromRoomResponse = await createRoom(`to-other-group`);
+  const createFromRoomResponse = await createRoom(groupName);
   const room: room = await createFromRoomResponse.json() as room;
   invite({ user_id: groupUserId, access_token: "" }, room.room_id);
 
