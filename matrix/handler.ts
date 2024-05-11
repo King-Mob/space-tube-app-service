@@ -391,7 +391,9 @@ export const forwardToTubeIntermediary = async (tubeIntermediary, event) => {
   const message = event.content.body;
 
   const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
+  console.log(inviteUser)
   const groupUser = await getItem("originalUserId", inviteUser.content.originalUserId, "spacetube.group.user");
+  console.log(groupUser)
 
   sendMessageAsUser(groupUser.content.user, tubeIntermediary, message);
 
