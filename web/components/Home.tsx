@@ -39,9 +39,11 @@ const TubeLink = ({ token }) => {
   }, []);
 
   return (
-    <a href={`/?linkToken=${token}`} key={token}>
-      <h3>{tubeName}</h3>
-    </a>
+    token && (
+      <a href={`/?linkToken=${token}`} key={token}>
+        <h3>{tubeName}</h3>
+      </a>
+    )
   );
 };
 
