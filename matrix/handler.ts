@@ -457,7 +457,18 @@ export const handleTubeMessage = async (tubesOpen, event) => {
 const handleFormat = async (event) => {
   const body = event.content.formatted_body;
 
+  //handle the unlikely event that it's not a user tag, because it could also be a link
+  //which would fuck up my string method here
+
   const userId = body.split("href=")[1].split("\"")[1].split("/")[4];
+
+  if (userId.includes("@space-tube-bot")) {
+    if (body.includes("create")) {
+      const groupName = await getRoomName(event.room_id);
+      const groupUser = await createGroupUser(groupName);
+      invite(groupUser, event.room_id);
+    }
+  }
 
   const user = await getItem("userId", userId);
 
@@ -475,7 +486,9 @@ const handleFormat = async (event) => {
     sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
   }
   if (user.type === "spacetube.group.user") {
-    //if it's the group user we need to do handle the command
+    // if it's the group user we need to do handle the command
+    // for the moment that's just the link command
+    // maybe something like "I'm your group's user"
   }
 }
 

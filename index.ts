@@ -334,6 +334,8 @@ app.put("/api/groupuser", imageUpload, async (req, res) => {
           cloneUsers.forEach(cloneUser => {
             setProfilePicture(cloneUser.content.user, content_uri);
           })
+
+          fs.unlink(filePath, () => { });
         })
       }
       if (req.body.displayName) {
