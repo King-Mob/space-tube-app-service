@@ -466,7 +466,8 @@ const handleFormat = async (event) => {
     if (body.includes("create")) {
       const groupName = await getRoomName(event.room_id);
       const groupUser = await createGroupUser(groupName);
-      invite(groupUser, event.room_id);
+
+      sendMessage(event.room_id, `Invite ${groupUser.user_id} to use in this group.`);
     }
   }
 
