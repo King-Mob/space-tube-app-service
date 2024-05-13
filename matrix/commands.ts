@@ -1,4 +1,4 @@
-import { sendMessage, sendMessageAsUser } from './matrixClientRequests.js';
+import { sendMessage, sendMessageAsUser, getProfile } from './matrixClientRequests.js';
 import { createTubeUser, registerTube, connectSameInstance, connectOtherInstance, getRoomName, handleTubeMessage } from './handler.js';
 import { getItem, storeItem, getAllItemIncludes, getDisplayName } from './storage.js';
 import { v4 as uuidv4 } from "uuid";
@@ -62,9 +62,10 @@ const link = async (roomId, sender, groupUser = null) => {
         );
     }
 
-    const name = await getDisplayName(roomId, sender);
+    const profileResponse = await getProfile(sender);
+    const profile = await profileResponse.json();
 
-    const linkMessage = `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${name}`;
+    const linkMessage = `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${profile.display_name}`;
 
     if (groupUser) {
         sendMessageAsUser(groupUser, roomId, linkMessage);

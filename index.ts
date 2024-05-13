@@ -16,7 +16,8 @@ import {
   uploadImage,
   setProfilePicture,
   getProfile,
-  getImage
+  getImage,
+  getDisplayNames
 } from "./matrix/matrixClientRequests.js";
 import {
   handleMessage,
@@ -27,7 +28,7 @@ import {
   createInvitationReceivedRoom
 } from "./matrix/handler.js";
 import commands from "./matrix/commands.js";
-import { getItem, getItemIncludes, getAllItems, storeItem, getDisplayNameAsUser } from "./matrix/storage.js";
+import { getItem, getItemIncludes, getAllItems, storeItem } from "./matrix/storage.js";
 import { startDiscord } from "./discord/index.js";
 import { startWhatsapp } from "./whatsapp/index.js";
 
@@ -123,6 +124,7 @@ app.get("/api/tubeInfo", async (req, res) => {
       "connectedRooms",
       linkEvent.content.roomId
     );
+
     const { tubeIntermediary } = tube.content;
 
     const response = await fetch(
@@ -200,6 +202,35 @@ app.get("/api/tubeInfo/userIds", async (req, res) => {
   } else {
     res.send({
       success: false,
+      message: "No room active with that link token",
+    });
+  }
+})
+
+app.get("/api/tubeInfo/displaynames", async (req, res) => {
+  const { linkToken } = req.query;
+
+  const linkEvent = await getItem("linkToken", linkToken, "spacetube.link");
+
+  if (linkEvent) {
+    const tube = await getItemIncludes(
+      "connectedRooms",
+      linkEvent.content.roomId
+    );
+    if (tube) {
+      const { tubeIntermediary } = tube.content;
+
+      const displayNames = await getDisplayNames(tubeIntermediary);
+
+      res.send({
+        success: true,
+        displayNames
+      });
+    }
+  } else {
+    res.send({
+      success: false,
+      displayNames: ["false", "fail"],
       message: "No room active with that link token",
     });
   }

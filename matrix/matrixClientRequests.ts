@@ -247,3 +247,26 @@ export const getImage = async (serverName: string, mediaId: string) => {
     }
   })
 }
+export const getDisplayNames = async (roomId) => {
+  const roomStateResponse = await getRoomState(roomId, APPLICATION_TOKEN);
+  const roomState = await roomStateResponse.json();
+
+  const memberUserIds = [];
+
+  roomState.forEach(event => {
+    if (event.type === "m.room.member" && !event.user_id.includes("@space-tube-bot")) {
+      memberUserIds.push(event.user_id);
+    }
+  })
+
+  const names = [];
+
+  for (const userId of memberUserIds) {
+    const profileResponse = await getProfile(userId);
+    const profile = await profileResponse.json();
+
+    names.push(profile.displayname);
+  }
+
+  return names;
+}

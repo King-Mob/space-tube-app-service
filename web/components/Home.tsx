@@ -6,7 +6,7 @@ import {
   createInviteRequest,
   getInviteRequest,
   acceptInviteRequest,
-  getTubeInfoRequest,
+  getDisplayNamesRequest,
 } from "../requests";
 import Stars from "./Stars";
 
@@ -14,24 +14,12 @@ const TubeLink = ({ token }) => {
   const [tubeName, setTubeName] = useState("loading participants...");
 
   const getTubeName = async () => {
-    const tubeInfoResponse = await getTubeInfoRequest(token);
-    const { tubeRoomEvents } = await tubeInfoResponse.json();
+    const tubeInfoResponse = await getDisplayNamesRequest(token);
+    const { displayNames } = await tubeInfoResponse.json();
 
-    const groupUserNames = [];
+    console.log(displayNames);
 
-    tubeRoomEvents.map((event: event) => {
-      if (
-        event.type === "m.room.member" &&
-        event.content.displayname &&
-        !event.sender.includes("@space-tube-bot")
-      ) {
-        const displayName = event.content.displayname;
-        groupUserNames.push(displayName);
-      }
-      return null;
-    });
-
-    setTubeName(groupUserNames.join(","));
+    setTubeName(displayNames.join(" & "));
   };
 
   useEffect(() => {
@@ -274,16 +262,22 @@ const Home = ({ storedLinkTokens, invite }) => {
     <div id="home-container">
       <Stars />
       <h1 id="title">Space tube</h1>
-      {linkTokens.length > 0 && (
-        <div>
-          <h2>My Tubes</h2>
-          {linkTokens.map((token) => (
-            <TubeLink token={token} />
-          ))}
+      <p>
+        Welcome to spacetube. Here you can find existing tubes, or create a new
+        group user.
+      </p>
+      <div id="actions-container">
+        {linkTokens.length > 0 && (
+          <div>
+            <h2>My Tubes</h2>
+            {linkTokens.map((token) => (
+              <TubeLink token={token} />
+            ))}
+          </div>
+        )}
+        <div className="form-container">
+          {invite ? <InviteAccept invite={invite} /> : <GroupUserCreate />}
         </div>
-      )}
-      <div className="form-container">
-        {invite ? <InviteAccept invite={invite} /> : <GroupUserCreate />}
       </div>
     </div>
   );

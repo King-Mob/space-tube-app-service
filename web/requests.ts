@@ -154,3 +154,7 @@ export const changeGroupUserRequest = async (token: string, groupUserInfo: { dis
     body
   })
 }
+
+export const getDisplayNamesRequest = async (token: string) => {
+  return fetch(`${URL}/api/tubeinfo/displaynames/?linkToken=${token}`);
+}
