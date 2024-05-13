@@ -580,13 +580,22 @@ export const handleInvite = async (event) => {
         const groupCloneUser = await createGroupCloneUser(cloneName, invitedUser.content.originalUserId, event.room_id);
         inviteAsUser(invitedUser.content.user, groupCloneUser, event.room_id);
 
-        const groupName = await getRoomName(event.room_id, invitedUser.content.user.access_token);
-        const groupUser = await createGroupUser(groupName);
-        inviteAsUser(invitedUser.content.user, groupUser, event.room_id);
-
         const tubeIntermediary = await createTubeIntermediary(event.room_id, invitedUser.content.roomId);
-        invite(groupUser, tubeIntermediary);
+
         invite(originalGroupUser.content.user, tubeIntermediary);
+
+        const existingInviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
+
+        if (!existingInviteUser) {
+          const groupName = await getRoomName(event.room_id, invitedUser.content.user.access_token);
+          const groupUser = await createGroupUser(groupName);
+          inviteAsUser(invitedUser.content.user, groupUser, event.room_id);
+          invite(groupUser, tubeIntermediary);
+        }
+        else {
+          const groupUser = await getItem("userId", existingInviteUser.content.originalGroupUser, "spacetube.group.user");
+          invite(groupUser.content.user, tubeIntermediary);
+        }
 
         leaveRoom(invitedUser.content.user, event.room_id);
       }
