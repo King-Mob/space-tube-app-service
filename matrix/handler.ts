@@ -457,10 +457,16 @@ export const handleTubeMessage = async (tubesOpen, event) => {
 const handleFormat = async (event) => {
   const body = event.content.formatted_body;
 
-  //handle the unlikely event that it's not a user tag, because it could also be a link
-  //which would fuck up my string method here
+  if (!body.split("href")[1])
+    return;
+
+  if (!body.split("href=")[1].split("\"")[1])
+    return;
 
   const userId = body.split("href=")[1].split("\"")[1].split("/")[4];
+
+  if (!userId)
+    return;
 
   if (userId.includes("@space-tube-bot")) {
     if (body.includes("create")) {
@@ -473,22 +479,24 @@ const handleFormat = async (event) => {
 
   const user = await getItem("userId", userId);
 
-  if (user.type === "spacetube.group.clone") {
-    const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
+  if (user) {
+    if (user.type === "spacetube.group.clone") {
+      const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
 
-    const groupUser = await getItem("userId", inviteUser.content.originalUserId);
+      const groupUser = await getItem("userId", inviteUser.content.originalUserId);
 
-    const message = body.split("</a>: ")[1];
+      const message = body.split("</a>: ")[1];
 
-    sendMessageAsUser(groupUser.content.user, event.room_id, message);
+      sendMessageAsUser(groupUser.content.user, event.room_id, message);
 
-    const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
+      const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
 
-    sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
-  }
-  if (user.type === "spacetube.group.user") {
-    if (body.includes("link")) {
-      commands.link(event.room_id, event.sender, user.content.user);
+      sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
+    }
+    if (user.type === "spacetube.group.user") {
+      if (body.includes("link")) {
+        commands.link(event.room_id, event.sender, user.content.user);
+      }
     }
   }
 }
