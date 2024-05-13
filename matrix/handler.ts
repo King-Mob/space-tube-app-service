@@ -487,9 +487,9 @@ const handleFormat = async (event) => {
     sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
   }
   if (user.type === "spacetube.group.user") {
-    // if it's the group user we need to do handle the command
-    // for the moment that's just the link command
-    // maybe something like "I'm your group's user"
+    if (body.includes("link")) {
+      commands.link(event.room_id, event.sender, user.content.user);
+    }
   }
 }
 
@@ -558,10 +558,10 @@ export const handleInvite = async (event) => {
         const roomInviteUser = await createRoomInviteUser(name, invitedUserId, event.room_id);
 
         if (!spacetubeBotInvited) {
-          const joinMessage = `Hello! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to connect them with this room.`
+          const joinMessage = `Hello! I am your group's user! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to talk to each other.`
           sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
           const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${invitedUser.content.editToken}`;
-          const editMessage = `Use ${editLink} to edit your display name`;
+          const editMessage = `Use ${editLink} to edit my display name and profile picture`;
           sendMessageAsUser(invitedUser.content.user, event.room_id, editMessage);
         }
       }
