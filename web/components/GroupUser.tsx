@@ -4,6 +4,7 @@ import {
   getProfilePictureRequest,
   changeGroupUserRequest,
 } from "../requests";
+import Stars from "./Stars";
 
 const GroupUser = ({ token }) => {
   const [displayName, setDisplayName] = useState("");
@@ -20,8 +21,6 @@ const GroupUser = ({ token }) => {
     const response = await getProfilePictureRequest(token);
     const result = await response.blob();
 
-    console.log(result);
-
     const image = new File([result], "profile-picture.jpg");
 
     setProfilePicture(image);
@@ -37,8 +36,6 @@ const GroupUser = ({ token }) => {
   }, []);
 
   const update = async () => {
-    console.log(profilePicture);
-
     await changeGroupUserRequest(token, { displayName, profilePicture });
     refresh();
   };
@@ -46,31 +43,54 @@ const GroupUser = ({ token }) => {
   const objectUrl = profilePicture ? URL.createObjectURL(profilePicture) : "";
 
   return (
-    <>
-      <h1>Group User</h1>
-      <p>Display Name</p>
-      <input
-        type="text"
-        value={displayName}
-        onChange={(e) => setDisplayName(e.target.value)}
-      ></input>
-      <p>Profile Picture</p>
-      <input
-        type="file"
-        name="file"
-        onChange={(event) => {
-          setProfilePicture(event.target.files[0]);
-        }}
-      ></input>
-      {profilePicture && <img src={objectUrl} />}
+    <div id="edit-user-container">
+      <header>
+        <h1 id="title">Space tube</h1>
+        <p>Life is better in tubes.</p>
+      </header>
+      <Stars />
+      <h2>Group User Profile</h2>
+      <div id="profile-container">
+        <input
+          hidden
+          id="uploadInput"
+          type="file"
+          name="file"
+          onChange={(event) => {
+            setProfilePicture(event.target.files[0]);
+          }}
+        ></input>
+        {profilePicture ? (
+          <img
+            className="profile-picture"
+            src={objectUrl}
+            onClick={() => document.getElementById("uploadInput").click()}
+          />
+        ) : (
+          <div
+            className="profile-picture empty"
+            onClick={() => document.getElementById("uploadInput").click()}
+          >
+            <p>🎭</p>
+          </div>
+        )}
+        <input
+          type="text"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          className="home-input"
+          placeholder="Display Name"
+        ></input>
+      </div>
       <button
+        className="home-button"
         id="update-button"
         disabled={!profilePicture && !displayName}
         onClick={update}
       >
-        Update
+        Save
       </button>
-    </>
+    </div>
   );
 };
 

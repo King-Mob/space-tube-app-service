@@ -26,11 +26,12 @@ a:visited {
 }
 
 #home-container {
-  height: 100%;
+  min-height: 100%;
   width: 100%;
   margin-left: 0;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   text-align: center;
 }
@@ -38,15 +39,30 @@ a:visited {
 #actions-container {
   display: flex;
   flex-direction: column;
+  padding-bottom: 10rem;
 }
 
-@media only screen and (min-width: 600px) {
-  #home-container {
-    width: 70%;
-    margin-left: 15%;
-  }
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+@media only screen and (min-width: 800px) {
   #actions-container {
     flex-direction: row;
+  }
+  .form-container {
+    width: 50%;
+  }
+}
+
+@media only screen and (min-width: 1000px) {
+  #home-container {
+    width: 80%;
+    margin-left: 10%;
   }
 }
 
@@ -147,7 +163,7 @@ p {
 }
 
 .form-container p {
-  font-size: 4rem;
+  font-size: 3rem;
 }
 
 .room-events-container {
@@ -194,14 +210,6 @@ input {
   opacity: 0.5;
 }
 
-#form-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-  width: 100%;
-}
-
 label {
   font-size: 3rem;
   font-family: monospace;
@@ -216,6 +224,9 @@ label {
   font-size: 3rem;
   width: 90%;
   text-align: center;
+  border-radius: 3px;
+  margin-top: 1rem;
+  border: none;
 }
 
 .home-button {
@@ -251,4 +262,54 @@ label {
 
 #update-button {
   display: block;
+}
+
+#tube-link-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+footer {
+  margin-top: 2rem;
+}
+
+#profile-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-picture {
+  cursor: pointer;
+  height: 10rem;
+  width: 10rem;
+  border-radius: 50%;
+  background-color: #8b8b8b;
+  object-fit: cover;
+}
+
+.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-picture p {
+  margin-top: -7%;
+  font-size: 4rem;
+}
+
+#edit-user-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }

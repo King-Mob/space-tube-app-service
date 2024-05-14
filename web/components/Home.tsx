@@ -9,6 +9,9 @@ import {
   getDisplayNamesRequest,
 } from "../requests";
 import Stars from "./Stars";
+import CopyInput from "./CopyInput";
+
+const { URL } = process.env;
 
 const TubeLink = ({ token }) => {
   const [tubeName, setTubeName] = useState("loading participants...");
@@ -17,9 +20,7 @@ const TubeLink = ({ token }) => {
     const tubeInfoResponse = await getDisplayNamesRequest(token);
     const { displayNames } = await tubeInfoResponse.json();
 
-    console.log(displayNames);
-
-    setTubeName(displayNames.join(" & "));
+    setTubeName("🛸" + displayNames.join(","));
   };
 
   useEffect(() => {
@@ -54,24 +55,26 @@ const GroupUserCreate = () => {
 
   return (
     <>
-      <h2>Create a group user</h2>
+      <h2>Create Group User</h2>
       {inProgress ? (
         <p>Creating group user...</p>
       ) : created ? (
         <>
           <p>
-            Your group user has been created. To use spacetube on Matrix, invite{" "}
-            <a>{groupMatrixId}</a>to your chat.
+            Your group user has been created. To use spacetube on Matrix, copy
+            the user id below and invite it to your chat.
           </p>
-          <p>
-            Otherwise, to continue on web, enter your name and we'll create a
-            web invite.
-          </p>
+          <CopyInput value={groupMatrixId} type={"invite user id"} />
           {<InviteCreate groupUserId={groupMatrixId} groupName={groupName} />}
         </>
       ) : (
         <>
+          <p>
+            The first step to using spacetube. Your group user will send
+            messages and perform actions on behalf of your group.
+          </p>
           <input
+            className="home-input"
             type="text"
             placeholder="Group Name"
             value={groupName}
@@ -80,7 +83,11 @@ const GroupUserCreate = () => {
               if (e.key === "Enter") createUser();
             }}
           ></input>
-          <button onClick={createUser} disabled={!groupName}>
+          <button
+            onClick={createUser}
+            disabled={!groupName}
+            className="home-button"
+          >
             Create
           </button>
         </>
@@ -96,7 +103,7 @@ const InviteCreate = ({ groupUserId, groupName }) => {
   const [myName, setMyName] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const create = () => {
+  const createInvite = () => {
     setSubmitted(true);
     createInviteRequest(myName, groupUserId, groupName)
       .then((response) => response.json())
@@ -116,19 +123,22 @@ const InviteCreate = ({ groupUserId, groupName }) => {
   if (!submitted)
     return (
       <>
-        <label htmlFor="myName">My Name</label>
+        <p>Or enter your name and get a web invite:</p>
         <input
           id="myName"
           className="home-input"
           type="text"
-          placeholder="my name"
+          placeholder="Name"
           value={myName}
           onChange={(e) => setMyName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") createInvite();
+          }}
         ></input>
         <button
           id="create-button"
           className="home-button"
-          onClick={create}
+          onClick={createInvite}
           disabled={!myName}
         >
           Create
@@ -139,25 +149,23 @@ const InviteCreate = ({ groupUserId, groupName }) => {
   if (submitted && !link)
     return (
       <>
-        <p>generating link</p>
+        <p>Generating link...</p>
       </>
     );
 
   if (submitted && link)
     return (
       <>
+        <p>Send this link to your contact to finish the tube!</p>
+        <CopyInput value={link} type={"contact link"} />
         <p>
-          Send this link to your contact to finish the tube!{" "}
-          <a href={link}>{link}</a>
+          Use <a href={`/?linkToken=${linkToken}&name=${myName}`}>this link</a>{" "}
+          to view the room once they've accepted the invite.
         </p>
-        <button onClick={copy} className="home-button">
-          Copy link
-        </button>
-        {copied && <p>Copied!</p>}
-        <p>
-          Use this link to view the room once they've accepted the invite:{" "}
-          <a href={`/?linkToken=${linkToken}&name=${myName}`}>view room</a>
-        </p>
+        <CopyInput
+          value={`${URL}/?linkToken=${linkToken}&name=${myName}`}
+          type="my link"
+        />
       </>
     );
 };
@@ -200,7 +208,7 @@ const InviteAccept = ({ invite }) => {
   };
 
   return (
-    <div>
+    <>
       {errorMessage ? (
         <p>{errorMessage}</p>
       ) : accepted ? (
@@ -251,7 +259,7 @@ const InviteAccept = ({ invite }) => {
           </button>
         </>
       )}
-    </div>
+    </>
   );
 };
 
@@ -261,24 +269,30 @@ const Home = ({ storedLinkTokens, invite }) => {
   return (
     <div id="home-container">
       <Stars />
-      <h1 id="title">Space tube</h1>
-      <p>
-        Welcome to spacetube. Here you can find existing tubes, or create a new
-        group user.
-      </p>
+      <header>
+        <h1 id="title">Space tube</h1>
+        <p>Life is better in tubes.</p>
+      </header>
       <div id="actions-container">
-        {linkTokens.length > 0 && (
-          <div>
-            <h2>My Tubes</h2>
-            {linkTokens.map((token) => (
-              <TubeLink token={token} />
-            ))}
-          </div>
-        )}
         <div className="form-container">
           {invite ? <InviteAccept invite={invite} /> : <GroupUserCreate />}
         </div>
+        {linkTokens.length > 0 && (
+          <div className="form-container">
+            <h2>Group Connections</h2>
+            <div id="tube-link-container">
+              {linkTokens.map((token) => (
+                <TubeLink token={token} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+      <footer>
+        <p>
+          <a href="https://spacetu.be">Read more</a> about spacetube.
+        </p>
+      </footer>
     </div>
   );
 };

@@ -15,7 +15,7 @@ const App = () => {
 
   if (storedLinkTokens) {
     const linkTokens = JSON.parse(storedLinkTokens);
-    if (!linkTokens.includes(linkToken)) {
+    if (!linkTokens.includes(linkToken) && linkToken) {
       linkTokens.push(linkToken);
       localStorage.setItem("linkTokens", JSON.stringify(linkTokens));
     }
