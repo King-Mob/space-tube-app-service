@@ -101,7 +101,6 @@ const InviteCreate = ({ groupUserId, groupName }) => {
   const [link, setLink] = useState("");
   const [linkToken, setLinkToken] = useState("");
   const [myName, setMyName] = useState("");
-  const [copied, setCopied] = useState(false);
 
   const createInvite = () => {
     setSubmitted(true);
@@ -113,11 +112,6 @@ const InviteCreate = ({ groupUserId, groupName }) => {
           setLinkToken(result.linkToken);
         }
       });
-  };
-
-  const copy = () => {
-    navigator.clipboard.writeText(link);
-    setCopied(true);
   };
 
   if (!submitted)
@@ -156,11 +150,11 @@ const InviteCreate = ({ groupUserId, groupName }) => {
   if (submitted && link)
     return (
       <>
-        <p>Send this link to your contact to finish the tube!</p>
+        <p>Send this link to your contact to finish the tube.</p>
         <CopyInput value={link} type={"contact link"} />
         <p>
           Use <a href={`/?linkToken=${linkToken}&name=${myName}`}>this link</a>{" "}
-          to view the room once they've accepted the invite.
+          to view your side of the tube once they've accepted the invite.
         </p>
         <CopyInput
           value={`${URL}/?linkToken=${linkToken}&name=${myName}`}

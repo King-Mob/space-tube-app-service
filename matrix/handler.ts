@@ -497,6 +497,11 @@ const handleFormat = async (event) => {
       if (body.includes("link")) {
         commands.link(event.room_id, event.sender, user.content.user);
       }
+      if (body.includes("profile")) {
+        const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${user.content.editToken}`;
+        const editMessage = `Use ${editLink} to edit my display name and profile picture`;
+        sendMessageAsUser(user.content.user, event.room_id, editMessage);
+      }
     }
   }
 }
