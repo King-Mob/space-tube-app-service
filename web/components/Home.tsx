@@ -64,7 +64,7 @@ const GroupUserCreate = () => {
             Your group user has been created. To use spacetube on Matrix, copy
             the user id below and invite it to your chat.
           </p>
-          <CopyInput value={groupMatrixId} type={"invite user id"} />
+          <CopyInput value={groupMatrixId} type={"Group User ID"} />
           {<InviteCreate groupUserId={groupMatrixId} groupName={groupName} />}
         </>
       ) : (
