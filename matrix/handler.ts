@@ -30,7 +30,6 @@ import commands from "./commands.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendMessageDiscord } from "../discord/index.js";
 import { sendMessageWhatsapp } from "../whatsapp/index.js";
-import { group } from "console";
 
 const { HOME_SERVER } = process.env;
 
@@ -457,13 +456,21 @@ export const handleTubeMessage = async (tubesOpen, event) => {
 const handleFormat = async (event) => {
   const body = event.content.formatted_body;
 
+  console.log(body)
+
   if (!body.split("href")[1])
     return;
+
+  console.log("split 1")
 
   if (!body.split("href=")[1].split("\"")[1])
     return;
 
+  console.log("split 2")
+
   const userId = body.split("href=")[1].split("\"")[1].split("/")[4];
+
+  console.log("split 3")
 
   if (!userId)
     return;
