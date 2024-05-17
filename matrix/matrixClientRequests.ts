@@ -68,11 +68,13 @@ export const getRoomState = (roomId: string, token: string | null) => {
 };
 
 export const registerUser = (name: string) => {
+  const normalisedName = name.replaceAll(" ", "-");
+
   return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/register`, {
     method: "POST",
     body: JSON.stringify({
       type: "m.login.application_service",
-      username: `_space-tube-${name}-${uuidv4()}`,
+      username: `_space-tube-${normalisedName}-${uuidv4()}`,
     }),
     headers: {
       "Content-Type": "application/json",
