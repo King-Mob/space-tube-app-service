@@ -613,7 +613,7 @@ export const handleInvite = async (event) => {
       }
 
       if (invitedUser.type === "spacetube.group.clone") {
-        const joinMessage = `Hello! Use @${invitedUser.content.name} to send messages through the spacetube. Other messages in this room remain private.`
+        const joinMessage = `Hello! Use \`@${invitedUser.content.name}\` to send messages through the spacetube. Other messages in this room remain private.`
         sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
       }
 
