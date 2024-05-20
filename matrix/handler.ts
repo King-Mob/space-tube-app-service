@@ -456,21 +456,13 @@ export const handleTubeMessage = async (tubesOpen, event) => {
 const handleFormat = async (event) => {
   const body = event.content.formatted_body;
 
-  console.log(body)
-
   if (!body.split("href")[1])
     return;
-
-  console.log("split 1")
 
   if (!body.split("href=")[1].split("\"")[1])
     return;
 
-  console.log("split 2")
-
   const userId = body.split("href=")[1].split("\"")[1].split("/")[4];
-
-  console.log("split 3")
 
   if (!userId)
     return;
@@ -573,17 +565,16 @@ export const handleInvite = async (event) => {
     if (invitedUser) {
       await join(invitedUser.content.user, event.room_id);
 
-      if (invitedUser.type === "spacetube.group.user") {
+      if (!spacetubeBotInvited && invitedUser.type === "spacetube.group.user") {
         const name = await getDisplayNameAsUser(invitedUser.content.user, event.room_id, invitedUserId);
         const roomInviteUser = await createRoomInviteUser(name, invitedUserId, event.room_id);
 
-        if (!spacetubeBotInvited) {
-          const joinMessage = `Hello! I am your group's user! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to talk to each other.`
-          sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
-          const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${invitedUser.content.editToken}`;
-          const editMessage = `Use ${editLink} to edit my display name and profile picture`;
-          sendMessageAsUser(invitedUser.content.user, event.room_id, editMessage);
-        }
+        const joinMessage = `Hello! I am your group's user! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to talk to each other.`
+        sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
+        const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${invitedUser.content.editToken}`;
+        const editMessage = `Use ${editLink} to edit my display name and profile picture`;
+        sendMessageAsUser(invitedUser.content.user, event.room_id, editMessage);
+
       }
 
       if (invitedUser.type === "spacetube.group.invite") {
