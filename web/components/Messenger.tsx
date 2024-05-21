@@ -290,8 +290,10 @@ const Messenger = ({ linkToken, userName }) => {
           <h1 id="matrix-room-title" className="room-title">
             {matrixRoomTitle || "Matrix Room"}
           </h1>
-          <EditProfile linkToken={linkToken} />
-          <Invite user={user} roomId={matrixRoomId} />
+          <div id="buttons-container">
+            <EditProfile linkToken={linkToken} />
+            <Invite user={user} roomId={matrixRoomId} />
+          </div>
         </div>
         <div
           id="matrix-room-events-container"
