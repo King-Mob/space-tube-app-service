@@ -25,6 +25,19 @@ const Invite = ({ user, roomId }) => {
   );
 };
 
+const EditProfile = ({ linkToken }) => {
+  const goToEdit = () => {
+    //do the redirect to edit page
+    console.log(linkToken);
+  };
+
+  return (
+    <button onClick={goToEdit} title="edit group user profile">
+      🎭
+    </button>
+  );
+};
+
 const connectLinkedEvents = (events) => {
   const linkedEvents = {};
   events.forEach((event) => {
@@ -277,6 +290,7 @@ const Messenger = ({ linkToken, userName }) => {
           <h1 id="matrix-room-title" className="room-title">
             {matrixRoomTitle || "Matrix Room"}
           </h1>
+          <EditProfile linkToken={linkToken} />
           <Invite user={user} roomId={matrixRoomId} />
         </div>
         <div
