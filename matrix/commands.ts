@@ -66,7 +66,7 @@ const link = async (roomId: string, sender: string, groupUser = null) => {
     const profileResponse = await getProfile(sender);
     const profile = await profileResponse.json();
 
-    const linkMessage = `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${profile.display_name}`;
+    const linkMessage = `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${profile.displayname}`;
 
     if (groupUser) {
         sendMessageAsUser(groupUser, roomId, linkMessage);
