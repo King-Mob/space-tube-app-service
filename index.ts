@@ -159,14 +159,11 @@ app.get("/api/tubeInfo/sync", async (req, res) => {
   if (linkEvent) {
     const matrixRoomId = linkEvent.content.roomId;
 
-    //and an if for the user, or change the link part so there's already a user,
-    //like how there is one for web created tubes
+    const inviteUser = await getItem("roomId", matrixRoomId, "spacetube.group.invite");
 
-    const {
-      content: { user },
-    } = await getItem("userRoomId", matrixRoomId, "spacetube.user");
+    const groupUser = await getItem("userId", inviteUser.content.originalUserId, "spacetube.group.user");
 
-    const syncData = await sync(user, nextBatch) as object;
+    const syncData = await sync(groupUser.content.user, nextBatch) as object;
 
     res.send({
       success: true,

@@ -1,5 +1,5 @@
 import { sendMessage, sendMessageAsUser, getProfile } from './matrixClientRequests.js';
-import { createTubeUser, registerTube, connectSameInstance, connectOtherInstance, getRoomName, handleTubeMessage } from './handler.js';
+import { registerTube, connectSameInstance, connectOtherInstance, getRoomName, handleTubeMessage } from './handler.js';
 import { getItem, storeItem, getAllItemIncludes, getDisplayName } from './storage.js';
 import { v4 as uuidv4 } from "uuid";
 
@@ -48,21 +48,6 @@ const link = async (roomId: string, sender: string, groupUser = null) => {
         linkToken = linkEvent.content.linkToken;
     }
 
-    /*
-    const user = await getItem("userRoomId", roomId, "spacetube.user");
-
-    if (!user) {
-        const newTubeUserName = await getRoomName(roomId);
-
-        const tubeIntermediary = await getItem("tubeIntermediary", roomId);
-
-        await createTubeUser(
-            newTubeUserName,
-            roomId,
-            tubeIntermediary
-        );
-    }*/
-
     const profileResponse = await getProfile(sender);
     const profile = await profileResponse.json();
 
@@ -74,7 +59,6 @@ const link = async (roomId: string, sender: string, groupUser = null) => {
     else {
         sendMessage(roomId, linkMessage);
     }
-
 
     return { homeServer: HOME_SERVER, linkToken };
 };
