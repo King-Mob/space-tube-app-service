@@ -315,3 +315,8 @@ footer {
   align-items: center;
   text-align: center;
 }
+
+#buttons-container button {
+  height: 100%;
+  font-size: 1.5rem;
+}

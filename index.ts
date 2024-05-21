@@ -9,7 +9,7 @@ import {
 } from "./types.js";
 import {
   registerUser,
-  invite,
+  inviteAsUser,
   join,
   setDisplayName,
   sync,
@@ -98,7 +98,12 @@ app.post("/api/register", async (req, res) => {
     const user = await userRegistration.json() as user;
 
     await setDisplayName(user, req.body.userName);
-    await invite(user, linkEvent.content.roomId);
+
+    const matrixRoomId = linkEvent.content.roomId;
+    const inviteUser = await getItem("roomId", matrixRoomId, "spacetube.group.invite");
+    const groupUser = await getItem("userId", inviteUser.content.originalUserId, "spacetube.group.user");
+
+    await inviteAsUser(groupUser.content.user, user, linkEvent.content.roomId);
     await join(user, linkEvent.content.roomId);
 
     res.send({
@@ -141,7 +146,7 @@ app.get("/api/tubeInfo", async (req, res) => {
     res.send({
       success: true,
       matrixRoomId: linkEvent.content.roomId,
-      tubeRoomEvents: eventsList.chunk,
+      tubeRoomEvents: eventsList.chunk
     });
   } else {
     res.send({
@@ -233,6 +238,29 @@ app.get("/api/tubeInfo/displaynames", async (req, res) => {
   }
 })
 
+app.get("/api/tubeInfo/editToken", async (req, res) => {
+  const { linkToken } = req.query;
+
+  const linkEvent = await getItem("linkToken", linkToken, "spacetube.link");
+
+  if (linkEvent) {
+    const matrixRoomId = linkEvent.content.roomId;
+    const inviteUser = await getItem("roomId", matrixRoomId, "spacetube.group.invite");
+    const groupUser = await getItem("userId", inviteUser.content.originalUserId, "spacetube.group.user");
+
+    res.send({
+      success: true,
+      editToken: groupUser.content.editToken
+    });
+  } else {
+    res.send({
+      success: false,
+      message: "No room active with that link token",
+    });
+  }
+
+})
+
 app.get("/api/invite", async (req, res) => {
   const { inviteUserId } = req.query;
 
@@ -318,16 +346,21 @@ app.get("/api/groupuser/picture", async (req, res) => {
     const profileResponse = await getProfile(groupUser.content.userId);
     const profile = await profileResponse.json();
 
-    const serverName = profile.avatar_url.split("/")[2];
-    const mediaId = profile.avatar_url.split("/")[3];
+    if (profile.avatar_url) {
+      const serverName = profile.avatar_url.split("/")[2];
+      const mediaId = profile.avatar_url.split("/")[3];
 
-    const imageResponse = await getImage(serverName, mediaId);
-    const image = await imageResponse.blob();
+      const imageResponse = await getImage(serverName, mediaId);
+      const image = await imageResponse.blob();
 
-    res.type(image.type)
-    image.arrayBuffer().then((buf) => {
-      res.send(Buffer.from(buf))
-    })
+      res.type(image.type)
+      image.arrayBuffer().then((buf) => {
+        res.send(Buffer.from(buf))
+      })
+    }
+    else {
+      res.sendStatus("404");
+    }
   }
   else {
     res.send({ success: false, message: "No user with matching edit token" });

@@ -19,11 +19,14 @@ const GroupUser = ({ token }) => {
 
   const getProfilePicture = async () => {
     const response = await getProfilePictureRequest(token);
-    const result = await response.blob();
 
-    const image = new File([result], "profile-picture.jpg");
+    if (response.status === 200) {
+      const result = await response.blob();
 
-    setProfilePicture(image);
+      const image = new File([result], "profile-picture.jpg");
+
+      setProfilePicture(image);
+    }
   };
 
   const refresh = () => {

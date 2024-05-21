@@ -16,6 +16,10 @@ export const getRoomRequest = async (user, matrixRoomId) => {
   );
 };
 
+export const getEditTokenRequest = async (linkToken) => {
+  return fetch(`${URL}/api/tubeInfo/editToken?linkToken=${linkToken}`);
+};
+
 export const registerRequest = async (linkToken, userName) => {
   return fetch(`${URL}/api/register`, {
     method: "POST",

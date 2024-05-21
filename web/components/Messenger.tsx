@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   getTubeInfoRequest,
   getRoomRequest,
+  getEditTokenRequest,
   registerRequest,
   sendMessageRequest,
   forwardMessageRequest,
@@ -11,6 +12,8 @@ import {
   getTubeUserIdsRequest,
   matrixRoomInviteRequest,
 } from "../requests";
+
+const { URL } = process.env;
 
 const Invite = ({ user, roomId }) => {
   const openInvitePrompt = () => {
@@ -26,9 +29,22 @@ const Invite = ({ user, roomId }) => {
 };
 
 const EditProfile = ({ linkToken }) => {
+  const [editToken, setEditToken] = useState(null);
+
+  useEffect(() => {
+    getEditTokenRequest(linkToken)
+      .then((response) => response.json())
+      .then((result) => {
+        if (result.success) {
+          setEditToken(result.editToken);
+        }
+      });
+  }, []);
+
   const goToEdit = () => {
-    //do the redirect to edit page
-    console.log(linkToken);
+    if (editToken) {
+      window.location.href = `${URL}/?groupUserEditToken=${editToken}`;
+    }
   };
 
   return (
@@ -68,14 +84,13 @@ const getTubeRoom = async (linkToken) => {
   return {
     name: tubeInfo.tubeRoomName,
     events: tubeInfo.tubeRoomEvents,
+    editToken: tubeInfo.editToken,
   };
 };
 
 const getTubeUserIds = async (linkToken) => {
   const tubeUserIdsResponse = await getTubeUserIdsRequest(linkToken);
   const { tubeUserIds } = await tubeUserIdsResponse.json();
-
-  console.log(tubeUserIds);
 
   return tubeUserIds;
 };
@@ -117,8 +132,6 @@ const Messenger = ({ linkToken, userName }) => {
   const [sendDisabled, setSendDisabled] = useState(true);
   const tubeMessageEnd = useRef();
   const matrixMessageEnd = useRef();
-
-  console.log(tubeUserIds);
 
   const syncLoopTube = async (linkToken, nextBatch = null) => {
     const syncTubeResponse = await syncTubeRequest(linkToken, nextBatch);
