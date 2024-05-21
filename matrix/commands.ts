@@ -33,7 +33,7 @@ const connect = async (event) => {
     }
 }
 
-const link = async (roomId, sender, groupUser = null) => {
+const link = async (roomId: string, sender: string, groupUser = null) => {
     let linkEvent = await getItem("roomId", roomId, "spacetube.link");
     let linkToken;
     if (!linkEvent) {
@@ -48,6 +48,7 @@ const link = async (roomId, sender, groupUser = null) => {
         linkToken = linkEvent.content.linkToken;
     }
 
+    /*
     const user = await getItem("userRoomId", roomId, "spacetube.user");
 
     if (!user) {
@@ -60,7 +61,7 @@ const link = async (roomId, sender, groupUser = null) => {
             roomId,
             tubeIntermediary
         );
-    }
+    }*/
 
     const profileResponse = await getProfile(sender);
     const profile = await profileResponse.json();
