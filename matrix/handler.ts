@@ -563,6 +563,9 @@ export const handleInvite = async (event) => {
 
     const spacetubeBotInvited = event.sender.includes("@space-tube-bot");
 
+    console.log("handling invite")
+    console.log(spacetubeBotInvited)
+
     if (invitedUser) {
       await join(invitedUser.content.user, event.room_id);
 
