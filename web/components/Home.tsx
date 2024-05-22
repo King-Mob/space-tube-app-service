@@ -151,7 +151,7 @@ const InviteCreate = ({ groupUserId, groupName }) => {
     return (
       <>
         <p>Send this link to your contact to finish the tube.</p>
-        <CopyInput value={link} type={"contact link"} />
+        <CopyInput value={link} type={"invite link"} />
         <p>
           Use <a href={`/?linkToken=${linkToken}&name=${myName}`}>this link</a>{" "}
           to view your side of the tube once they've accepted the invite.
