@@ -22,6 +22,7 @@ import {
   inviteAsUser,
   join,
   joinAsSpaceTube,
+  getJoinedRooms,
   getRoomsList,
   leaveRoom,
   getProfile
@@ -611,37 +612,29 @@ export const handleInvite = async (event) => {
     const spacetubeBotInvited = event.sender.includes("@space-tube-bot");
 
     if (invitedUser) {
-      const joinResponse = await join(invitedUser.content.user, event.room_id);
-      const joinResult = await joinResponse.json();
-
 
       if (!spacetubeBotInvited && invitedUser.type === "spacetube.group.user") {
-        //check group membership
-        console.log("join result", joinResult);
+        const joinedRoomsResponse = await getJoinedRooms(invitedUser.content.user);
+        const joinedRooms = await joinedRoomsResponse.json();
 
-        //then do on join if added by human
-
-        /*
-        const profileResponse = await getProfile(invitedUserId);
-        const { displayname } = await profileResponse.json();
-        const roomInviteUser = await createRoomInviteUser(displayname, invitedUserId, event.room_id);
-
-        const joinMessage = `Hello! I am your group's user! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to talk to each other.`
-        sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
-        const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${invitedUser.content.editToken}`;
-        const editMessage = `Use ${editLink} to edit my display name and profile picture`;
-        sendMessageAsUser(invitedUser.content.user, event.room_id, editMessage);
-        */
+        if (!joinedRooms.includes(event.room_id)) {
+          await join(invitedUser.content.user, event.room_id);
+          onGroupUserJoin(invitedUser, event.room_id);
+        }
       }
 
       if (!spacetubeBotInvited && invitedUser.type === "spacetube.group.invite") {
+        await join(invitedUser.content.user, event.room_id);
         await onInviteUserJoin(invitedUser, event.room_id);
       }
 
       if (invitedUser.type === "spacetube.group.clone") {
+        await join(invitedUser.content.user, event.room_id);
         const joinMessage = `Hello! Use \`@${invitedUser.content.name}\` to send messages through the spacetube. Other messages in this room remain private.`
         sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
       }
+
+      await join(invitedUser.content.user, event.room_id);
 
       return;
     }
