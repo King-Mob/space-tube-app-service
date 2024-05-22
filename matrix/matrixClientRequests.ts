@@ -274,7 +274,7 @@ export const getDisplayNames = async (roomId) => {
 }
 
 export const getJoinedRooms = async (user: user) => {
-  return fetch(`https://matrix.${HOME_SERVER}_matrix/client/v3/joined_rooms`, {
+  return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms`, {
     headers: {
       Authorization: `Bearer ${user.access_token}`
     }
