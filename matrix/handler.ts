@@ -559,6 +559,20 @@ export const handleMessage = async (event) => {
   }
 };
 
+const onGroupUserJoin = async (invitedUser: event, roomId: string) => {
+  const invitedUserId = invitedUser.content.userId;
+
+  const profileResponse = await getProfile(invitedUserId);
+  const { displayname } = await profileResponse.json();
+  const roomInviteUser = await createRoomInviteUser(displayname, invitedUserId, roomId);
+
+  const joinMessage = `Hello! I am your group's user! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to talk to each other.`
+  sendMessageAsUser(invitedUser.content.user, roomId, joinMessage);
+  const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${invitedUser.content.editToken}`;
+  const editMessage = `Use ${editLink} to edit my display name and profile picture`;
+  sendMessageAsUser(invitedUser.content.user, roomId, editMessage);
+}
+
 const onInviteUserJoin = async (invitedUser: event, roomId: string) => {
   const originalGroupUser = await getItem("userId", invitedUser.content.originalUserId);
   const profileResponse = await getProfile(invitedUser.content.originalUserId);
@@ -575,7 +589,10 @@ const onInviteUserJoin = async (invitedUser: event, roomId: string) => {
   if (!existingInviteUser) {
     const groupName = await getRoomName(roomId, invitedUser.content.user.access_token);
     const groupUser = await createGroupUser(groupName);
-    inviteAsUser(invitedUser.content.user, groupUser, roomId);
+    await inviteAsUser(invitedUser.content.user, groupUser, roomId); //here the group user joins and the race starts
+    await join(groupUser, roomId);
+    const bigGroupUser = await getItem("userId", groupUser.user_id, "spacetube.group.user");
+    await onGroupUserJoin(bigGroupUser, roomId);
     invite(groupUser, tubeIntermediary);
   }
   else {
@@ -594,9 +611,15 @@ export const handleInvite = async (event) => {
     const spacetubeBotInvited = event.sender.includes("@space-tube-bot");
 
     if (invitedUser) {
-      await join(invitedUser.content.user, event.room_id);
+      const joinResponse = await join(invitedUser.content.user, event.room_id);
+      const joinResult = await joinResponse.json();
+
 
       if (!spacetubeBotInvited && invitedUser.type === "spacetube.group.user") {
+        //check group membership
+        console.log(joinResult);
+
+        /*
         const profileResponse = await getProfile(invitedUserId);
         const { displayname } = await profileResponse.json();
         const roomInviteUser = await createRoomInviteUser(displayname, invitedUserId, event.room_id);
@@ -606,6 +629,7 @@ export const handleInvite = async (event) => {
         const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${invitedUser.content.editToken}`;
         const editMessage = `Use ${editLink} to edit my display name and profile picture`;
         sendMessageAsUser(invitedUser.content.user, event.room_id, editMessage);
+        */
       }
 
       if (!spacetubeBotInvited && invitedUser.type === "spacetube.group.invite") {
@@ -661,7 +685,6 @@ export const createInvitationReceivedRoom = async (groupName: string, inviteUser
   const toRoom: room = await createToRoomResponse.json() as room;
 
   const invitedUser = await getItem("userId", inviteUserId);
-  console.log("invitedUser create invitationroom", invitedUser)
   await invite(invitedUser.content.user, toRoom.room_id);
   await join(invitedUser.content.user, toRoom.room_id);
   await onInviteUserJoin(invitedUser, toRoom.room_id);
