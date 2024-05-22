@@ -97,24 +97,45 @@ app.post("/api/register", async (req, res) => {
     const userRegistration = await registerUser(req.body.userName);
     const user = await userRegistration.json() as user;
 
-    console.log("user registration")
-
     await setDisplayName(user, req.body.userName);
-
-    console.log("linkevent", linkEvent)
 
     const matrixRoomId = linkEvent.content.roomId;
     const inviteUser = await getItem("roomId", matrixRoomId, "spacetube.group.invite");
-    console.log("inviteUser", inviteUser)
-    const groupUser = await getItem("userId", inviteUser.content.originalUserId, "spacetube.group.user");
-    console.log("groupUser", groupUser)
-    await inviteAsUser(groupUser.content.user, user, linkEvent.content.roomId);
-    await join(user, linkEvent.content.roomId);
 
-    res.send({
-      success: true,
-      ...user,
-    });
+    const inviteWebUser = async (inviteUser) => {
+      const groupUser = await getItem("userId", inviteUser.content.originalUserId, "spacetube.group.user");
+      await inviteAsUser(groupUser.content.user, user, linkEvent.content.roomId);
+      await join(user, linkEvent.content.roomId);
+    }
+
+    if (inviteUser) {
+      await inviteWebUser(inviteUser);
+
+      res.send({
+        success: true,
+        ...user,
+      });
+    }
+    else {
+      setTimeout(async () => {
+        const inviteUser = await getItem("roomId", matrixRoomId, "spacetube.group.invite");
+
+        if (inviteUser) {
+          await inviteWebUser(inviteUser);
+
+          res.send({
+            success: true,
+            ...user,
+          });
+        }
+        else {
+          res.send({
+            success: false
+          });
+        }
+      }, 3000);
+    }
+
   } else {
     res.send({
       success: false,
