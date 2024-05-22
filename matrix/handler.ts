@@ -617,7 +617,9 @@ export const handleInvite = async (event) => {
 
       if (!spacetubeBotInvited && invitedUser.type === "spacetube.group.user") {
         //check group membership
-        console.log(joinResult);
+        console.log("join result", joinResult);
+
+        //then do on join if added by human
 
         /*
         const profileResponse = await getProfile(invitedUserId);
