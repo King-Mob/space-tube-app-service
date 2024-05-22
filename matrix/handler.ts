@@ -494,7 +494,9 @@ const handleFormat = async (event) => {
     }
     if (user.type === "spacetube.group.user") {
       if (body.includes("link")) {
-        commands.link(event.room_id, event.sender, user.content.user);
+        const profileResponse = await getProfile(event.sender);
+        const { displayname } = await profileResponse.json();
+        commands.link(event.room_id, displayname, user.content.user);
       }
       if (body.includes("profile")) {
         const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${user.content.editToken}`;
@@ -537,7 +539,9 @@ export const handleMessage = async (event) => {
   }
 
   if (message.includes("!spacetube link")) {
-    commands.link(event.room_id, event.sender);
+    const profileResponse = await getProfile(event.sender);
+    const { displayname } = await profileResponse.json();
+    commands.link(event.room_id, displayname);
     return;
   }
 

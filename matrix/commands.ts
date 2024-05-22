@@ -33,7 +33,7 @@ const connect = async (event) => {
     }
 }
 
-const link = async (roomId: string, sender: string, groupUser = null) => {
+const link = async (roomId: string, name: string, groupUser = null) => {
     let linkEvent = await getItem("roomId", roomId, "spacetube.link");
     let linkToken;
     if (!linkEvent) {
@@ -48,10 +48,7 @@ const link = async (roomId: string, sender: string, groupUser = null) => {
         linkToken = linkEvent.content.linkToken;
     }
 
-    const profileResponse = await getProfile(sender);
-    const profile = await profileResponse.json();
-
-    const linkMessage = `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${profile.displayname}`;
+    const linkMessage = `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${name}`;
 
     if (groupUser) {
         sendMessageAsUser(groupUser, roomId, linkMessage);
