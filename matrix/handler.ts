@@ -24,7 +24,8 @@ import {
   join,
   joinAsSpaceTube,
   getRoomsList,
-  leaveRoom
+  leaveRoom,
+  getProfile
 } from "./matrixClientRequests.js";
 import commands from "./commands.js";
 import { v4 as uuidv4 } from "uuid";
@@ -566,8 +567,9 @@ export const handleInvite = async (event) => {
       await join(invitedUser.content.user, event.room_id);
 
       if (!spacetubeBotInvited && invitedUser.type === "spacetube.group.user") {
-        const name = await getDisplayNameAsUser(invitedUser.content.user, event.room_id, invitedUserId);
-        const roomInviteUser = await createRoomInviteUser(name, invitedUserId, event.room_id);
+        const profileResponse = await getProfile(invitedUserId);
+        const { displayname } = await profileResponse.json();
+        const roomInviteUser = await createRoomInviteUser(displayname, invitedUserId, event.room_id);
 
         const joinMessage = `Hello! I am your group's user! Ask other groups to invite ${roomInviteUser.user_id} to their rooms to talk to each other.`
         sendMessageAsUser(invitedUser.content.user, event.room_id, joinMessage);
