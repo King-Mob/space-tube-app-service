@@ -661,6 +661,7 @@ export const createInvitationReceivedRoom = async (groupName: string, inviteUser
   const toRoom: room = await createToRoomResponse.json() as room;
 
   const invitedUser = await getItem("userId", inviteUserId);
+  console.log("invitedUser create invitationroom", invitedUser)
   await invite(invitedUser.content.user, toRoom.room_id);
   await join(invitedUser.content.user, toRoom.room_id);
   await onInviteUserJoin(invitedUser, toRoom.room_id);

@@ -334,6 +334,8 @@ app.post("/api/invite/accept", async (req, res) => {
   if (invitation) {
     const toRoom = await createInvitationReceivedRoom(groupName, invitation.content.inviteUserId);
 
+    console.log(toRoom)
+
     const { linkToken } = await commands.link(toRoom.room_id, myName);
     res.send({ success: true, invitation, linkToken });
   }
