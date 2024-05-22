@@ -10,7 +10,6 @@ import {
   storeItemShared,
   getDisplayName,
   getItemIncludes,
-  getDisplayNameAsUser,
 } from "./storage.js";
 import {
   sendMessage,
@@ -584,8 +583,9 @@ export const handleInvite = async (event) => {
 
       if (invitedUser.type === "spacetube.group.invite") {
         const originalGroupUser = await getItem("userId", invitedUser.content.originalUserId);
-        const cloneName = await getDisplayNameAsUser(originalGroupUser.content.user, invitedUser.content.roomId, invitedUser.content.originalUserId);
-        const groupCloneUser = await createGroupCloneUser(cloneName, invitedUser.content.originalUserId, event.room_id);
+        const profileResponse = await getProfile(invitedUser.content.originalUserId);
+        const { displayname } = await profileResponse.json();
+        const groupCloneUser = await createGroupCloneUser(displayname, invitedUser.content.originalUserId, event.room_id);
         inviteAsUser(invitedUser.content.user, groupCloneUser, event.room_id);
 
         const tubeIntermediary = await createTubeIntermediary(event.room_id, invitedUser.content.roomId);
