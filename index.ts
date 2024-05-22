@@ -201,6 +201,7 @@ app.get("/api/tubeInfo/userIds", async (req, res) => {
     const cloneIds = cloneUsers.map(cloneUser => cloneUser.content.userId);
 
     const inviteUser = await getItem("roomId", matrixRoomId, "spacetube.group.invite");
+    console.log("inviteuser later", inviteUser)
     const groupUser = await getItem("userId", inviteUser.content.originalUserId, "spacetube.group.user");
 
     res.send({
