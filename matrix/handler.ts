@@ -615,7 +615,7 @@ export const handleInvite = async (event) => {
 
       if (!spacetubeBotInvited && invitedUser.type === "spacetube.group.user") {
         const joinedRoomsResponse = await getJoinedRooms(invitedUser.content.user);
-        const joinedRooms = await joinedRoomsResponse.json();
+        const { joinedRooms } = await joinedRoomsResponse.json();
 
         if (!joinedRooms.includes(event.room_id)) {
           await join(invitedUser.content.user, event.room_id);
