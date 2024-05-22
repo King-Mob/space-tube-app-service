@@ -117,7 +117,9 @@ app.post("/api/register", async (req, res) => {
       });
     }
     else {
+      console.log("waiting 3000 ms")
       setTimeout(async () => {
+        console.log("wait over")
         const inviteUser = await getItem("roomId", matrixRoomId, "spacetube.group.invite");
 
         if (inviteUser) {
