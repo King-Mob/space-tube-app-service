@@ -278,6 +278,7 @@ app.post("/api/invite/create", async (req, res) => {
   const { name, groupUserId, groupName } = req.body;
 
   const { inviteUser, roomId } = await createInvitationRoom(groupUserId, groupName);
+  console.log(roomId);
   const { linkToken } = await linkAsSpacetube(roomId, name);
 
   storeItem({
