@@ -621,7 +621,7 @@ const onCloneUserJoin = (invitedUser: event, roomId: string) => {
   sendMessageAsUser(invitedUser.content.user, roomId, joinMessage);
 }
 
-export const handleInvite = async (event: event) => {
+export const handleInvite = async (event) => {
   if (event.content.membership === "invite") {
     const invitedBySpacetubeBot = event.sender.includes("@space-tube-bot");
     const invitedBySpacetubeUser = event.sender.includes("@_space-tube");

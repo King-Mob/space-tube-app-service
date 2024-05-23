@@ -9,7 +9,7 @@ import {
 } from "./types.js";
 import {
   registerUser,
-  inviteAsUser,
+  inviteAsUserRequest,
   join,
   setDisplayName,
   sync,
@@ -104,7 +104,7 @@ app.post("/api/register", async (req, res) => {
 
     const inviteWebUser = async (inviteUser) => {
       const groupUser = await getItem("userId", inviteUser.content.originalUserId, "spacetube.group.user");
-      await inviteAsUser(groupUser.content.user, user, linkEvent.content.roomId);
+      await inviteAsUserRequest(groupUser.content.user, user, linkEvent.content.roomId);
       await join(user, linkEvent.content.roomId);
     }
 

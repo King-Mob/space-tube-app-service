@@ -6,7 +6,7 @@ import {
 import { storeItem, getItem, getDisplayName } from "../matrix/storage.js";
 import {
   createRoom,
-  invite,
+  inviteAsSpacetubeRequest,
   join,
   registerUser,
   sendMessageAsUser,
@@ -170,7 +170,7 @@ export const startDiscord = (app) => {
         });
       }
 
-      await invite(user, room.room_id);
+      await inviteAsSpacetubeRequest(user, room.room_id);
       await join(user, room.room_id);
 
       sendMessageAsUser(user, room.room_id, "!spacetube create");
