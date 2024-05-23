@@ -3,6 +3,7 @@ import { event } from "../types";
 import { RoomMemberEvent, RoomEvent, ClientEvent } from "matrix-js-sdk";
 import { getDisplayName, getItem, storeItem } from "../matrix/storage.js";
 import { joinAsSpaceTube, getRoomState, registerUser, join, inviteAsSpacetubeRequest } from "../matrix/matrixClientRequests.js";
+import { inviteAsUser } from "../matrix/handler.js";
 
 const { HOME_SERVER, WHATSAPP_HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_PASSWORD, WHATSAPP_ACCESS_TOKEN } = process.env;
 
@@ -30,7 +31,16 @@ export const joinAsSpacetubeWhatsapp = async (roomId: string) => {
 export const handleFormatWhatsapp = async (event: event) => {
     console.log("handling formatted message with whatsapp");
 
-    console.log(event.type);
+    const message = event.content.body;
+
+    if (message.includes("invite")) {
+        const partsOfMessage = message.split(" ");
+        const inviteUserId = partsOfMessage[partsOfMessage.length - 1];
+
+        const inviteUser = await getItem("userId", inviteUserId, "spacetube.group.invite");
+
+        inviteAsUser(spacetubeWhatsappUser, inviteUser.content.user, event.room_id);
+    }
 }
 
 export const startWhatsapp = async () => {
