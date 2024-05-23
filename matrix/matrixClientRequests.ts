@@ -115,7 +115,7 @@ export const setProfilePicture = (user: user, avatar_url: string) => {
   );
 };
 
-export const invite = (user: user, roomId: string) => {
+export const inviteAsSpacetubeRequest = (user: user, roomId: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@space-tube-bot:${HOME_SERVER}`,
     {
@@ -131,7 +131,7 @@ export const invite = (user: user, roomId: string) => {
   );
 };
 
-export const inviteAsUser = (inviter: user, invitee: user, roomId: string) => {
+export const inviteAsUserRequest = (inviter: user, invitee: user, roomId: string) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite`,
     {
