@@ -249,7 +249,8 @@ const updateTubeIntermediary = async (tubeInterRoomId: string, newRoomId: string
 
   const oldConnectedRooms = tubeIntermediary.content.connectedRooms.slice();
   console.log("old cnnctedrooms", oldConnectedRooms);
-  const connectedRooms = oldConnectedRooms.push(newRoomId).sort();
+  const connectedRooms = oldConnectedRooms.push(newRoomId);
+  connectedRooms.sort();
   console.log("new cnnctedrooms", connectedRooms);
 
   const tubeName = `open-${connectedRooms.join("-")}`;
