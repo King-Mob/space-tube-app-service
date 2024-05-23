@@ -3,13 +3,25 @@ import { RoomMemberEvent, RoomEvent, ClientEvent } from "matrix-js-sdk";
 import { getDisplayName, getItem, storeItem } from "../matrix/storage.js";
 import { joinAsSpaceTube, getRoomState, registerUser, join, inviteAsSpacetubeRequest } from "../matrix/matrixClientRequests.js";
 
-const { HOME_SERVER, WHATSAPP_HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_PASSWORD } = process.env;
+const { HOME_SERVER, WHATSAPP_HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_PASSWORD, WHATSAPP_ACCESS_TOKEN } = process.env;
 
 let client;
+
+const spacetubeWhatsappUser = {
+    user_id: `@${WHATSAPP_USER_ID}:${WHATSAPP_HOME_SERVER}`,
+    access_token: WHATSAPP_ACCESS_TOKEN
+};
 
 export const handleWhatsapp = (event) => {
     console.log("handlnig whatsapp");
     console.log(event);
+}
+
+export const joinAsSpacetubeWhatsapp = (roomId: string) => {
+    join(spacetubeWhatsappUser, roomId);
+    //on join, create the group user
+    //create invite code
+    //other stuff
 }
 
 export const startWhatsapp = async () => {

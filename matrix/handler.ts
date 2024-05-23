@@ -30,7 +30,7 @@ import commands from "./commands.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendMessageDiscord } from "../discord/index.js";
 import { sendMessageWhatsapp } from "../whatsapp/index.js";
-import { handleWhatsapp } from "../whatsapp/index.js";
+import { handleWhatsapp, joinAsSpacetubeWhatsapp } from "../whatsapp/index.js";
 
 const { HOME_SERVER } = process.env;
 
@@ -700,6 +700,11 @@ export const handleInvite = async (event) => {
 
     if (invitedUserId.includes("@space-tube-bot")) {
       joinAsSpaceTube(event.room_id);
+      return;
+    }
+
+    if (invitedUserId.includes("@spacetube-whatsapp")) {
+      joinAsSpacetubeWhatsapp(event.room_id);
       return;
     }
 
