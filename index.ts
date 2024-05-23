@@ -49,6 +49,7 @@ as.on("event", (event) => {
       handleMessage(event);
       break;
     case "m.room.member":
+      console.log("invitation", event)
       handleInvite(event);
       break;
     case "spacetube.remote.open":
