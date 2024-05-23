@@ -1,4 +1,5 @@
 import * as sdk from "matrix-js-sdk";
+import { event } from "../types";
 import { RoomMemberEvent, RoomEvent, ClientEvent } from "matrix-js-sdk";
 import { getDisplayName, getItem, storeItem } from "../matrix/storage.js";
 import { joinAsSpaceTube, getRoomState, registerUser, join, inviteAsSpacetubeRequest } from "../matrix/matrixClientRequests.js";
@@ -12,16 +13,24 @@ const spacetubeWhatsappUser = {
     access_token: WHATSAPP_ACCESS_TOKEN
 };
 
-export const handleWhatsapp = (event) => {
+export const handleWhatsapp = async (event) => {
     console.log("handlnig whatsapp");
     console.log(event);
 }
 
-export const joinAsSpacetubeWhatsapp = (roomId: string) => {
-    join(spacetubeWhatsappUser, roomId);
-    //on join, create the group user
-    //create invite code
-    //other stuff
+export const joinAsSpacetubeWhatsapp = async (roomId: string) => {
+    await join(spacetubeWhatsappUser, roomId);
+    //create the group user
+    //does adding to whatsapp matrix group break everything like we thought?
+    //create invite user
+    //send invite user to group
+
+}
+
+export const handleFormatWhatsapp = async (event: event) => {
+    console.log("handling formatted message with whatsapp");
+
+    console.log(event.type);
 }
 
 export const startWhatsapp = async () => {
