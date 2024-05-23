@@ -247,7 +247,10 @@ const updateTubeIntermediary = async (tubeInterRoomId: string, newRoomId: string
 
   const tubeIntermediary = await getItem("tubeIntermediary", tubeInterRoomId, "spacetube.open");
 
-  const connectedRooms = tubeIntermediary.content.connectedRooms.push(newRoomId).sort();
+  const oldConnectedRooms = tubeIntermediary.content.connectedRooms.slice();
+  console.log("old cnnctedrooms", oldConnectedRooms);
+  const connectedRooms = oldConnectedRooms.push(newRoomId).sort();
+  console.log("new cnnctedrooms", connectedRooms);
 
   const tubeName = `open-${connectedRooms.join("-")}`;
 
