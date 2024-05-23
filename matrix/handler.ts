@@ -243,6 +243,8 @@ const createTubeIntermediary = async (roomId1: string, roomId2: string) => {
 }
 
 const updateTubeIntermediary = async (tubeInterRoomId: string, newRoomId: string) => {
+  console.log("updating tube intermediary")
+
   const tubeIntermediary = await getItem("tubeIntermediary", tubeInterRoomId, "spacetube.open");
 
   const connectedRooms = tubeIntermediary.content.connectedRooms.push(newRoomId).sort();
@@ -654,6 +656,8 @@ const onInviteUserJoin = async (invitedUser: event, roomId: string) => {
   let tubeInterRoomId;
 
   const tubeIntermediary = await getItemIncludes("connectedRooms", invitedUser.content.roomId);
+
+  console.log("tube intermediary", tubeIntermediary)
   if (tubeIntermediary) {
     tubeInterRoomId = tubeIntermediary.content.roomId;
     updateTubeIntermediary(tubeInterRoomId, roomId);
