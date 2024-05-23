@@ -4,6 +4,7 @@ import {
     event,
     user
 } from "../types.js";
+import { access } from 'fs';
 
 const { HOME_SERVER, APPLICATION_TOKEN, MANAGEMENT_ROOM_ID } = process.env
 
@@ -103,7 +104,6 @@ export const getItemIncludes = async (key, value) => {
 }
 
 export const getAllItemIncludes = async (key, value) => {
-
     const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/messages?limit=10000&dir=b`, {
         headers: {
             'Content-Type': 'application/json',
@@ -177,4 +177,16 @@ export const getDisplayNameAsUser = async (user: user, sharedRoomId: string, use
     }
 
     return displayName;
+}
+
+export const removeItem = async (eventId: string, reason: string) => {
+    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/redact/${eventId}/${uuidv4()}`, {
+        method: "PUT",
+        body: JSON.stringify({
+            reason
+        }),
+        headers: {
+            "Authorization": `Bearer ${APPLICATION_TOKEN}`
+        }
+    })
 }

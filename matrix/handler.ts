@@ -10,6 +10,7 @@ import {
   storeItemShared,
   getDisplayName,
   getItemIncludes,
+  removeItem
 } from "./storage.js";
 import {
   sendMessage,
@@ -239,6 +240,22 @@ const createTubeIntermediary = async (roomId1: string, roomId2: string) => {
   });
 
   return tubeRoom.room_id;
+}
+
+const updateTubeIntermediary = async (tubeInterRoomId: string, newRoomId: string) => {
+  const tubeIntermediary = await getItem("tubeIntermediary", tubeInterRoomId, "spacetube.open");
+
+  const connectedRooms = tubeIntermediary.content.connectedRooms.push(newRoomId).sort();
+
+  const tubeName = `open-${connectedRooms.join("-")}`;
+
+  await removeItem(tubeIntermediary.event_id, "updating tube intermediary");
+  storeItem({
+    name: tubeName,
+    type: "spacetube.open",
+    tubeIntermediary: tubeInterRoomId,
+    connectedRooms,
+  });
 }
 
 export const connectOtherInstance = async (
@@ -634,24 +651,32 @@ const onInviteUserJoin = async (invitedUser: event, roomId: string) => {
       onCloneUserJoin(bigCloneUser, roomId);
     })
 
-  //for multi-tube, this needs to check for a tube intermediary existing already
-  const tubeIntermediary = await createTubeIntermediary(roomId, invitedUser.content.roomId);
+  let tubeInterRoomId;
 
-  inviteAsSpacetube(originalGroupUser.content.user, tubeIntermediary);
+  const tubeIntermediary = await getItemIncludes("connectedRooms", invitedUser.content.roomId);
+  if (tubeIntermediary) {
+    tubeInterRoomId = tubeIntermediary.content.roomId;
+    updateTubeIntermediary(tubeInterRoomId, roomId);
+  }
+  else {
+    tubeInterRoomId = await createTubeIntermediary(roomId, invitedUser.content.roomId);
+  }
+
+  inviteAsSpacetube(originalGroupUser.content.user, tubeInterRoomId);
 
   const existingInviteUser = await getItem("roomId", roomId, "spacetube.group.invite");
 
   if (!existingInviteUser) {
     const groupName = await getRoomName(roomId, invitedUser.content.user.access_token);
     const groupUser = await createGroupUser(groupName);
-    inviteAsSpacetube(groupUser, tubeIntermediary);
+    inviteAsSpacetube(groupUser, tubeInterRoomId);
     await inviteAsUser(invitedUser.content.user, groupUser, roomId);
     const bigGroupUser = await getItem("userId", groupUser.user_id, "spacetube.group.user");
     await onGroupUserJoin(bigGroupUser, roomId);
   }
   else {
     const groupUser = await getItem("userId", existingInviteUser.content.originalGroupUser, "spacetube.group.user");
-    inviteAsSpacetube(groupUser.content.user, tubeIntermediary);
+    inviteAsSpacetube(groupUser.content.user, tubeInterRoomId);
   }
 
   leaveRoom(invitedUser.content.user, roomId);
