@@ -42,7 +42,7 @@ as.on("http-log", (event) => {
 });
 
 as.on("event", (event) => {
-  //console.log("event received", event);
+  console.log("event received", event);
 
   switch (event.type) {
     case "m.room.message":
