@@ -348,8 +348,35 @@ export const handleRemoteOpen = async (event) => {
 };
 
 const handleMessageLocalTube = async (tubeIntermediary: event, event: event, message: string) => {
-  const name = await getDisplayName(event.room_id, event.sender);
+  //const name = await getDisplayName(event.room_id, event.sender);
 
+  const inviteUser = await getItem("originalUserId", event.sender, "spacetube.group.invite");
+  const homeRoom = inviteUser.content.roomId;
+
+  const { connectedRooms } = tubeIntermediary.content;
+
+  for (const roomId of connectedRooms) {
+    if (roomId !== homeRoom) {
+      const groupCloneUsers = await getAllItems("roomId", roomId, "spacetube.group.clone");
+      const groupCloneUser = groupCloneUsers.find(clone => clone.content.originalUserId === event.sender);
+      if (groupCloneUser) {
+        sendMessageAsUser(groupCloneUser.content.user, roomId, message);
+      }
+      else {
+        const profileResponse = await getProfile(event.sender);
+        const { displayname } = await profileResponse.json();
+        const groupCloneUser = await createGroupCloneUser(displayname, event.sender, roomId);
+        const receivingGroupInviteUser = await getItem("roomId", roomId, "spacetube.group.invite");
+        const receivingGroupUser = await getItem("userId", receivingGroupInviteUser.content.originalUserId, "spacetube.group.user");
+        await inviteAsUser(receivingGroupUser.content.user, groupCloneUser, roomId);
+        const bigCloneUser = await getItem("userId", groupCloneUser.user_id, "spacetube.group.clone");
+        onCloneUserJoin(bigCloneUser, roomId);
+        sendMessageAsUser(groupCloneUser, roomId, message);
+      }
+    }
+  }
+
+  /*
   const clones = await getAllItems("originalUserId", event.sender, "spacetube.group.clone");
 
   console.log(clones)
@@ -386,6 +413,7 @@ const handleMessageLocalTube = async (tubeIntermediary: event, event: event, mes
   }
 
   sendMessageAsUser(cloneUser, cloneUserRoomId, message);
+  */
 };
 
 const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
