@@ -249,7 +249,7 @@ const updateTubeIntermediary = async (tubeInterRoomId: string, newRoomId: string
 
   const oldConnectedRooms = tubeIntermediary.content.connectedRooms.slice();
   console.log("old cnnctedrooms", oldConnectedRooms);
-  const connectedRooms = oldConnectedRooms.push(newRoomId);
+  const connectedRooms = oldConnectedRooms.concat([newRoomId]);
   connectedRooms.sort();
   console.log("new cnnctedrooms", connectedRooms);
 
