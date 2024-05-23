@@ -726,7 +726,8 @@ export const createInvitationRoom = async (groupUserId: string, groupName: strin
   const createFromRoomResponse = await createRoom(groupName);
   const room: room = await createFromRoomResponse.json() as room;
 
-  await inviteAsSpacetube({ user_id: groupUserId, access_token: "" }, room.room_id);
+  const groupUser = await getItem("userId", groupUserId, "spacetube.group.user");
+  await inviteAsSpacetube(groupUser.content.user, room.room_id);
 
   const inviteUser = await createRoomInviteUser(groupName, groupUserId, room.room_id);
 
