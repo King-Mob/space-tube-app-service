@@ -43,6 +43,9 @@ as.on("http-log", (event) => {
 
 as.on("event", (event) => {
   //console.log("event received", event);
+  if (event.sender === "@whatsappbot:spacetu.be") {
+    console.log("whatsapp bot event", event)
+  }
 
   switch (event.type) {
     case "m.room.message":
