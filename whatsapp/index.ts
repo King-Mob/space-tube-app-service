@@ -36,6 +36,7 @@ export const handleFormatWhatsapp = async (event: event) => {
     if (message.includes("invite")) {
         const partsOfMessage = message.split(" ");
         const inviteUserId = partsOfMessage[partsOfMessage.length - 1];
+        console.log("invite user id", inviteUserId);
 
         const inviteUser = await getItem("userId", inviteUserId, "spacetube.group.invite");
 
