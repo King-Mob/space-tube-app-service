@@ -4,6 +4,7 @@
   "description": "a matrix application service to run a space tube instance",
   "scripts": {
     "start": "node dist-server/index.js",
+    "startpm2": "pm2 start dist-server/index.js --name spacetube",
     "register": "node registerService.js",
     "setup": "node dist-server/matrix/setup.js",
     "register-discord": "node discord/registerDiscord.js",
