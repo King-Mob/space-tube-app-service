@@ -7,6 +7,11 @@ const { HOME_SERVER, WHATSAPP_HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_PASSWORD }
 
 let client;
 
+export const handleWhatsapp = (event) => {
+    console.log("handlnig whatsapp");
+    console.log(event);
+}
+
 export const startWhatsapp = async () => {
     client = sdk.createClient({ baseUrl: `https://matrix.${WHATSAPP_HOME_SERVER}` });
 

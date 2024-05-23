@@ -30,6 +30,7 @@ import commands from "./commands.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendMessageDiscord } from "../discord/index.js";
 import { sendMessageWhatsapp } from "../whatsapp/index.js";
+import { handleWhatsapp } from "../whatsapp/index.js";
 
 const { HOME_SERVER } = process.env;
 
@@ -579,6 +580,11 @@ export const handleMessage = async (event) => {
   if (event.sender === `@space-tube-bot:${HOME_SERVER}`) return;
 
   if (event.sender === `@spacetube-whatsapp:${HOME_SERVER}`) return;
+
+  if (event.sender.includes("@whatsapp")) {
+    handleWhatsapp(event);
+    return;
+  }
 
   const message = event.content.body;
 
