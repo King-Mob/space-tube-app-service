@@ -37,7 +37,7 @@ const inviteAsSpacetube = async (invitee: user, roomId: string) => {
   await join(invitee, roomId);
 }
 
-const inviteAsUser = async (inviter: user, invitee: user, roomId) => {
+export const inviteAsUser = async (inviter: user, invitee: user, roomId) => {
   await inviteAsUserRequest(inviter, invitee, roomId);
   await join(invitee, roomId);
 }
@@ -459,6 +459,49 @@ export const handleTubeMessage = async (tubesOpen, event) => {
   sendMessageAsUser(user, event.room_id, message);
 }
 
+export const linkAsSpacetube = async (roomId: string, name: string) => {
+  let linkEvent = await getItem("roomId", roomId, "spacetube.link");
+  let linkToken;
+  if (!linkEvent) {
+    const newLinkToken = uuidv4();
+    await storeItem({
+      type: "spacetube.link",
+      linkToken: newLinkToken,
+      roomId: roomId,
+    });
+    linkToken = newLinkToken;
+  } else {
+    linkToken = linkEvent.content.linkToken;
+  }
+
+  const linkMessage = `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${name}`;
+
+  sendMessage(roomId, linkMessage);
+
+  return { homeServer: HOME_SERVER, linkToken };
+}
+
+export const linkAsUser = async (roomId: string, name: string, groupUser = null) => {
+  let linkEvent = await getItem("roomId", roomId, "spacetube.link");
+  let linkToken;
+  if (!linkEvent) {
+    const newLinkToken = uuidv4();
+    await storeItem({
+      type: "spacetube.link",
+      linkToken: newLinkToken,
+      roomId: roomId,
+    });
+    linkToken = newLinkToken;
+  } else {
+    linkToken = linkEvent.content.linkToken;
+  }
+
+  const linkMessage = `Use this link to view the room: https://spacetube.${HOME_SERVER}/?linkToken=${linkToken}&name=${name}`;
+  sendMessageAsUser(groupUser, roomId, linkMessage);
+
+  return { homeServer: HOME_SERVER, linkToken };
+};
+
 const handleFormat = async (event) => {
   const body = event.content.formatted_body;
 
@@ -502,7 +545,7 @@ const handleFormat = async (event) => {
       if (body.includes("link")) {
         const profileResponse = await getProfile(event.sender);
         const { displayname } = await profileResponse.json();
-        commands.link(event.room_id, displayname, user.content.user);
+        linkAsUser(event.room_id, displayname, user.content.user);
       }
       if (body.includes("profile")) {
         const editLink = `https://spacetube.${HOME_SERVER}/?groupUserEditToken=${user.content.editToken}`;
@@ -547,7 +590,7 @@ export const handleMessage = async (event) => {
   if (message.includes("!spacetube link")) {
     const profileResponse = await getProfile(event.sender);
     const { displayname } = await profileResponse.json();
-    commands.link(event.room_id, displayname);
+    linkAsSpacetube(event.room_id, displayname);
     return;
   }
 
@@ -602,11 +645,9 @@ const onInviteUserJoin = async (invitedUser: event, roomId: string) => {
     const groupName = await getRoomName(roomId, invitedUser.content.user.access_token);
     const groupUser = await createGroupUser(groupName);
     inviteAsSpacetube(groupUser, tubeIntermediary);
-    inviteAsUser(invitedUser.content.user, groupUser, roomId)
-      .then(async () => {
-        const bigGroupUser = await getItem("userId", groupUser.user_id, "spacetube.group.user");
-        onGroupUserJoin(bigGroupUser, roomId);
-      })
+    await inviteAsUser(invitedUser.content.user, groupUser, roomId);
+    const bigGroupUser = await getItem("userId", groupUser.user_id, "spacetube.group.user");
+    await onGroupUserJoin(bigGroupUser, roomId);
   }
   else {
     const groupUser = await getItem("userId", existingInviteUser.content.originalGroupUser, "spacetube.group.user");

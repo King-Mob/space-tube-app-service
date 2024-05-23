@@ -9,8 +9,6 @@ import {
 } from "./types.js";
 import {
   registerUser,
-  inviteAsUserRequest,
-  join,
   setDisplayName,
   sync,
   uploadImage,
@@ -20,12 +18,14 @@ import {
   getDisplayNames
 } from "./matrix/matrixClientRequests.js";
 import {
+  inviteAsUser,
   handleMessage,
   handleInvite,
   handleRemoteOpen,
   createGroupUser,
   createInvitationRoom,
-  createInvitationReceivedRoom
+  createInvitationReceivedRoom,
+  linkAsSpacetube
 } from "./matrix/handler.js";
 import commands from "./matrix/commands.js";
 import { getItem, getItemIncludes, getAllItems, storeItem } from "./matrix/storage.js";
@@ -102,45 +102,17 @@ app.post("/api/register", async (req, res) => {
     const matrixRoomId = linkEvent.content.roomId;
     const inviteUser = await getItem("roomId", matrixRoomId, "spacetube.group.invite");
 
-    const inviteWebUser = async (inviteUser) => {
-      const groupUser = await getItem("userId", inviteUser.content.originalUserId, "spacetube.group.user");
-      await inviteAsUserRequest(groupUser.content.user, user, linkEvent.content.roomId);
-      await join(user, linkEvent.content.roomId);
-    }
-
     if (inviteUser) {
-      await inviteWebUser(inviteUser);
+      const groupUser = await getItem("userId", inviteUser.content.originalUserId, "spacetube.group.user");
+      await inviteAsUser(groupUser.content.user, user, linkEvent.content.roomId);
 
       res.send({
         success: true,
         ...user,
       });
     }
-    else {
-      console.log("where timer would be")
-      /*
-      setTimeout(async () => {
-        console.log("wait over")
-        const inviteUser = await getItem("roomId", matrixRoomId, "spacetube.group.invite");
-
-        if (inviteUser) {
-          await inviteWebUser(inviteUser);
-
-          res.send({
-            success: true,
-            ...user,
-          });
-        }
-        else {
-          res.send({
-            success: false
-          });
-        }
-      }, 3000);
-      */
-    }
-
   } else {
+    console.log("no invite user found");
     res.send({
       success: false,
       message: "No room active with that link token",
@@ -306,16 +278,7 @@ app.post("/api/invite/create", async (req, res) => {
   const { name, groupUserId, groupName } = req.body;
 
   const { inviteUser, roomId } = await createInvitationRoom(groupUserId, groupName);
-  const { linkToken } = await commands.link(roomId, name);
-
-  storeItem({
-    type: "spacetube.create.invite",
-    from: {
-      name,
-      groupUserId,
-    },
-    inviteUserId: inviteUser.user_id,
-  });
+  const { linkToken } = await linkAsSpacetube(roomId, name);
 
   const { URL } = process.env;
 
@@ -334,9 +297,7 @@ app.post("/api/invite/accept", async (req, res) => {
   if (invitation) {
     const toRoom = await createInvitationReceivedRoom(groupName, invitation.content.inviteUserId);
 
-    console.log(toRoom)
-
-    const { linkToken } = await commands.link(toRoom.room_id, myName);
+    const { linkToken } = await linkAsSpacetube(toRoom.room_id, myName);
     res.send({ success: true, invitation, linkToken });
   }
   else {
