@@ -708,7 +708,9 @@ export const handleInvite = async (event) => {
     }
 
     if (invitedUserId.includes("@spacetube-whatsapp")) {
+      console.log("spacetube whatsapp invited");
       joinAsSpacetubeWhatsapp(event.room_id);
+      console.log("attempting to join")
       return;
     }
 

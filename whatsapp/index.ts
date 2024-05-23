@@ -20,6 +20,7 @@ export const handleWhatsapp = async (event) => {
 }
 
 export const joinAsSpacetubeWhatsapp = async (roomId: string) => {
+    console.log("joinging", roomId)
     await join(spacetubeWhatsappUser, roomId);
     //create the group user
     //does adding to whatsapp matrix group break everything like we thought?
@@ -40,7 +41,8 @@ export const handleFormatWhatsapp = async (event: event) => {
 
         const inviteUser = await getItem("userId", inviteUserId, "spacetube.group.invite");
 
-        inviteAsUser(spacetubeWhatsappUser, inviteUser.content.user, event.room_id);
+        await inviteAsUser(spacetubeWhatsappUser, inviteUser.content.user, event.room_id);
+
     }
 }
 
