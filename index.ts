@@ -435,6 +435,8 @@ app.post("/api/mailinglist", (req, res) => {
 
   const MAILINGLIST_ROOM_ID = process.env;
 
+  console.log(MAILINGLIST_ROOM_ID)
+
   sendMessage(MAILINGLIST_ROOM_ID, address);
 
   res.send({ success: true });
