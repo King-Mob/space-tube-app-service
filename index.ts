@@ -15,7 +15,8 @@ import {
   setProfilePicture,
   getProfile,
   getImage,
-  getDisplayNames
+  getDisplayNames,
+  sendMessage
 } from "./matrix/matrixClientRequests.js";
 import {
   inviteAsUser,
@@ -422,6 +423,16 @@ app.put("/api/groupuser", imageUpload, async (req, res) => {
   else {
     res.send({ success: false, message: "No user with matching edit token" });
   }
+})
+
+app.post("/api/mailinglist", (req, res) => {
+  const { address } = req.body;
+
+  const MAILINGLIST_ROOM_ID = process.env;
+
+  sendMessage(MAILINGLIST_ROOM_ID, address);
+
+  res.send({ success: true });
 })
 
 if (process.env.DISCORD_TOKEN) {
