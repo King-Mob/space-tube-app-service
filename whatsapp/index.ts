@@ -22,7 +22,7 @@ export const handleWhatsapp = async (event) => {
 
     const groupCloneUser = await getItem("userId", event.sender, "spacetube.group.clone");
     if (groupCloneUser) {
-        const profileResponse = await getProfile(groupCloneUser.content.user);
+        const profileResponse = await getProfile(event.sender);
         const { displayname } = await profileResponse.json();
         sendMessageAsUser(spacetubeWhatsappUser, event.room_id, `🎭${displayname}🎭: ${event.content.body}`)
     }
