@@ -516,7 +516,11 @@ export const linkAsUser = async (roomId: string, name: string, groupUser = null)
 export const sendGroupUserMessage = async (event: event, body: string) => {
   const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
 
+  console.log("invite user", inviteUser)
+
   const groupUser = await getItem("userId", inviteUser.content.originalUserId);
+
+  console.log("gorup user", groupUser)
 
   const message = body.split("</a>: ")[1];
 
