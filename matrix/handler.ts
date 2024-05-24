@@ -46,8 +46,22 @@ export const inviteAsUser = async (inviter: user, invitee: user, roomId) => {
   await join(invitee, roomId);
 }
 
-export const getRoomName = async (roomId: string, token: string | null = null) => {
-  const roomStateResponse = await getRoomState(roomId, token);
+export const getRoomNameAsSpacetube = async (roomId: string) => {
+  const roomStateResponse = await getRoomState(roomId, null);
+  const roomState = await roomStateResponse.json() as event[];
+
+  let roomName = "default";
+
+  for (const roomEvent of roomState) {
+    if (roomEvent.type === "m.room.name")
+      roomName = roomEvent.content.name;
+  }
+
+  return roomName;
+}
+
+export const getRoomNameAsUser = async (user: user, roomId: string) => {
+  const roomStateResponse = await getRoomState(roomId, user.access_token);
   const roomState = await roomStateResponse.json() as event[];
 
   let roomName = "default";
@@ -554,7 +568,7 @@ const handleFormat = async (event) => {
 
   if (userId.includes("@space-tube-bot")) {
     if (body.includes("create")) {
-      const groupName = await getRoomName(event.room_id);
+      const groupName = await getRoomNameAsSpacetube(event.room_id);
       const groupUser = await createGroupUser(groupName);
 
       sendMessage(event.room_id, `Invite ${groupUser.user_id} to use in this group.`);
@@ -695,7 +709,7 @@ export const onInviteUserJoin = async (invitedUser: event, roomId: string) => {
   const existingInviteUser = await getItem("roomId", roomId, "spacetube.group.invite");
 
   if (!existingInviteUser) {
-    const groupName = await getRoomName(roomId, invitedUser.content.user.access_token);
+    const groupName = await getRoomNameAsUser(invitedUser.content.user, roomId);
     const groupUser = await createGroupUser(groupName);
     inviteAsSpacetube(groupUser, tubeInterRoomId);
     await inviteAsUser(invitedUser.content.user, groupUser, roomId);

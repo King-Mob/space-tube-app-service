@@ -1,9 +1,7 @@
-import * as sdk from "matrix-js-sdk";
 import { event } from "../types";
-import { RoomMemberEvent, RoomEvent, ClientEvent } from "matrix-js-sdk";
-import { getDisplayName, getItem, storeItem } from "../matrix/storage.js";
-import { joinAsSpaceTube, getRoomState, registerUser, join, inviteAsSpacetubeRequest, sendMessageAsUser, getProfile } from "../matrix/matrixClientRequests.js";
-import { inviteAsUser, onGroupUserJoin, onInviteUserJoin, createGroupUser, getRoomName, sendGroupUserMessage } from "../matrix/handler.js";
+import { getDisplayName, getItem, } from "../matrix/storage.js";
+import { join, sendMessageAsUser, getProfile } from "../matrix/matrixClientRequests.js";
+import { inviteAsUser, onGroupUserJoin, onInviteUserJoin, createGroupUser, sendGroupUserMessage, getRoomNameAsUser } from "../matrix/handler.js";
 
 const { HOME_SERVER, WHATSAPP_HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_PASSWORD, WHATSAPP_ACCESS_TOKEN } = process.env;
 
@@ -55,7 +53,7 @@ const inviteCommand = async (message, event) => {
 }
 
 const createCommand = async (event) => {
-    const roomName = await getRoomName(event.room_id, WHATSAPP_ACCESS_TOKEN);
+    const roomName = await getRoomNameAsUser(spacetubeWhatsappUser, event.room_id);
     const groupUser = await createGroupUser(roomName);
     await inviteAsUser(spacetubeWhatsappUser, groupUser, event.room_id);
     const bigGroupUser = await getItem("userId", groupUser.user_id, "spacetube.group.user");
