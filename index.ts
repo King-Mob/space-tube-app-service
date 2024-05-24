@@ -30,7 +30,7 @@ import {
 import commands from "./matrix/commands.js";
 import { getItem, getItemIncludes, getAllItems, storeItem } from "./matrix/storage.js";
 import { startDiscord } from "./discord/index.js";
-import { startWhatsapp } from "./whatsapp/index.js";
+//import { startWhatsapp } from "./whatsapp/index.js";
 
 // listening
 const as = new AppService({
@@ -43,16 +43,12 @@ as.on("http-log", (event) => {
 
 as.on("event", (event) => {
   //console.log("event received", event);
-  if (event.sender === "@whatsappbot:spacetu.be") {
-    console.log("whatsapp bot event", event)
-  }
 
   switch (event.type) {
     case "m.room.message":
       handleMessage(event);
       break;
     case "m.room.member":
-      console.log("invitation", event)
       handleInvite(event);
       break;
     case "spacetube.remote.open":
@@ -432,7 +428,7 @@ if (process.env.DISCORD_TOKEN) {
   startDiscord(app);
 }
 if (process.env.WHATSAPP_USER_ID) {
-  startWhatsapp();
+  //startWhatsapp();
 }
 
 app.listen(8134);

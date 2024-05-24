@@ -628,7 +628,7 @@ export const handleMessage = async (event) => {
   }
 };
 
-const onGroupUserJoin = async (invitedUser: event, roomId: string) => {
+export const onGroupUserJoin = async (invitedUser: event, roomId: string) => {
   const invitedUserId = invitedUser.content.userId;
 
   const profileResponse = await getProfile(invitedUserId);
@@ -642,7 +642,7 @@ const onGroupUserJoin = async (invitedUser: event, roomId: string) => {
   sendMessageAsUser(invitedUser.content.user, roomId, editMessage);
 }
 
-const onInviteUserJoin = async (invitedUser: event, roomId: string) => {
+export const onInviteUserJoin = async (invitedUser: event, roomId: string) => {
   const originalGroupUser = await getItem("userId", invitedUser.content.originalUserId);
   const profileResponse = await getProfile(invitedUser.content.originalUserId);
   const { displayname } = await profileResponse.json();
