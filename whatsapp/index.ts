@@ -69,7 +69,7 @@ export const handleFormatWhatsapp = async (event: event) => {
         return;
     }
 
-    sendGroupUserMessage(event, event.content.body);
+    sendGroupUserMessage(event, event.content.formatted_body);
 }
 
 /*
