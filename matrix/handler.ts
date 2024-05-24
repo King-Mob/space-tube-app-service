@@ -513,6 +513,17 @@ export const linkAsUser = async (roomId: string, name: string, groupUser = null)
   return { homeServer: HOME_SERVER, linkToken };
 };
 
+const extractMessage = (body: string) => {
+  const colonIncluded = body.split("</a>: ")[1];
+  if (colonIncluded) {
+    return colonIncluded;
+  }
+  else {
+    const colonNotIncluded = body.split("</a>")[1];
+    return colonNotIncluded;
+  }
+}
+
 export const sendGroupUserMessage = async (event: event, body: string) => {
   const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
 
@@ -522,7 +533,7 @@ export const sendGroupUserMessage = async (event: event, body: string) => {
 
   console.log("gorup user", groupUser)
 
-  const message = body.split("</a>: ")[1];
+  const message = extractMessage(body);
 
   sendMessageAsUser(groupUser.content.user, event.room_id, message);
 
