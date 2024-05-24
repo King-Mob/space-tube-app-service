@@ -432,6 +432,7 @@ app.post("/api/mailinglist", (req, res) => {
   const address = req.body;
 
   console.log(address)
+  console.log(req)
 
   const { MAILINGLIST_ROOM_ID } = process.env;
 
