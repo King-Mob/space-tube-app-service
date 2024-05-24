@@ -696,8 +696,9 @@ export const handleInvite = async (event) => {
   if (event.content.membership === "invite") {
     const invitedBySpacetubeBot = event.sender.includes("@space-tube-bot");
     const invitedBySpacetubeUser = event.sender.includes("@_space-tube");
+    const invitedBySpacetubeWhatsapp = event.sender.includes("@spacetube-whatsapp");
 
-    if (invitedBySpacetubeBot || invitedBySpacetubeUser)
+    if (invitedBySpacetubeBot || invitedBySpacetubeUser || invitedBySpacetubeWhatsapp)
       return;
 
     const invitedUserId = event.state_key;
