@@ -429,12 +429,16 @@ app.post("/api/mailinglist", (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const address = req.query;
+  const { address } = req.query;
 
 
   const { MAILINGLIST_ROOM_ID } = process.env;
 
+  console.log(address)
+
   sendMessage(MAILINGLIST_ROOM_ID, address);
+
+
 
   res.send({ success: true });
 })
