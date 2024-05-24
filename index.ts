@@ -426,6 +426,8 @@ app.put("/api/groupuser", imageUpload, async (req, res) => {
 })
 
 app.post("/api/mailinglist", (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
   const { address } = req.body;
 
   const MAILINGLIST_ROOM_ID = process.env;
