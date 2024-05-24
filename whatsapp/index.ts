@@ -20,7 +20,6 @@ export const handleWhatsapp = async (event) => {
 }
 
 export const joinAsSpacetubeWhatsapp = async (roomId: string) => {
-    console.log("joinging", roomId)
     await join(spacetubeWhatsappUser, roomId);
 }
 

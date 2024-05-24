@@ -24,15 +24,17 @@ import {
   join,
   joinAsSpaceTube,
   leaveRoom,
-  getProfile
+  getProfile,
+  getJoinedRooms
 } from "./matrixClientRequests.js";
 import commands from "./commands.js";
 import { v4 as uuidv4 } from "uuid";
 import { sendMessageDiscord } from "../discord/index.js";
 import { sendMessageWhatsapp } from "../whatsapp/index.js";
 import { handleWhatsapp, handleFormatWhatsapp, joinAsSpacetubeWhatsapp } from "../whatsapp/index.js";
+import { access } from "fs";
 
-const { HOME_SERVER } = process.env;
+const { HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_SERVER, WHATSAPP_ACCESS_TOKEN } = process.env;
 
 const inviteAsSpacetube = async (invitee: user, roomId: string) => {
   await inviteAsSpacetubeRequest(invitee, roomId);
@@ -526,19 +528,13 @@ const extractMessage = (body: string) => {
 
 export const sendGroupUserMessage = async (event: event, body: string) => {
   const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
-
-  console.log("invite user", inviteUser)
-
   const groupUser = await getItem("userId", inviteUser.content.originalUserId);
-
-  console.log("gorup user", groupUser)
 
   const message = extractMessage(body);
 
   sendMessageAsUser(groupUser.content.user, event.room_id, message);
 
   const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
-
   sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
 }
 
@@ -590,6 +586,17 @@ const handleFormat = async (event) => {
   }
 }
 
+const checkWhatsappUser = async (event: event) => {
+  const whatsappUser = { user_id: `@${WHATSAPP_USER_ID}:${WHATSAPP_SERVER}`, access_token: WHATSAPP_ACCESS_TOKEN }
+  const roomsResponse = await getJoinedRooms(whatsappUser);
+  const { joined_rooms } = await roomsResponse.json();
+
+  if (joined_rooms.includes(event.room_id)) {
+    handleWhatsapp(event);
+  }
+  return;
+}
+
 export const handleMessage = async (event) => {
   const bridgeRoomEvent = await getItem("bridgeRoomId", event.room_id);
   if (bridgeRoomEvent) {
@@ -604,10 +611,7 @@ export const handleMessage = async (event) => {
 
   if (event.sender === `@spacetube-whatsapp:${HOME_SERVER}`) return;
 
-  if (event.sender.includes("@whatsapp")) {
-    handleWhatsapp(event);
-    return;
-  }
+  checkWhatsappUser(event);
 
   const message = event.content.body;
 
