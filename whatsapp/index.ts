@@ -2,7 +2,7 @@ import * as sdk from "matrix-js-sdk";
 import { event } from "../types";
 import { RoomMemberEvent, RoomEvent, ClientEvent } from "matrix-js-sdk";
 import { getDisplayName, getItem, storeItem } from "../matrix/storage.js";
-import { joinAsSpaceTube, getRoomState, registerUser, join, inviteAsSpacetubeRequest } from "../matrix/matrixClientRequests.js";
+import { joinAsSpaceTube, getRoomState, registerUser, join, inviteAsSpacetubeRequest, sendMessageAsUser, getProfile } from "../matrix/matrixClientRequests.js";
 import { inviteAsUser, onGroupUserJoin, onInviteUserJoin, createGroupUser, getRoomName, sendGroupUserMessage } from "../matrix/handler.js";
 
 const { HOME_SERVER, WHATSAPP_HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_PASSWORD, WHATSAPP_ACCESS_TOKEN } = process.env;
@@ -17,6 +17,15 @@ const spacetubeWhatsappUser = {
 export const handleWhatsapp = async (event) => {
     console.log("handlnig whatsapp");
     console.log(event);
+
+    //for now let's focus on relaying clone messages
+
+    const groupCloneUser = await getItem("userId", event.sender, "spacetube.group.clone");
+    if (groupCloneUser) {
+        const profileResponse = await getProfile(groupCloneUser.content.user);
+        const { displayname } = await profileResponse.json();
+        sendMessageAsUser(spacetubeWhatsappUser, event.room_id, `🎭${displayname}🎭: ${event.content.body}`)
+    }
 }
 
 export const joinAsSpacetubeWhatsapp = async (roomId: string) => {
