@@ -3,7 +3,7 @@ import { event } from "../types";
 import { RoomMemberEvent, RoomEvent, ClientEvent } from "matrix-js-sdk";
 import { getDisplayName, getItem, storeItem } from "../matrix/storage.js";
 import { joinAsSpaceTube, getRoomState, registerUser, join, inviteAsSpacetubeRequest } from "../matrix/matrixClientRequests.js";
-import { inviteAsUser, onGroupUserJoin, onInviteUserJoin, createGroupUser, getRoomName } from "../matrix/handler.js";
+import { inviteAsUser, onGroupUserJoin, onInviteUserJoin, createGroupUser, getRoomName, sendGroupUserMessage } from "../matrix/handler.js";
 
 const { HOME_SERVER, WHATSAPP_HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_PASSWORD, WHATSAPP_ACCESS_TOKEN } = process.env;
 
@@ -24,40 +24,52 @@ export const joinAsSpacetubeWhatsapp = async (roomId: string) => {
     await join(spacetubeWhatsappUser, roomId);
 }
 
+const inviteCommand = async (message, event) => {
+    const partsOfMessage = message.split(" ");
+    const inviteeUserId = partsOfMessage[partsOfMessage.length - 1];
+    console.log("invitee user id", inviteeUserId);
+
+    const groupUser = await getItem("userId", inviteeUserId, "spacetube.group.user");
+
+    if (groupUser) {
+        console.log("inviting group user")
+        await inviteAsUser(spacetubeWhatsappUser, groupUser.content.user, event.room_id);
+        onGroupUserJoin(groupUser, event.room_id);
+    }
+
+    const inviteUser = await getItem("userId", inviteeUserId, "spacetube.group.invite");
+
+    if (inviteUser) {
+        console.log("inviting invite user")
+        await inviteAsUser(spacetubeWhatsappUser, inviteUser.content.user, event.room_id);
+        onInviteUserJoin(inviteUser, event.room_id);
+    }
+}
+
+const createCommand = async (event) => {
+    const roomName = await getRoomName(event.room_id, WHATSAPP_ACCESS_TOKEN);
+    const groupUser = await createGroupUser(roomName);
+    await inviteAsUser(spacetubeWhatsappUser, groupUser, event.room_id);
+    const bigGroupUser = await getItem("userId", groupUser.user_id, "spacetube.group.user");
+    onGroupUserJoin(bigGroupUser, event.room_id);
+}
+
 export const handleFormatWhatsapp = async (event: event) => {
     console.log("event included @spacetube whatsapp", event);
 
     const message = event.content.body;
 
     if (message.includes("!invite")) {
-        const partsOfMessage = message.split(" ");
-        const inviteeUserId = partsOfMessage[partsOfMessage.length - 1];
-        console.log("invitee user id", inviteeUserId);
-
-        const groupUser = await getItem("userId", inviteeUserId, "spacetube.group.user");
-
-        if (groupUser) {
-            console.log("inviting group user")
-            await inviteAsUser(spacetubeWhatsappUser, groupUser.content.user, event.room_id);
-            onGroupUserJoin(groupUser, event.room_id);
-        }
-
-        const inviteUser = await getItem("userId", inviteeUserId, "spacetube.group.invite");
-
-        if (inviteUser) {
-            console.log("inviting invite user")
-            await inviteAsUser(spacetubeWhatsappUser, inviteUser.content.user, event.room_id);
-            onInviteUserJoin(inviteUser, event.room_id);
-        }
+        await inviteCommand(message, event);
+        return;
     }
 
     if (message.includes("!create")) {
-        const roomName = await getRoomName(event.room_id, WHATSAPP_ACCESS_TOKEN);
-        const groupUser = await createGroupUser(roomName);
-        await inviteAsUser(spacetubeWhatsappUser, groupUser, event.room_id);
-        const bigGroupUser = await getItem("userId", groupUser.user_id, "spacetube.group.user");
-        onGroupUserJoin(bigGroupUser, event.room_id);
+        await createCommand(event);
+        return;
     }
+
+    sendGroupUserMessage(event, event.content.body);
 }
 
 /*

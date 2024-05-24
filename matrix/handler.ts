@@ -513,6 +513,20 @@ export const linkAsUser = async (roomId: string, name: string, groupUser = null)
   return { homeServer: HOME_SERVER, linkToken };
 };
 
+export const sendGroupUserMessage = async (event: event, body: string) => {
+  const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
+
+  const groupUser = await getItem("userId", inviteUser.content.originalUserId);
+
+  const message = body.split("</a>: ")[1];
+
+  sendMessageAsUser(groupUser.content.user, event.room_id, message);
+
+  const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
+
+  sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
+}
+
 const handleFormat = async (event) => {
   const body = event.content.formatted_body;
 
@@ -540,17 +554,7 @@ const handleFormat = async (event) => {
 
   if (user) {
     if (user.type === "spacetube.group.clone") {
-      const inviteUser = await getItem("roomId", event.room_id, "spacetube.group.invite");
-
-      const groupUser = await getItem("userId", inviteUser.content.originalUserId);
-
-      const message = body.split("</a>: ")[1];
-
-      sendMessageAsUser(groupUser.content.user, event.room_id, message);
-
-      const tubeIntermediary = await getItemIncludes("connectedRooms", event.room_id);
-
-      sendMessageAsUser(groupUser.content.user, tubeIntermediary.content.tubeIntermediary, message);
+      sendGroupUserMessage(event, body);
     }
     if (user.type === "spacetube.group.user") {
       if (body.includes("link")) {
