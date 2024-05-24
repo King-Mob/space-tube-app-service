@@ -429,7 +429,7 @@ app.post("/api/mailinglist", (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  const { address } = req.body;
+  const address = req.body;
 
   console.log(address)
 
