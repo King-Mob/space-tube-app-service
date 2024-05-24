@@ -427,6 +427,7 @@ app.put("/api/groupuser", imageUpload, async (req, res) => {
 
 app.post("/api/mailinglist", (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Content-Type', 'application/json')
 
   const { address } = req.body;
 
