@@ -582,7 +582,7 @@ const handleFormat = async (event) => {
       sendGroupUserMessage(event, body);
     }
     if (user.type === "spacetube.group.user") {
-      if (body.includes("link")) {
+      if (body.includes("web")) {
         const profileResponse = await getProfile(event.sender);
         const { displayname } = await profileResponse.json();
         linkAsUser(event.room_id, displayname, user.content.user);
