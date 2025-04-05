@@ -14,4 +14,4 @@ reg.addRegexPattern("aliases", "#_spacetube.*", true);
 reg.setProtocols(["spacetubeservice"]); // For 3PID lookups
 reg.setId("spacetube-service");
 reg.outputAsYaml("registration.yaml");
-console.log("Done: registration.yaml exists and can be reference in your homeserver.")
+console.log("Done: registration.yaml exists and can be referenced in your homeserver.")
