@@ -122,16 +122,16 @@ export const startWhatsapp = async () => {
             return; //don't reply to your own messages
         }
 
-        const spacetubebotJoined = room.getJoinedMembers().filter(member => member.userId === `@space-tube-bot:${HOME_SERVER}`);
+        const spacetubebotJoined = room.getJoinedMembers().filter(member => member.userId === `@spacetube_bot:${HOME_SERVER}`);
 
         if (spacetubebotJoined.length < 1) {
-            client.invite(roomId, `@space-tube-bot:${HOME_SERVER}`);
+            client.invite(roomId, `@spacetube_bot:${HOME_SERVER}`);
             await joinAsSpaceTube(roomId);
         }
 
         const message = event.event.content.body;
 
-        if (event.event.sender === `@space-tube-bot:${HOME_SERVER}`) {
+        if (event.event.sender === `@spacetube_bot:${HOME_SERVER}`) {
             client.sendTextMessage(roomId, `🤖spacetube🤖: ${message}`);
         }
         else {

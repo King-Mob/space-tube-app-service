@@ -231,7 +231,7 @@ const Messenger = ({ linkToken, userName }) => {
       if (
         event.type === "m.room.member" &&
         event.content.displayname &&
-        !event.sender.includes("@space-tube-bot")
+        !event.sender.includes("@spacetube_bot")
       ) {
         const displayName = event.content.displayname;
         tubeRoomNames[event.sender] = displayName;

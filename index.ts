@@ -31,6 +31,7 @@ import {
 import commands from "./matrix/commands.js";
 import { getItem, getItemIncludes, getAllItems, storeItem } from "./matrix/storage.js";
 import { startDiscord } from "./discord/index.js";
+import { startSlack } from "./slack/index.js";
 //import { startWhatsapp } from "./whatsapp/index.js";
 
 // listening
@@ -441,6 +442,9 @@ if (process.env.DISCORD_TOKEN) {
 }
 if (process.env.WHATSAPP_USER_ID) {
   //startWhatsapp();
+}
+if (process.env.SLACK_TOKEN) {
+  startSlack(app);
 }
 
 app.listen(8134);

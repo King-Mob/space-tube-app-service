@@ -11,7 +11,7 @@ const { HOME_SERVER, APPLICATION_TOKEN, MANAGEMENT_ROOM_ID } = process.env
 export const storeItem = (item: item) => {
     const txnId = uuidv4();
 
-    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/send/${item.type}/${txnId}?user_id=@space-tube-bot:${HOME_SERVER}`, {
+    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${MANAGEMENT_ROOM_ID}/send/${item.type}/${txnId}?user_id=@spacetube_bot:${HOME_SERVER}`, {
         method: "PUT",
         body: JSON.stringify(item),
         headers: {
@@ -25,7 +25,7 @@ export const storeItemShared = (sharedRoomId, item: item) => {
     console.log("shared mgmtroom id", sharedRoomId);
     const txnId = uuidv4();
 
-    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/send/${item.type}/${txnId}?user_id=@space-tube-bot:${HOME_SERVER}`, {
+    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${sharedRoomId}/send/${item.type}/${txnId}?user_id=@spacetube_bot:${HOME_SERVER}`, {
         method: "PUT",
         body: JSON.stringify(item),
         headers: {

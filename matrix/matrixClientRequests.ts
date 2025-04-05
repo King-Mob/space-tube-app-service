@@ -6,7 +6,7 @@ const { HOME_SERVER, APPLICATION_TOKEN } = process.env;
 
 export const sendMessage = (roomId, message) => {
   return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/send/m.room.message?user_id=@space-tube-bot:${HOME_SERVER}`,
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/send/m.room.message?user_id=@spacetube_bot:${HOME_SERVER}`,
     {
       method: "POST",
       body: JSON.stringify({
@@ -40,7 +40,7 @@ export const sendMessageAsUser = (user: user, roomId: string, message: string) =
 
 export const createRoom = (name: string = "no room name") => {
   return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/createRoom?user_id=@space-tube-bot:${HOME_SERVER}`,
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/createRoom?user_id=@spacetube_bot:${HOME_SERVER}`,
     {
       method: "POST",
       body: JSON.stringify({
@@ -117,7 +117,7 @@ export const setProfilePicture = (user: user, avatar_url: string) => {
 
 export const inviteAsSpacetubeRequest = (user: user, roomId: string) => {
   return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@space-tube-bot:${HOME_SERVER}`,
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/invite?user_id=@spacetube_bot:${HOME_SERVER}`,
     {
       method: "POST",
       body: JSON.stringify({
@@ -163,7 +163,7 @@ export const join = (user: user, roomId: string) => {
 
 export const joinAsSpaceTube = (roomId: string) => {
   return fetch(
-    `https://matrix.${HOME_SERVER}/_matrix/client/v3/join/${roomId}?user_id=@space-tube-bot:${HOME_SERVER}`,
+    `https://matrix.${HOME_SERVER}/_matrix/client/v3/join/${roomId}?user_id=@spacetube_bot:${HOME_SERVER}`,
     {
       method: "POST",
       body: JSON.stringify({}),
@@ -256,7 +256,7 @@ export const getDisplayNames = async (roomId) => {
   const memberUserIds = [];
 
   roomState.forEach(event => {
-    if (event.type === "m.room.member" && !event.user_id.includes("@space-tube-bot")) {
+    if (event.type === "m.room.member" && !event.user_id.includes("@spacetube_bot")) {
       memberUserIds.push(event.user_id);
     }
   })

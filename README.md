@@ -12,7 +12,7 @@ There's a default instance hosted on spacetu.be that you can use.
 
 ### Through Your Matrix Client
 
-1. Invite `@space-tube-bot:spacetu.be` to the room you want to open the tube in (for now the room CAN'T be end to end encrypted)
+1. Invite `@spacetube_bot:spacetu.be` to the room you want to open the tube in (for now the room CAN'T be end to end encrypted)
 2. Send `!spacetube create` in the room
 3. Copy the connection code and send to a contact in the group you want to connect to
 4. Have your contact in the other group send `!spacetube connect <the-connection-code>`
@@ -77,7 +77,7 @@ For a normal synapse instance add the path to `registration.yaml` to the [server
 12. Start the app service using `npm run build`. To have it run indefinitely, you'll need a process runner like systemd or pm2. [SystemD](https://nodesource.com/blog/running-your-node-js-app-with-systemd-part-1/) is a standard linux way to run processes. [PM2](https://www.digitalocean.com/community/tutorials/how-to-use-pm2-to-setup-a-node-js-production-environment-on-an-ubuntu-vps) is an easy to use node solution.
 
 13. Start talking to space tube
-    invite `@space-tube-bot:<your domain>` to your chat e.g. @space-tube-bot:example.com
+    invite `@spacetube_bot:<your domain>` to your chat e.g. @spacetube_bot:example.com
     `!spacetube echo <some test text>`
 
 You can interact with it in the same way as the default spacetube instance, and connect to others on different instances.

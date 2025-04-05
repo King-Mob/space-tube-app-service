@@ -4,7 +4,7 @@ import { room, event } from "../types"
 const { HOME_SERVER, APPLICATION_TOKEN } = process.env;
 
 const findOrCreateManagementRoom = async () => {
-    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms?user_id=@space-tube-bot:${HOME_SERVER}`, {
+    const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/joined_rooms?user_id=@spacetube_bot:${HOME_SERVER}`, {
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -13,7 +13,7 @@ const findOrCreateManagementRoom = async () => {
     const roomsList = await response.json() as { joined_rooms: string[] };
 
     for (const roomId of roomsList.joined_rooms) {
-        const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/state??user_id=@space-tube-bot:${HOME_SERVER}`, {
+        const response = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/state??user_id=@spacetube_bot:${HOME_SERVER}`, {
             headers: {
                 'Content-Type': 'application/json',
                 "Authorization": `Bearer ${APPLICATION_TOKEN}`
@@ -32,7 +32,7 @@ const findOrCreateManagementRoom = async () => {
     }
 
     console.log("creating space-tube-management room");
-    const createRoomResponse = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/createRoom?user_id=@space-tube-bot:${HOME_SERVER}`, {
+    const createRoomResponse = await fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v3/createRoom?user_id=@spacetube_bot:${HOME_SERVER}`, {
         method: "POST",
         body: JSON.stringify({
             room_alias_name: "_space-tube-management"

@@ -178,7 +178,7 @@ export const registerTube = async (roomId) => {
 
   const tubeCode = tubeOpening
     ? tubeOpening.content.tubeCode
-    : `${uuidv4()}~@space-tube-bot:${HOME_SERVER}`;
+    : `${uuidv4()}~@spacetube_bot:${HOME_SERVER}`;
 
   if (!tubeOpening) {
     storeItem({
@@ -346,7 +346,7 @@ export const connectOtherInstance = async (
 
 // on receipt of tubeOpen in shared management room, store tubeOpen in own room.
 export const handleRemoteOpen = async (event) => {
-  if (event.sender !== `@space-tube-bot:${HOME_SERVER}`) {
+  if (event.sender !== `@spacetube_bot:${HOME_SERVER}`) {
     const { connectionCode } = event.content;
 
     const tubeOpening = await getItem("tubeCode", connectionCode);
@@ -566,7 +566,7 @@ const handleFormat = async (event) => {
   if (!userId)
     return;
 
-  if (userId.includes("@space-tube-bot")) {
+  if (userId.includes("@spacetube_bot")) {
     if (body.includes("create")) {
       const groupName = await getRoomNameAsSpacetube(event.room_id);
       const groupUser = await createGroupUser(groupName);
@@ -621,7 +621,7 @@ export const handleMessage = async (event) => {
     handleFormat(event);
   }
 
-  if (event.sender === `@space-tube-bot:${HOME_SERVER}`) return;
+  if (event.sender === `@spacetube_bot:${HOME_SERVER}`) return;
 
   if (event.sender === `@spacetube-whatsapp:${HOME_SERVER}`) return;
 
@@ -731,7 +731,7 @@ const onCloneUserJoin = (invitedUser: event, roomId: string) => {
 
 export const handleInvite = async (event) => {
   if (event.content.membership === "invite") {
-    const invitedBySpacetubeBot = event.sender.includes("@space-tube-bot");
+    const invitedBySpacetubeBot = event.sender.includes("@spacetube_bot");
     const invitedBySpacetubeUser = event.sender.includes("@_space-tube");
     const invitedBySpacetubeWhatsapp = event.sender.includes("@spacetube-whatsapp");
 
@@ -740,7 +740,7 @@ export const handleInvite = async (event) => {
 
     const invitedUserId = event.state_key;
 
-    if (invitedUserId.includes("@space-tube-bot")) {
+    if (invitedUserId.includes("@spacetube_bot")) {
       joinAsSpaceTube(event.room_id);
       return;
     }
@@ -773,8 +773,8 @@ export const handleInvite = async (event) => {
 
     /*
         if (
-          event.sender.includes("@space-tube-bot") &&
-          event.sender !== `@space-tube-bot:${HOME_SERVER}`
+          event.sender.includes("@spacetube_bot") &&
+          event.sender !== `@spacetube_bot:${HOME_SERVER}`
         ) {
           console.log(event);
     

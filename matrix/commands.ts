@@ -24,7 +24,7 @@ const connect = async (event) => {
     const connectionCode = message.split("!spacetube connect")[1].trim();
     const spaceTubeInstance = connectionCode.split("~")[1];
 
-    if (spaceTubeInstance === `@space-tube-bot:${HOME_SERVER}`) {
+    if (spaceTubeInstance === `@spacetube_bot:${HOME_SERVER}`) {
         await connectSameInstance(event, connectionCode);
         return;
     } else {
