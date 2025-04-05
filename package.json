@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node dist-server/index.js",
     "startpm2": "pm2 start dist-server/index.js --name spacetube",
-    "register": "node dist-service/registerService.js",
+    "register": "node dist-server/registerService.js",
     "setup": "node dist-server/matrix/setup.js",
     "register-discord": "node discord/registerDiscord.js",
     "dev-web": "parcel web/index.html --dist-dir ./dist-web",
