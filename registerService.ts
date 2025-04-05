@@ -1,10 +1,9 @@
 import 'dotenv/config';
 import { AppServiceRegistration } from "matrix-appservice";
 
-
 // creating registration files
 console.log("Creating the registration yaml to be linked in your homeserver.")
-const reg = new AppServiceRegistration();
+const reg = new AppServiceRegistration(null);
 reg.setAppServiceUrl(`http://${process.env.HOST}:8133`);
 reg.setHomeserverToken(AppServiceRegistration.generateToken());
 reg.setAppServiceToken(AppServiceRegistration.generateToken());
