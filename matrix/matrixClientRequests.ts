@@ -4,7 +4,7 @@ import { user } from "../types";
 
 const { HOME_SERVER, APPLICATION_TOKEN } = process.env;
 
-export const sendMessage = (roomId, message) => {
+export const sendMessage = (roomId: string, message: string, context = {}) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/send/m.room.message?user_id=@spacetube_bot:${HOME_SERVER}`,
     {
@@ -12,6 +12,7 @@ export const sendMessage = (roomId, message) => {
       body: JSON.stringify({
         body: message,
         msgtype: "m.text",
+        context
       }),
       headers: {
         "Content-Type": "application/json",
@@ -21,7 +22,7 @@ export const sendMessage = (roomId, message) => {
   );
 };
 
-export const sendMessageAsUser = (user: user, roomId: string, message: string) => {
+export const sendMessageAsUser = (user: user, roomId: string, message: string, context = {}) => {
   return fetch(
     `https://matrix.${HOME_SERVER}/_matrix/client/v3/rooms/${roomId}/send/m.room.message`,
     {
@@ -29,6 +30,7 @@ export const sendMessageAsUser = (user: user, roomId: string, message: string) =
       body: JSON.stringify({
         body: message,
         msgtype: "m.text",
+        context
       }),
       headers: {
         "Content-Type": "application/json",
@@ -74,7 +76,7 @@ export const registerUser = (name: string) => {
     method: "POST",
     body: JSON.stringify({
       type: "m.login.application_service",
-      username: `_space-tube-${normalisedName}-${uuidv4()}`,
+      username: `_spacetube-${normalisedName}-${uuidv4()}`,
     }),
     headers: {
       "Content-Type": "application/json",

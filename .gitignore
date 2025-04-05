@@ -6,3 +6,5 @@ constants.js
 /dist-server
 /.parcel-cache
 /uploads
+spacetube_duckdb.db
+spacetube_duckdb.db.wal
