@@ -630,7 +630,7 @@ const handleFormat = async (event) => {
 
       if (user) {
         const matrixUser = { user_id: user.tube_user_id, access_token: user.tube_user_access_token };
-        sendMessageAsUser(matrixUser, link.tube_room_id, message, { from: event.channel });
+        sendMessageAsUser(matrixUser, link.tube_room_id, message, { from: event.room_id });
       }
       else {
         const displayName = await getDisplayName(event.room_id, event.sender);
@@ -639,7 +639,7 @@ const handleFormat = async (event) => {
         setDisplayName(matrixUser, displayName);
         await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
         await join(matrixUser, link.tube_room_id);
-        sendMessageAsUser(matrixUser, link.tube_room_id, message, { from: event.channel });
+        sendMessageAsUser(matrixUser, link.tube_room_id, message, { from: event.room_id });
 
         const insertUserSQL = `INSERT INTO UserTubeUserLinks VALUES ('${event.user}','${matrixUser.user_id}','${matrixUser.access_token}');`;
         connection.run(insertUserSQL);
