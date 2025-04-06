@@ -27,9 +27,9 @@ const Slack = () => {
       <h1>Thanks for Installing Spacetube on Slack</h1>
       <p>you won't regret this</p>
       {success ? (
-        <p>Processing slack OAuth Code</p>
-      ) : (
         <p>slack OAuth Code processed successfully!</p>
+      ) : (
+        <p>Processing slack OAuth Code</p>
       )}
     </div>
   );

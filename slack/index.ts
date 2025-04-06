@@ -112,13 +112,15 @@ export async function startSlack(app) {
         data.append("client_id", SLACK_CLIENT_ID);
         data.append("client_secret", SLACK_SECRET);
 
+        console.log("slack process request got through")
+
         const slackResponse = await fetch("https://slack.com/api/oauth.v2.access", {
             method: "POST",
             body: data
         });
         const slackResult = await slackResponse.json();
 
-        console.log(slackResult)
+        console.log("slack result", slackResult)
 
         if (slackResult.ok) {
             const { access_token, team: { id }, bot_user_id } = slackResult;
