@@ -90,8 +90,13 @@ export async function startSlack(app) {
     app.post("/slack/events", async function (req, res) {
         const { challenge, event } = req.body;
 
-        console.log(event)
-        //if(previousEvents.find(previousEvent => previousEvent ===))
+        // slack sends events twice, we only want to handle the first one
+        if (previousEvents.find(previousEvent => previousEvent.event_ts === event.event_ts)) {
+            return;
+        }
+        else {
+            previousEvents.push(event);
+        }
 
         if (challenge)
             return res.send(challenge);
