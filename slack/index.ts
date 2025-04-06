@@ -107,3 +107,17 @@ export async function startSlack(app) {
     })
 }
 
+export async function sendSlackMessage(channel: string, text: string, username: string) {
+    return fetch("https://slack.com/api/chat.postMessage", {
+        method: "POST",
+        body: JSON.stringify({
+            channel,
+            text,
+            username
+        }),
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SLACK_TOKEN}`,
+        }
+    })
+}

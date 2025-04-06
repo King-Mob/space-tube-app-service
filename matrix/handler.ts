@@ -33,6 +33,7 @@ import { v4 as uuidv4 } from "uuid";
 import { sendMessageDiscord } from "../discord/index.js";
 import { sendMessageWhatsapp } from "../whatsapp/index.js";
 import { handleWhatsapp, handleFormatWhatsapp, joinAsSpacetubeWhatsapp } from "../whatsapp/index.js";
+import { sendSlackMessage } from "../slack/index.js";
 import { getDuckDBConnection } from "../duckdb";
 
 const { HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_SERVER, WHATSAPP_ACCESS_TOKEN } = process.env;
@@ -380,7 +381,8 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
 
     switch (link.channel_type) {
       case "slack":
-        console.log("we should forward this to slack")
+        const username = await getDisplayName(event.room_id, event.sender);
+        sendSlackMessage(link.channel_id, message, username);
         break;
       case "matrix":
         const roomId = link.channel_id;
@@ -647,14 +649,6 @@ const handleFormat = async (event) => {
     }
 
     return;
-    /*
-    if (body.includes("create")) {
-      const groupName = await getRoomNameAsSpacetube(event.room_id);
-      const groupUser = await createGroupUser(groupName);
-
-      sendMessage(event.room_id, `Invite ${groupUser.user_id} to use in this group.`);
-    }
-    */
   }
 
   const user = await getItem("userId", userId);
