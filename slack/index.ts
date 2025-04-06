@@ -1,8 +1,7 @@
-import { channel } from "diagnostics_channel";
 import { getDuckDBConnection } from "../duckdb";
 import { sendMessageAsUser, registerUser, setDisplayName, inviteAsSpacetubeRequest, join } from "../matrix/matrixClientRequests";
 
-const { SLACK_BOT_USER_ID } = process.env;
+const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
 
 function create(event) {
     console.log("create event sent")
@@ -37,19 +36,20 @@ async function forward(event) {
         const users = await userRows.getRowObjects();
 
         const user = users[0];
-        const message = event.text.replace(SLACK_BOT_USER_ID, "");
+
+        const { bot_token, bot_user_id } = await getBot(event.channel);
+        const message = event.text.replace(`<@${bot_user_id}>`, "");
 
         if (user) {
             const matrixUser = { user_id: user.tube_user_id, access_token: user.tube_user_access_token };
             sendMessageAsUser(matrixUser, link.tube_room_id, message, { from: event.channel });
         }
         else {
-            const botToken = await getBotToken(event.channel)
             const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${event.user}`, {
                 headers: {
-                    Authorization: `Bearer ${botToken}`
+                    Authorization: `Bearer ${bot_token}`
                 }
-            })
+            });
             const slackUser = await slackUserResponse.json();
             const displayName = slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
             const matrixUserResponse = await registerUser(displayName);
@@ -102,9 +102,38 @@ export async function startSlack(app) {
             handleMention(event);
         }
     })
+
+    app.get("/api/slack/process/", async function (req, res) {
+        const { slackCode } = req.query;
+        const connection = await getDuckDBConnection();
+
+        const data = new URLSearchParams();
+        data.append("code", slackCode);
+        data.append("client_id", SLACK_CLIENT_ID);
+        data.append("client_secret", SLACK_SECRET);
+
+        const slackResponse = await fetch("https://slack.com/api/oauth.v2.access", {
+            method: "POST",
+            body: data
+        });
+        const slackResult = await slackResponse.json();
+
+        console.log(slackResult)
+
+        if (slackResult.ok) {
+            const { access_token, team: { id }, bot_user_id } = slackResult;
+
+            const insertTeamBotTokenLink = `INSERT INTO SlackTeamBotTokenLinks VALUES ('${id}','${access_token}','${bot_user_id}');`;
+            connection.run(insertTeamBotTokenLink);
+
+            return res.send({ success: true });
+        }
+
+        return res.send({ success: false });
+    })
 }
 
-async function getBotToken(channel_id: string) {
+async function getBot(channel_id: string) {
     const connection = await getDuckDBConnection();
     const getChannelTeamLinksSQL = `SELECT * FROM SlackChannelTeamLinks WHERE channel_id='${channel_id}';`;
     const channelTeamLinkRows = await connection.run(getChannelTeamLinksSQL);
@@ -114,12 +143,12 @@ async function getBotToken(channel_id: string) {
     const getBotTokenSQL = `SELECT * FROM SlackTeamBotTokenLinks WHERE team_id='${team_id}';`;
     const teamBotTokenLinkRows = await connection.run(getBotTokenSQL);
     const teamBotTokenLinks = await teamBotTokenLinkRows.getRowObjects();
-    const { bot_token } = teamBotTokenLinks[0];
-    return bot_token;
+    const { bot_token, bot_user_id } = teamBotTokenLinks[0];
+    return { bot_token, bot_user_id };
 }
 
 export async function sendSlackMessage(channel: string, text: string, username: string) {
-    const botToken = await getBotToken(channel);
+    const { bot_token } = await getBot(channel);
 
     return fetch("https://slack.com/api/chat.postMessage", {
         method: "POST",
@@ -130,7 +159,7 @@ export async function sendSlackMessage(channel: string, text: string, username: 
         }),
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${botToken}`,
+            Authorization: `Bearer ${bot_token}`,
         }
     })
 }

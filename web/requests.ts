@@ -162,3 +162,7 @@ export const changeGroupUserRequest = async (token: string, groupUserInfo: { dis
 export const getDisplayNamesRequest = async (token: string) => {
   return fetch(`${URL}/api/tubeinfo/displaynames/?linkToken=${token}`);
 }
+
+export const processSlackRequest = async (slackCode: string) => {
+  return fetch(`${URL}/api/slack/process/?slackCode=${slackCode}`);
+}
