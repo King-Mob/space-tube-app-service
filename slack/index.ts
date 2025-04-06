@@ -31,6 +31,9 @@ async function connect(event) {
     const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`
     await connection.run(insertChannelTubeRoomLink);
 
+    const insertChannelTeamLink = `INSERT INTO SlackChannelTeamLinks VALUES ('${event.channel}','${event.team}');`;
+    await connection.run(insertChannelTeamLink);
+
     sendSlackMessage(event.channel, "You have joined the spacetube!", "spacetube");
 }
 
