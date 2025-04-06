@@ -610,12 +610,51 @@ const handleFormat = async (event) => {
     return;
 
   if (userId.includes("@spacetube_bot")) {
+    if (body.includes("!create")) {
+      commands.create(event);
+      return;
+    }
+
+    const connection = await getDuckDBConnection();
+
+    const linkRows = await connection.run(`SELECT * FROM ChannelTubeRoomLinks WHERE channel_id='${event.room_id}';`);
+    const links = await linkRows.getRowObjects();
+
+    const link = links[0];
+    if (link) {
+      const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${event.user}'`);
+      const users = await userRows.getRowObjects();
+
+      const user = users[0];
+      const message = extractMessage(body);
+
+      if (user) {
+        const matrixUser = { user_id: user.tube_user_id, access_token: user.tube_user_access_token };
+        sendMessageAsUser(matrixUser, link.tube_room_id, message, { from: event.channel });
+      }
+      else {
+        const displayName = await getDisplayName(event.room_id, event.sender);
+        const matrixUserResponse = await registerUser(displayName);
+        const matrixUser = await matrixUserResponse.json();
+        setDisplayName(matrixUser, displayName);
+        await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
+        await join(matrixUser, link.tube_room_id);
+        sendMessageAsUser(matrixUser, link.tube_room_id, message, { from: event.channel });
+
+        const insertUserSQL = `INSERT INTO UserTubeUserLinks VALUES ('${event.user}','${matrixUser.user_id}','${matrixUser.access_token}');`;
+        connection.run(insertUserSQL);
+      }
+    }
+
+    return;
+    /*
     if (body.includes("create")) {
       const groupName = await getRoomNameAsSpacetube(event.room_id);
       const groupUser = await createGroupUser(groupName);
 
       sendMessage(event.room_id, `Invite ${groupUser.user_id} to use in this group.`);
     }
+    */
   }
 
   const user = await getItem("userId", userId);
