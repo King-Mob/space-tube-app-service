@@ -389,7 +389,7 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
         // test if tubeUser is in the room
         const tubeUserMembershipSQL = `SELECT * FROM TubeUserRoomMemberships WHERE tube_user_id='${event.sender}' AND room_id='${roomId}';`;
         const tubeUserMembershipRows = await connection.run(tubeUserMembershipSQL);
-        const tubeUserMemberships = tubeUserMembershipRows.getRowObjects();
+        const tubeUserMemberships = await tubeUserMembershipRows.getRowObjects();
 
         console.log(tubeUserMemberships)
 
