@@ -83,12 +83,6 @@ function handleMention(event) {
 const previousEvents = [];
 
 export async function startSlack(app) {
-    /*
-    app.get("/slack", async function (req, res) {
-        return res.send("hello from slack component")
-    })
-    */
-
     app.post("/slack/events", async function (req, res) {
         const { challenge, event } = req.body;
 

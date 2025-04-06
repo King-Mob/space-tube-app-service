@@ -90,6 +90,7 @@ const upload = multer({ dest: 'uploads/' })
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("dist-web"));
+app.use("/slack", express.static("dist-web"));
 
 app.post("/api/register", async (req, res) => {
   const linkEvent = await getItem(
