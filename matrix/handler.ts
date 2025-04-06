@@ -394,13 +394,22 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
         console.log(tubeUserMemberships)
 
         if (!tubeUserMemberships) {
-          await inviteAsSpacetubeRequest(matrixUser, roomId);
-          await join(matrixUser, roomId);
+          const inviteResponse = await inviteAsSpacetubeRequest(matrixUser, roomId);
+          const inviteResult = await inviteResponse.json();
+          console.log("invite result", inviteResult);
+          const joinResponse = await join(matrixUser, roomId);
+          const joinResult = await joinResponse.json();
+          console.log("join result", joinResult)
           const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${event.sender}','${roomId}');`;
           connection.run(insertTubeUserMembershipSQL);
         }
 
-        sendMessageAsUser(matrixUser, roomId, message);
+        console.log("let's send this message")
+
+        const sendResponse = await sendMessageAsUser(matrixUser, roomId, message);
+        const sendResult = await sendResponse.json();
+
+        console.log("send result", sendResult)
 
         break;
     }
