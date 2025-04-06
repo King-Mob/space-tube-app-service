@@ -747,9 +747,7 @@ export const handleMessage = async (event) => {
   const tubeRoomLinkRows = await connection.run(tubeRoomLinksSQL);
   const tubeRoomLinks = await tubeRoomLinkRows.getRowObjects();
 
-  console.log("tube room links", tubeRoomLinks)
-
-  if (tubeRoomLinks) {
+  if (tubeRoomLinks.length > 0) {
     handleTubeRoomMessage(tubeRoomLinks, event);
     return;
   }
