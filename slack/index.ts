@@ -16,11 +16,21 @@ function create(event) {
     // sends message with invite code to channel
 }
 
-function connect(event) {
+async function connect(event) {
     console.log("connect event sent")
-    // retrieves link between invite code and tube room
-    // creates link between channel and tube room
-    //      in duckDB
+    const inviteCode = event.text.split("!connect ")[1];
+
+    const connection = await getDuckDBConnection();
+
+    const getInviteTubeRoomLinkSQL = `SELECT * FROM InviteTubeRoomLinks WHERE invite_code='${inviteCode}';`;
+    const inviteTubeRoomsLinkRows = await connection.run(getInviteTubeRoomLinkSQL);
+    const inviteTubeRoomsLinks = inviteTubeRoomsLinkRows.getRowObjects();
+    const { tube_room_id } = inviteTubeRoomsLinks[0];
+
+    const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`
+    await connection.run(insertChannelTubeRoomLink);
+
+    sendSlackMessage(event.channel, "You have joined the spacetube!", "spacetube");
 }
 
 async function forward(event) {

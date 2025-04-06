@@ -27,7 +27,15 @@ const Slack = () => {
       <h1>Thanks for Installing Spacetube on Slack</h1>
       <p>you won't regret this</p>
       {success ? (
-        <p>slack OAuth Code processed successfully!</p>
+        <>
+          <p>slack OAuth Code processed successfully!</p>
+          <p>Now create the slack channel you want to use spacetube in.</p>
+          <p>Invite @spacetube to the channel</p>
+          <p>
+            And use <span>@spacetube !connect your-invite-code</span> to join a
+            tube!
+          </p>
+        </>
       ) : (
         <p>Processing slack OAuth Code</p>
       )}

@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { DuckDBInstance } from '@duckdb/node-api';
 
 let connection;
-const { SLACK_TOKEN, SLACK_CHANNEL, SLACK_TEAM, SLACK_BOT_USER_ID } = process.env;
+const { SLACK_TOKEN, SLACK_CHANNEL, SLACK_TEAM, SLACK_BOT_USER_ID, TEST_INVITE_CODE } = process.env;
 
 export async function startDuckDB() {
     const spacetubeDuckDBFileName = "spacetube_duckdb.db"
@@ -38,6 +38,12 @@ export async function startDuckDB() {
 
         const insertSTBTL = `INSERT INTO SlackTeamBotTokenLinks VALUES ('${SLACK_TEAM}','${SLACK_TOKEN}','${SLACK_BOT_USER_ID}')`;
         await connection.run(insertSTBTL);
+
+        const createInviteTubeRoomLinks = "CREATE TABLE InviteTubeRoomLinks (invite_code VARCHAR, tube_room_id VARCHAR);";
+        await connection.run(createInviteTubeRoomLinks);
+
+        const insertInviteTubeRoomLink = `INSERT INTO InviteTubeRoomLinks VALUES ('${TEST_INVITE_CODE}','!MPYlXGrdptSscBRvAb:spacetu.be');`;
+        await connection.run(insertInviteTubeRoomLink)
 
         console.log("duckdb initiated")
     }
