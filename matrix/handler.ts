@@ -1,7 +1,8 @@
 import {
   user,
   room,
-  event
+  event,
+  TubeRoomLink
 } from "../types.js";
 import {
   storeItem,
@@ -32,7 +33,7 @@ import { v4 as uuidv4 } from "uuid";
 import { sendMessageDiscord } from "../discord/index.js";
 import { sendMessageWhatsapp } from "../whatsapp/index.js";
 import { handleWhatsapp, handleFormatWhatsapp, joinAsSpacetubeWhatsapp } from "../whatsapp/index.js";
-import { access } from "fs";
+import { getDuckDBConnection } from "../duckdb";
 
 const { HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_SERVER, WHATSAPP_ACCESS_TOKEN } = process.env;
 
@@ -364,11 +365,40 @@ export const handleRemoteOpen = async (event) => {
   }
 };
 
-const handleMessageLocalTube = async (tubeIntermediary: event, event: event, message: string) => {
+const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: event, message: string) => {
+  const { context: { from } } = event.content;
+  const connection = await getDuckDBConnection();
+
+  const getTubeUserSQL = `SELECT * FROM UserTubeUserLinks WHERE tube_user_id='${event.sender}';`;
+  const tubeUserRows = await connection.run(getTubeUserSQL);
+  const tubeUsers = await tubeUserRows.getRowObjects();
+  const tubeUser = tubeUsers[0];
+
+  tubeRoomLinks.forEach(link => {
+    if (link.channel_id === from)
+      return;
+
+    switch (link.channel_type) {
+      case "slack":
+
+        break;
+      case "matrix":
+        const roomId = link.channel_id;
+        // test if tubeUser is in the room
+        console.log("would send matrix message to: ", roomId);
+
+        //const matrixUser = { user_id: tubeUser.tube_user_id, access_token: tubeUser.tube_user_access_token };
+        //sendMessageAsUser(matrixUser, roomId, message);
+
+        break;
+    }
+  })
+
+  /*
   const inviteUser = await getItem("originalUserId", event.sender, "spacetube.group.invite");
   const homeRoom = inviteUser.content.roomId;
 
-  const { connectedRooms } = tubeIntermediary.content;
+  const { connectedRooms } = tubeRoom.content;
 
   for (const roomId of connectedRooms) {
     if (roomId !== homeRoom) {
@@ -390,6 +420,7 @@ const handleMessageLocalTube = async (tubeIntermediary: event, event: event, mes
       }
     }
   }
+  */
 };
 
 const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
@@ -444,20 +475,22 @@ const handleBridgeMessage = async (event, bridgeRoomEvent) => {
   }
 }
 
-const handleTubeIntermediaryMessage = async (tubeIntermediary, event) => {
-  console.log("message in tube intermediary");
+const handleTubeRoomMessage = async (tubeRoomLinks, event) => {
+  console.log("message in tube room");
 
-  const tubeName = tubeIntermediary.content.name;
   const message = event.content.body;
+  handleMessageLocalTube(tubeRoomLinks, event, message);
 
-  //later when we use connection codes throughout, test if the instances are the same
+  /*
+  const tubeName = tubeRoom.content.name;
   if (tubeName.includes("~")) {
-    handleMessageRemoteTube(tubeIntermediary, event, message);
+    handleMessageRemoteTube(tubeRoom, event, message);
     return;
   } else {
-    handleMessageLocalTube(tubeIntermediary, event, message);
+    handleMessageLocalTube(tubeRoom, event, message);
     return;
   }
+    */
 }
 
 export const handleTubeMessage = async (tubesOpen, event) => {
@@ -657,10 +690,17 @@ export const handleMessage = async (event) => {
     return;
   }
 
-  const tubeIntermediary = await getItem("tubeIntermediary", event.room_id);
+  const connection = await getDuckDBConnection();
+  const tubeRoomLinksSQL = `SELECT * FROM ChannelTubeRoomLinks WHERE tube_room_id='${event.room_id}'`;
 
-  if (tubeIntermediary) {
-    handleTubeIntermediaryMessage(tubeIntermediary, event);
+  const tubeRoomLinkRows = await connection.run(tubeRoomLinksSQL);
+  const tubeRoomLinks = await tubeRoomLinkRows.getRowObjects();
+
+  console.log("tube room links", tubeRoomLinks)
+
+  if (tubeRoomLinks) {
+    console.log("message in tube room")
+    handleTubeRoomMessage(tubeRoomLinks, event);
     return;
   }
 };
@@ -732,7 +772,7 @@ const onCloneUserJoin = (invitedUser: event, roomId: string) => {
 export const handleInvite = async (event) => {
   if (event.content.membership === "invite") {
     const invitedBySpacetubeBot = event.sender.includes("@spacetube_bot");
-    const invitedBySpacetubeUser = event.sender.includes("@_space-tube");
+    const invitedBySpacetubeUser = event.sender.includes("@_spacetube");
     const invitedBySpacetubeWhatsapp = event.sender.includes("@spacetube-whatsapp");
 
     if (invitedBySpacetubeBot || invitedBySpacetubeUser || invitedBySpacetubeWhatsapp)

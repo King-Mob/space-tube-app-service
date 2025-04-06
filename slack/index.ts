@@ -1,4 +1,4 @@
-import { startDuckDB, getDuckDBConnection } from "../duckdb";
+import { getDuckDBConnection } from "../duckdb";
 import { sendMessageAsUser, registerUser, setDisplayName, inviteAsSpacetubeRequest, join } from "../matrix/matrixClientRequests";
 
 const { SLACK_TOKEN, SLACK_BOT_USER_ID } = process.env;
@@ -26,7 +26,7 @@ function connect(event) {
 async function forward(event) {
     const connection = await getDuckDBConnection();
 
-    const linkRows = await connection.run(`select * from ChannelTubeRoomLinks where channel_id='${event.channel}';`);
+    const linkRows = await connection.run(`SELECT * FROM ChannelTubeRoomLinks WHERE channel_id='${event.channel}';`);
     const links = await linkRows.getRowObjects();
 
     const link = links[0];
@@ -78,36 +78,22 @@ function handleMention(event) {
     return;
 }
 
-
-
 export async function startSlack(app) {
-    await startDuckDB();
-
     console.log("SLAAACK", SLACK_TOKEN);
-
-    const possibleUsernames = ["buddy", "the sAuSaGe", "Britches", "second piano"]
-
-    const username = possibleUsernames[Math.floor(Math.random() * possibleUsernames.length)]
-
-
 
     app.get("/slack", async function (req, res) {
         return res.send("hello from slack component")
     })
 
     app.post("/slack/events", async function (req, res) {
-        console.log(req.body);
         const { challenge, event } = req.body;
 
         if (challenge)
             return res.send(challenge);
 
         if (event.type === "app_mention") {
-
             handleMention(event);
         }
-
     })
-
 }
 

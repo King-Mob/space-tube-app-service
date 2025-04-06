@@ -30,6 +30,7 @@ import {
 } from "./matrix/handler.js";
 import commands from "./matrix/commands.js";
 import { getItem, getItemIncludes, getAllItems, storeItem } from "./matrix/storage.js";
+import { startDuckDB } from "./duckdb.js";
 import { startDiscord } from "./discord/index.js";
 import { startSlack } from "./slack/index.js";
 //import { startWhatsapp } from "./whatsapp/index.js";
@@ -38,6 +39,7 @@ import { startSlack } from "./slack/index.js";
 const as = new AppService({
   homeserverToken: process.env.HOME_SERVER_TOKEN,
 });
+startDuckDB();
 
 as.on("http-log", (event) => {
   console.log("http-log", event);
