@@ -390,10 +390,9 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
         const tubeUserMembershipSQL = `SELECT * FROM TubeUserRoomMemberships WHERE tube_user_id='${event.sender}' AND room_id='${roomId}';`;
         const tubeUserMembershipRows = await connection.run(tubeUserMembershipSQL);
         const tubeUserMemberships = await tubeUserMembershipRows.getRowObjects();
+        const tubeUserMembership = tubeUserMemberships[0];
 
-        console.log(tubeUserMemberships)
-
-        if (!tubeUserMemberships) {
+        if (!tubeUserMembership) {
           const inviteResponse = await inviteAsSpacetubeRequest(matrixUser, roomId);
           const inviteResult = await inviteResponse.json();
           console.log("invite result", inviteResult);
