@@ -22,6 +22,7 @@ export async function startDuckDB() {
 
         const insertSecondLink = "INSERT INTO ChannelTubeRoomLinks VALUES ('!tfHSOJOhSOJwHiFolz:spacetu.be', 'matrix', '!MPYlXGrdptSscBRvAb:spacetu.be'); "
         await connection.run(insertSecondLink);
+        console.log("duckdb initiated")
     }
 
     return connection;
