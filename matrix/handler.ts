@@ -645,10 +645,12 @@ const checkWhatsappUser = async (event: event) => {
 }
 
 export const handleMessage = async (event) => {
+  /*
   const bridgeRoomEvent = await getItem("bridgeRoomId", event.room_id);
   if (bridgeRoomEvent) {
     handleBridgeMessage(event, bridgeRoomEvent);
   }
+  */
 
   if (event.content.formatted_body) {
     handleFormat(event);
