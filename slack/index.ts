@@ -78,6 +78,8 @@ function handleMention(event) {
     return;
 }
 
+const previousEvents = [];
+
 export async function startSlack(app) {
     console.log("SLAAACK", SLACK_TOKEN);
 
@@ -87,6 +89,9 @@ export async function startSlack(app) {
 
     app.post("/slack/events", async function (req, res) {
         const { challenge, event } = req.body;
+
+        console.log(event)
+        //if(previousEvents.find(previousEvent => previousEvent ===))
 
         if (challenge)
             return res.send(challenge);
