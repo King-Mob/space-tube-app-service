@@ -1,7 +1,8 @@
+import { channel } from "diagnostics_channel";
 import { getDuckDBConnection } from "../duckdb";
 import { sendMessageAsUser, registerUser, setDisplayName, inviteAsSpacetubeRequest, join } from "../matrix/matrixClientRequests";
 
-const { SLACK_TOKEN, SLACK_BOT_USER_ID } = process.env;
+const { SLACK_BOT_USER_ID } = process.env;
 
 function create(event) {
     console.log("create event sent")
@@ -43,9 +44,10 @@ async function forward(event) {
             sendMessageAsUser(matrixUser, link.tube_room_id, message, { from: event.channel });
         }
         else {
+            const botToken = await getBotToken(event.channel)
             const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${event.user}`, {
                 headers: {
-                    Authorization: `Bearer ${SLACK_TOKEN}`
+                    Authorization: `Bearer ${botToken}`
                 }
             })
             const slackUser = await slackUserResponse.json();
@@ -81,8 +83,6 @@ function handleMention(event) {
 const previousEvents = [];
 
 export async function startSlack(app) {
-    console.log("SLAAACK", SLACK_TOKEN);
-
     app.get("/slack", async function (req, res) {
         return res.send("hello from slack component")
     })
@@ -108,7 +108,23 @@ export async function startSlack(app) {
     })
 }
 
+async function getBotToken(channel_id: string) {
+    const connection = await getDuckDBConnection();
+    const getChannelTeamLinksSQL = `SELECT * FROM SlackChannelTeamLinks WHERE channel_id='${channel_id}';`;
+    const channelTeamLinkRows = await connection.run(getChannelTeamLinksSQL);
+    const channelTeamLinks = await channelTeamLinkRows.getRowObjects();
+    const { team_id } = channelTeamLinks[0];
+
+    const getBotTokenSQL = `SELECT * FROM SlackTeamBotTokenLinks WHERE team_id='${team_id}';`;
+    const teamBotTokenLinkRows = await connection.run(getBotTokenSQL);
+    const teamBotTokenLinks = await teamBotTokenLinkRows.getRowObjects();
+    const { bot_token } = teamBotTokenLinks[0];
+    return bot_token;
+}
+
 export async function sendSlackMessage(channel: string, text: string, username: string) {
+    const botToken = await getBotToken(channel);
+
     return fetch("https://slack.com/api/chat.postMessage", {
         method: "POST",
         body: JSON.stringify({
@@ -118,7 +134,7 @@ export async function sendSlackMessage(channel: string, text: string, username: 
         }),
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${SLACK_TOKEN}`,
+            Authorization: `Bearer ${botToken}`,
         }
     })
 }
