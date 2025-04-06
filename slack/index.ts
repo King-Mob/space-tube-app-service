@@ -102,6 +102,7 @@ export async function startSlack(app) {
             return res.send(challenge);
 
         if (event.type === "app_mention") {
+            console.log("slack event", event)
             handleMention(event);
         }
     })
