@@ -14,6 +14,9 @@ export async function startDuckDB() {
         const createChannelTubeRoomLinks = "CREATE TABLE ChannelTubeRoomLinks (channel_id VARCHAR, channel_type VARCHAR, tube_room_id VARCHAR);"
         await connection.run(createChannelTubeRoomLinks);
 
+        const createTubeUserRoomMemberships = "CREATE TABLE TubeUserRoomMemberships (tube_user_id VARCHAR, room_id VARCHAR);";
+        await connection.run(createTubeUserRoomMemberships);
+
         const createUserTubeUserLinks = "CREATE TABLE UserTubeUserLinks (user_id VARCHAR, tube_user_id VARCHAR, tube_user_access_token VARCHAR);";
         await connection.run(createUserTubeUserLinks);
 
