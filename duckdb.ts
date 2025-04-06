@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { DuckDBInstance } from '@duckdb/node-api';
 
 let connection;
-const { SLACK_TOKEN } = process.env;
+const { SLACK_TOKEN, SLACK_CHANNEL, SLACK_TEAM } = process.env;
 
 export async function startDuckDB() {
     const spacetubeDuckDBFileName = "spacetube_duckdb.db"
@@ -15,7 +15,7 @@ export async function startDuckDB() {
         const createChannelTubeRoomLinks = "CREATE TABLE ChannelTubeRoomLinks (channel_id VARCHAR, channel_type VARCHAR, tube_room_id VARCHAR);"
         await connection.run(createChannelTubeRoomLinks);
 
-        const insertFirstLink = "INSERT INTO ChannelTubeRoomLinks VALUES ('C08LV6R3UF7', 'slack', '!MPYlXGrdptSscBRvAb:spacetu.be');"
+        const insertFirstLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${SLACK_CHANNEL}', 'slack', '!MPYlXGrdptSscBRvAb:spacetu.be');`
         await connection.run(insertFirstLink);
 
         const insertSecondLink = "INSERT INTO ChannelTubeRoomLinks VALUES ('!tfHSOJOhSOJwHiFolz:spacetu.be', 'matrix', '!MPYlXGrdptSscBRvAb:spacetu.be'); "
@@ -30,13 +30,13 @@ export async function startDuckDB() {
         const createSlackChannelTeamLinks = "CREATE TABLE SlackChannelTeamLinks (channel_id VARCHAR, team_id VARCHAR);";
         await connection.run(createSlackChannelTeamLinks);
 
-        const insertSCTL = "INSERT INTO SlackChannelTeamLinks VALUES ('C08LV6R3UF7','T04CRH1BXU6');";
+        const insertSCTL = `INSERT INTO SlackChannelTeamLinks VALUES ('${SLACK_CHANNEL}','${SLACK_TEAM}');`;
         await connection.run(insertSCTL);
 
         const createSlackTeamBotTokenLinks = "CREATE TABLE SlackTeamBotTokenLinks (team_id VARCHAR, bot_token VARCHAR);";
         await connection.run(createSlackTeamBotTokenLinks);
 
-        const insertSTBTL = `INSERt INTO SlackTeamBotTokenLinks VALUES ('T04CRH1BXU6','${SLACK_TOKEN}')`;
+        const insertSTBTL = `INSERT INTO SlackTeamBotTokenLinks VALUES ('${SLACK_TEAM}','${SLACK_TOKEN}')`;
         await connection.run(insertSTBTL);
 
         console.log("duckdb initiated")
