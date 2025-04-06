@@ -391,6 +391,8 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
         const tubeUserMembershipRows = await connection.run(tubeUserMembershipSQL);
         const tubeUserMemberships = tubeUserMembershipRows.getRowObjects();
 
+        console.log(tubeUserMemberships)
+
         if (!tubeUserMemberships) {
           await inviteAsSpacetubeRequest(matrixUser, roomId);
           await join(matrixUser, roomId);
