@@ -20,14 +20,12 @@ async function connect(event) {
     console.log("connect event sent")
     const inviteCode = event.text.split("!connect ")[1];
 
-    console.log(inviteCode)
-
     const connection = await getDuckDBConnection();
 
     const getInviteTubeRoomLinkSQL = `SELECT * FROM InviteTubeRoomLinks WHERE invite_code='${inviteCode}';`;
     const inviteTubeRoomsLinkRows = await connection.run(getInviteTubeRoomLinkSQL);
-    const inviteTubeRoomsLinks = inviteTubeRoomsLinkRows.getRowObjects();
-    console.log(inviteTubeRoomsLinks)
+    const inviteTubeRoomsLinks = await inviteTubeRoomsLinkRows.getRowObjects();
+
     const { tube_room_id } = inviteTubeRoomsLinks[0];
 
     const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`
