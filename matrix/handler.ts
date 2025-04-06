@@ -387,14 +387,14 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
         const matrixUser = { user_id: tubeUser.tube_user_id, access_token: tubeUser.tube_user_access_token };
 
         // test if tubeUser is in the room
-        const tubeUserMembershipSQL = `SELECT * FROM TubeUserRoomMembership WHERE tube_user_id='${event.sender}' AND room_id='${roomId}';`;
+        const tubeUserMembershipSQL = `SELECT * FROM TubeUserRoomMemberships WHERE tube_user_id='${event.sender}' AND room_id='${roomId}';`;
         const tubeUserMembershipRows = await connection.run(tubeUserMembershipSQL);
         const tubeUserMemberships = tubeUserMembershipRows.getRowObjects();
 
         if (!tubeUserMemberships) {
           await inviteAsSpacetubeRequest(matrixUser, roomId);
           await join(matrixUser, roomId);
-          const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMembership VALUES ('${event.sender}','${roomId}');`;
+          const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${event.sender}','${roomId}');`;
           connection.run(insertTubeUserMembershipSQL);
         }
 
