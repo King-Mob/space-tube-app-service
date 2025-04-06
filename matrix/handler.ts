@@ -380,7 +380,7 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
 
     switch (link.channel_type) {
       case "slack":
-
+        console.log("we should forward this to slack")
         break;
       case "matrix":
         const roomId = link.channel_id;
