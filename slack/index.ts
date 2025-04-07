@@ -67,6 +67,8 @@ async function forward(event) {
 
     const link = links[0];
 
+    console.log("link", link);
+
     if (link) {
         const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${event.user}'`);
         const users = await userRows.getRowObjects();
@@ -75,6 +77,8 @@ async function forward(event) {
 
         const { bot_token, bot_user_id } = await getBot(event.channel);
         const message = event.text.replace(`<@${bot_user_id}>`, "");
+
+        console.log(message);
 
         if (user) {
             const matrixUser = {
