@@ -384,7 +384,7 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
                 };
                 console.log(matrixUser);
 
-                const tubeUserMembership = getTubeUserMembership(matrixUser.user_id, roomId);
+                const tubeUserMembership = await getTubeUserMembership(matrixUser.user_id, roomId);
 
                 console.log("membership", tubeUserMembership);
 
