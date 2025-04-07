@@ -84,54 +84,54 @@ async function forward(event) {
     const links = await linkRows.getRowObjects();
     const link = links[0];
 
-    if (link) {
-        const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${event.user}'`);
-        const users = await userRows.getRowObjects();
+    if (!link) return;
 
-        const user = users[0];
+    const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${event.user}'`);
+    const users = await userRows.getRowObjects();
 
-        const { bot_token, bot_user_id } = await getBot(event.channel);
-        const message = event.text.replace(`<@${bot_user_id}>`, "");
+    const user = users[0];
 
-        if (user) {
-            const matrixUser = {
-                user_id: user.tube_user_id,
-                access_token: user.tube_user_access_token,
-            };
+    const { bot_token, bot_user_id } = await getBot(event.channel);
+    const message = event.text.replace(`<@${bot_user_id}>`, "");
 
-            const tubeUserMembership = await getTubeUserMembership(user.tube_user_id, link.tube_room_id);
+    if (user) {
+        const matrixUser = {
+            user_id: user.tube_user_id,
+            access_token: user.tube_user_access_token,
+        };
 
-            if (!tubeUserMembership) {
-                await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
-                await join(matrixUser, link.tube_room_id);
-                const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${user.tube_user_id}','${link.tube_room_id}');`;
-                connection.run(insertTubeUserMembershipSQL);
-            }
-            await sendMessageAsUser(matrixUser, link.tube_room_id, message, {
-                from: event.channel,
-            });
-        } else {
-            const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${event.user}`, {
-                headers: {
-                    Authorization: `Bearer ${bot_token}`,
-                },
-            });
-            const slackUser = await slackUserResponse.json();
-            const displayName =
-                slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
-            const matrixUserResponse = await registerUser(displayName);
-            const matrixUser = await matrixUserResponse.json();
-            setDisplayName(matrixUser, displayName);
+        const tubeUserMembership = await getTubeUserMembership(user.tube_user_id, link.tube_room_id);
+
+        if (!tubeUserMembership) {
             await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
             await join(matrixUser, link.tube_room_id);
             const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${user.tube_user_id}','${link.tube_room_id}');`;
             connection.run(insertTubeUserMembershipSQL);
-            sendMessageAsUser(matrixUser, link.tube_room_id, message, {
-                from: event.channel,
-            });
-
-            insertUserTubeUserLink(event.user, matrixUser);
         }
+        await sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+            from: event.channel,
+        });
+    } else {
+        const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${event.user}`, {
+            headers: {
+                Authorization: `Bearer ${bot_token}`,
+            },
+        });
+        const slackUser = await slackUserResponse.json();
+        const displayName =
+            slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
+        const matrixUserResponse = await registerUser(displayName);
+        const matrixUser = await matrixUserResponse.json();
+        setDisplayName(matrixUser, displayName);
+        await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
+        await join(matrixUser, link.tube_room_id);
+        const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${user.tube_user_id}','${link.tube_room_id}');`;
+        connection.run(insertTubeUserMembershipSQL);
+        sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+            from: event.channel,
+        });
+
+        insertUserTubeUserLink(event.user, matrixUser);
     }
 }
 

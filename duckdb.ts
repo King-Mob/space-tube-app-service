@@ -61,13 +61,20 @@ export async function getDuckDBConnection() {
     return connection;
 }
 
-export async function getTubeRoomLinks(tubeRoomId) {
+export async function getTubeRoomLinksByTubeId(tubeRoomId) {
     const tubeRoomLinksSQL = `SELECT * FROM ChannelTubeRoomLinks WHERE tube_room_id='${tubeRoomId}'`;
 
     const tubeRoomLinkRows = await connection.run(tubeRoomLinksSQL);
     const tubeRoomLinks = await tubeRoomLinkRows.getRowObjects();
 
     return tubeRoomLinks;
+}
+
+export async function getTubeRoomLinkByChannelId(channelId) {
+    const linkRows = await connection.run(`SELECT * FROM ChannelTubeRoomLinks WHERE channel_id='${channelId}';`);
+    const links = await linkRows.getRowObjects();
+    const link = links[0];
+    return link;
 }
 
 export async function insertUserTubeUserLink(user, tubeUser) {
@@ -88,10 +95,17 @@ export async function insertTubeUserMembership(userId, roomId) {
     connection.run(insertTubeUserMembershipSQL);
 }
 
-export async function getTubeUser(userId) {
-    const getTubeUserSQL = `SELECT * FROM UserTubeUserLinks WHERE tube_user_id='${userId}';`;
+export async function getTubeUserByTubeUserId(tubeUserId) {
+    const getTubeUserSQL = `SELECT * FROM UserTubeUserLinks WHERE tube_user_id='${tubeUserId}';`;
     const tubeUserRows = await connection.run(getTubeUserSQL);
     const tubeUsers = await tubeUserRows.getRowObjects();
     const tubeUser = tubeUsers[0];
     return tubeUser;
+}
+
+export async function getTubeUserByUserId(userId) {
+    const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${userId}'`);
+    const users = await userRows.getRowObjects();
+    const user = users[0];
+    return user;
 }

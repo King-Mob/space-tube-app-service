@@ -30,12 +30,13 @@ import { sendMessageWhatsapp } from "../whatsapp/index.js";
 import { handleWhatsapp, handleFormatWhatsapp, joinAsSpacetubeWhatsapp } from "../whatsapp/index.js";
 import { sendSlackMessage } from "../slack/index.js";
 import {
-    getDuckDBConnection,
-    getTubeRoomLinks,
+    getTubeRoomLinksByTubeId,
     insertUserTubeUserLink,
     getTubeUserMembership,
     insertTubeUserMembership,
-    getTubeUser,
+    getTubeUserByTubeUserId,
+    getTubeUserByUserId,
+    getTubeRoomLinkByChannelId,
 } from "../duckdb";
 
 const { HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_SERVER, WHATSAPP_ACCESS_TOKEN } = process.env;
@@ -361,7 +362,7 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
         context: { from },
     } = event.content;
 
-    const tubeUser = await getTubeUser(event.sender);
+    const tubeUser = await getTubeUserByTubeUserId(event.sender);
 
     tubeRoomLinks.forEach(async (link) => {
         if (link.channel_id === from) return;
@@ -528,7 +529,7 @@ export const linkAsUser = async (roomId: string, name: string, groupUser = null)
     return { homeServer: HOME_SERVER, linkToken };
 };
 
-const extractMessage = (body: string) => {
+export const extractMessage = (body: string) => {
     const colonIncluded = body.split("</a>: ")[1];
     if (colonIncluded) {
         return colonIncluded;
@@ -567,49 +568,12 @@ const handleFormat = async (event) => {
             return;
         }
 
-        const connection = await getDuckDBConnection();
-
-        const linkRows = await connection.run(
-            `SELECT * FROM ChannelTubeRoomLinks WHERE channel_id='${event.room_id}';`
-        );
-        const links = await linkRows.getRowObjects();
-
-        const link = links[0];
-        if (link) {
-            const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${event.sender}'`);
-            const users = await userRows.getRowObjects();
-
-            const user = users[0];
-            const message = extractMessage(body);
-
-            if (user) {
-                const matrixUser = {
-                    user_id: user.tube_user_id,
-                    access_token: user.tube_user_access_token,
-                };
-                const tubeUserMembership = await getTubeUserMembership(user.tube_user_id, link.tube_room_id);
-
-                if (!tubeUserMembership) {
-                }
-
-                sendMessageAsUser(matrixUser, link.tube_room_id, message, {
-                    from: event.room_id,
-                });
-            } else {
-                const displayName = await getDisplayName(event.room_id, event.sender);
-                const matrixUserResponse = await registerUser(displayName);
-                const matrixUser = await matrixUserResponse.json();
-                setDisplayName(matrixUser, displayName);
-                await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
-                await join(matrixUser, link.tube_room_id);
-                sendMessageAsUser(matrixUser, link.tube_room_id, message, {
-                    from: event.room_id,
-                });
-
-                insertUserTubeUserLink(event.sender, matrixUser);
-            }
+        if (body.includes("!connect")) {
+            commands.connect(event);
+            return;
         }
 
+        commands.forward(event);
         return;
     }
 
@@ -700,7 +664,7 @@ export const handleMessage = async (event) => {
         return;
     }
 
-    const tubeRoomLinks = await getTubeRoomLinks(event.room_id);
+    const tubeRoomLinks = await getTubeRoomLinksByTubeId(event.room_id);
 
     if (tubeRoomLinks.length > 0) {
         handleTubeRoomMessage(tubeRoomLinks, event);
