@@ -216,5 +216,7 @@ async function getSlackDisplayName(channelId, userId) {
         },
     });
     const slackUser = await slackUserResponse.json();
+    console.log(slackUser);
+    // i'd like the server name, going to put that in front of the display name
     return slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
 }

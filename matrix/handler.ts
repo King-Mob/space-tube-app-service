@@ -1,13 +1,5 @@
 import { user, room, event, TubeRoomLink } from "../types.js";
-import {
-    storeItem,
-    getItem,
-    getAllItems,
-    storeItemShared,
-    getDisplayName,
-    getItemIncludes,
-    removeItem,
-} from "./storage.js";
+import { storeItem, getItem, storeItemShared, getDisplayName, getItemIncludes, removeItem } from "./storage.js";
 import {
     sendMessage,
     sendMessageAsUser,

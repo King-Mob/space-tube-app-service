@@ -1,20 +1,10 @@
-import {
-    sendMessage,
-    sendMessageAsUser,
-    registerUser,
-    setDisplayName,
-    inviteAsSpacetubeRequest,
-    join,
-    createRoom,
-} from "./matrixClientRequests.js";
+import { sendMessage, sendMessageAsUser, registerUser, setDisplayName, createRoom } from "./matrixClientRequests.js";
 import { extractMessage, sendMessageAsMatrixUser } from "./handler.js";
 import { getItem, storeItem, getDisplayName } from "./storage.js";
 import {
     getTubeRoomLinkByChannelId,
     getTubeUserByUserId,
-    getTubeUserMembership,
     insertUserTubeUserLink,
-    insertTubeUserMembership,
     getInviteCodeByTubeId,
     insertChannelTubeRoomLink,
     insertInviteTubeRoomLink,
