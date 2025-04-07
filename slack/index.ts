@@ -81,13 +81,16 @@ async function forward(event) {
         console.log(message);
 
         if (user) {
+            console.log("user exists, sending message");
             const matrixUser = {
                 user_id: user.tube_user_id,
                 access_token: user.tube_user_access_token,
             };
-            sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+            const response = await sendMessageAsUser(matrixUser, link.tube_room_id, message, {
                 from: event.channel,
             });
+            const result = await response.json();
+            console.log(result);
         } else {
             const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${event.user}`, {
                 headers: {
