@@ -82,8 +82,9 @@ async function forward(event) {
 
     const linkRows = await connection.run(`SELECT * FROM ChannelTubeRoomLinks WHERE channel_id='${event.channel}';`);
     const links = await linkRows.getRowObjects();
+    const link = links[0];
 
-    links.forEach(async (link) => {
+    if (link) {
         const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${event.user}'`);
         const users = await userRows.getRowObjects();
 
@@ -92,10 +93,7 @@ async function forward(event) {
         const { bot_token, bot_user_id } = await getBot(event.channel);
         const message = event.text.replace(`<@${bot_user_id}>`, "");
 
-        console.log(message);
-
         if (user) {
-            console.log("user exists, sending message");
             const matrixUser = {
                 user_id: user.tube_user_id,
                 access_token: user.tube_user_access_token,
@@ -111,11 +109,9 @@ async function forward(event) {
                 const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${user.tube_user_id}','${link.tube_room_id}');`;
                 connection.run(insertTubeUserMembershipSQL);
             }
-            const response = await sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+            await sendMessageAsUser(matrixUser, link.tube_room_id, message, {
                 from: event.channel,
             });
-            const result = await response.json();
-            console.log(result);
         } else {
             const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${event.user}`, {
                 headers: {
@@ -139,7 +135,7 @@ async function forward(event) {
             const insertUserSQL = `INSERT INTO UserTubeUserLinks VALUES ('${event.user}','${matrixUser.user_id}','${matrixUser.access_token}');`;
             connection.run(insertUserSQL);
         }
-    });
+    }
 }
 
 function handleMention(event) {

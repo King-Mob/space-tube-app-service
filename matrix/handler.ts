@@ -365,7 +365,6 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
 
         switch (link.channel_type) {
             case "slack":
-                console.log("slack channel link", link.channel_id);
                 const username = await getDisplayName(event.room_id, event.sender);
                 sendSlackMessage(link.channel_id, message, username);
                 break;
@@ -704,8 +703,6 @@ export const handleMessage = async (event) => {
 
     const tubeRoomLinkRows = await connection.run(tubeRoomLinksSQL);
     const tubeRoomLinks = await tubeRoomLinkRows.getRowObjects();
-
-    console.log("tube room link", tubeRoomLinks);
 
     if (tubeRoomLinks.length > 0) {
         handleTubeRoomMessage(tubeRoomLinks, event);
