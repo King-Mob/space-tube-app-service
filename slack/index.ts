@@ -20,8 +20,8 @@ async function create(event) {
 
     console.log(tube_room_id);
 
-    const insertSecondLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`;
-    await connection.run(insertSecondLink);
+    const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`;
+    await connection.run(insertChannelTubeRoomLink);
 
     const insertChannelTeamLink = `INSERT INTO SlackChannelTeamLinks VALUES ('${event.channel}','${event.team}');`;
     await connection.run(insertChannelTeamLink);
