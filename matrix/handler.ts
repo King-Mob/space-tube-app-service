@@ -29,7 +29,14 @@ import { sendMessageDiscord } from "../discord/index.js";
 import { sendMessageWhatsapp } from "../whatsapp/index.js";
 import { handleWhatsapp, handleFormatWhatsapp, joinAsSpacetubeWhatsapp } from "../whatsapp/index.js";
 import { sendSlackMessage } from "../slack/index.js";
-import { getDuckDBConnection } from "../duckdb";
+import {
+    getDuckDBConnection,
+    getTubeRoomLinks,
+    insertUserTubeUserLink,
+    getTubeUserMembership,
+    insertTubeUserMembership,
+    getTubeUser,
+} from "../duckdb";
 
 const { HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_SERVER, WHATSAPP_ACCESS_TOKEN } = process.env;
 
@@ -353,12 +360,8 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
     const {
         context: { from },
     } = event.content;
-    const connection = await getDuckDBConnection();
 
-    const getTubeUserSQL = `SELECT * FROM UserTubeUserLinks WHERE tube_user_id='${event.sender}';`;
-    const tubeUserRows = await connection.run(getTubeUserSQL);
-    const tubeUsers = await tubeUserRows.getRowObjects();
-    const tubeUser = tubeUsers[0];
+    const tubeUser = await getTubeUser(event.sender);
 
     tubeRoomLinks.forEach(async (link) => {
         if (link.channel_id === from) return;
@@ -375,17 +378,12 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
                     access_token: tubeUser.tube_user_access_token,
                 };
 
-                // test if tubeUser is in the room
-                const tubeUserMembershipSQL = `SELECT * FROM TubeUserRoomMemberships WHERE tube_user_id='${event.sender}' AND room_id='${roomId}';`;
-                const tubeUserMembershipRows = await connection.run(tubeUserMembershipSQL);
-                const tubeUserMemberships = await tubeUserMembershipRows.getRowObjects();
-                const tubeUserMembership = tubeUserMemberships[0];
+                const tubeUserMembership = getTubeUserMembership(matrixUser.user_id, roomId);
 
                 if (!tubeUserMembership) {
                     await inviteAsSpacetubeRequest(matrixUser, roomId);
                     await join(matrixUser, roomId);
-                    const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${event.sender}','${roomId}');`;
-                    connection.run(insertTubeUserMembershipSQL);
+                    insertTubeUserMembership(matrixUser.user_id, roomId);
                 }
 
                 sendMessageAsUser(matrixUser, roomId, message);
@@ -578,7 +576,7 @@ const handleFormat = async (event) => {
 
         const link = links[0];
         if (link) {
-            const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${event.user}'`);
+            const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${event.sender}'`);
             const users = await userRows.getRowObjects();
 
             const user = users[0];
@@ -589,6 +587,11 @@ const handleFormat = async (event) => {
                     user_id: user.tube_user_id,
                     access_token: user.tube_user_access_token,
                 };
+                const tubeUserMembership = await getTubeUserMembership(user.tube_user_id, link.tube_room_id);
+
+                if (!tubeUserMembership) {
+                }
+
                 sendMessageAsUser(matrixUser, link.tube_room_id, message, {
                     from: event.room_id,
                 });
@@ -603,8 +606,7 @@ const handleFormat = async (event) => {
                     from: event.room_id,
                 });
 
-                const insertUserSQL = `INSERT INTO UserTubeUserLinks VALUES ('${event.user}','${matrixUser.user_id}','${matrixUser.access_token}');`;
-                connection.run(insertUserSQL);
+                insertUserTubeUserLink(event.sender, matrixUser);
             }
         }
 
@@ -698,11 +700,7 @@ export const handleMessage = async (event) => {
         return;
     }
 
-    const connection = await getDuckDBConnection();
-    const tubeRoomLinksSQL = `SELECT * FROM ChannelTubeRoomLinks WHERE tube_room_id='${event.room_id}'`;
-
-    const tubeRoomLinkRows = await connection.run(tubeRoomLinksSQL);
-    const tubeRoomLinks = await tubeRoomLinkRows.getRowObjects();
+    const tubeRoomLinks = await getTubeRoomLinks(event.room_id);
 
     if (tubeRoomLinks.length > 0) {
         handleTubeRoomMessage(tubeRoomLinks, event);

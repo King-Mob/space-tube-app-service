@@ -1,4 +1,4 @@
-import { getDuckDBConnection } from "../duckdb";
+import { getDuckDBConnection, insertUserTubeUserLink, getTubeUserMembership } from "../duckdb";
 import xkpasswd from "xkpasswd";
 import {
     sendMessageAsUser,
@@ -98,10 +98,8 @@ async function forward(event) {
                 user_id: user.tube_user_id,
                 access_token: user.tube_user_access_token,
             };
-            const tubeUserMembershipSQL = `SELECT * FROM TubeUserRoomMemberships WHERE tube_user_id='${user.tube_user_id}' AND room_id='${link.tube_room_id}';`;
-            const tubeUserMembershipRows = await connection.run(tubeUserMembershipSQL);
-            const tubeUserMemberships = await tubeUserMembershipRows.getRowObjects();
-            const tubeUserMembership = tubeUserMemberships[0];
+
+            const tubeUserMembership = await getTubeUserMembership(user.tube_user_id, link.tube_room_id);
 
             if (!tubeUserMembership) {
                 await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
@@ -132,8 +130,7 @@ async function forward(event) {
                 from: event.channel,
             });
 
-            const insertUserSQL = `INSERT INTO UserTubeUserLinks VALUES ('${event.user}','${matrixUser.user_id}','${matrixUser.access_token}');`;
-            connection.run(insertUserSQL);
+            insertUserTubeUserLink(event.user, matrixUser);
         }
     }
 }
