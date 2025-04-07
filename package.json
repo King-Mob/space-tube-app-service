@@ -28,7 +28,8 @@
     "react-dom": "^18.2.0",
     "react-router": "^7.5.0",
     "typescript": "^5.4.5",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "xkpasswd": "^1.0.5"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",

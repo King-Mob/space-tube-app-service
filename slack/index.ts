@@ -1,29 +1,38 @@
 import { getDuckDBConnection } from "../duckdb";
+import xkpasswd from "xkpasswd";
 import {
     sendMessageAsUser,
     registerUser,
     setDisplayName,
     inviteAsSpacetubeRequest,
     join,
+    createRoom,
 } from "../matrix/matrixClientRequests";
 
 const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
 
-function create(event) {
-    console.log("create event sent");
-    // makes a tube room
-    // creates link between channel and tube room
-    //      in duckDB
-    //      e.g. 'C08LV6R3UF7', 'slack', '!MPYlXGrdptSscBRvAb:spacetu.be'
-    // makes an invite code
-    // creates link between tube room and invite code
-    //      e.g. '!MPYlXGrdptSscBRvAb:spacetu.be' , 35435g-34tj3-tioj4-30fdf0
+async function create(event) {
+    const connection = await getDuckDBConnection();
 
-    // sends message with invite code to channel
+    const createRoomResponse = await createRoom("slack tube room");
+    const createRoomResult = await createRoomResponse.json();
+    const tube_room_id = createRoomResult.room_id;
+
+    console.log(tube_room_id);
+
+    const insertSecondLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`;
+    await connection.run(insertSecondLink);
+
+    const customInviteCode = event.text.split("!connect ")[2];
+    const inviteCode = customInviteCode || xkpasswd({ seperators: "" });
+
+    const insertInviteTubeRoomLink = `INSERT INTO InviteTubeRoomLinks VALUES ('${inviteCode}','${tube_room_id}');`;
+    await connection.run(insertInviteTubeRoomLink);
+
+    sendSlackMessage(event.chanel, `Tube is open with invite code: ${inviteCode}`, "spacetube");
 }
 
 async function connect(event) {
-    console.log("connect event sent");
     const inviteCode = event.text.split("!connect ")[1];
 
     const connection = await getDuckDBConnection();
