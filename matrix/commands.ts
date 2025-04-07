@@ -7,7 +7,7 @@ import {
     join,
     createRoom,
 } from "./matrixClientRequests.js";
-import { connectSameInstance, connectOtherInstance, extractMessage } from "./handler.js";
+import { extractMessage } from "./handler.js";
 import { getItem, storeItem, getDisplayName } from "./storage.js";
 import {
     getTubeRoomLinkByChannelId,
@@ -18,6 +18,8 @@ import {
     getInviteCodeByTubeId,
     insertChannelTubeRoomLink,
     insertInviteTubeRoomLink,
+    getInviteTubeRoomLink,
+    deleteChannelTubeRoomLinks,
 } from "../duckdb.js";
 import { v4 as uuidv4 } from "uuid";
 import { xkpasswd } from "xkpasswd";
@@ -57,16 +59,19 @@ const create = async (event) => {
 };
 
 const connect = async (event) => {
-    const message = event.content.body;
-    const connectionCode = message.split("!spacetube connect")[1].trim();
-    const spaceTubeInstance = connectionCode.split("~")[1];
+    const message = extractMessage(event.content.formatted_body);
+    const inviteCode = message.split("!connect ")[1];
 
-    if (spaceTubeInstance === `@spacetube_bot:${HOME_SERVER}`) {
-        await connectSameInstance(event, connectionCode);
-        return;
+    const { tube_room_id } = await getInviteTubeRoomLink(inviteCode);
+
+    if (tube_room_id) {
+        deleteChannelTubeRoomLinks(event.room_id);
+
+        insertChannelTubeRoomLink(event.room_id, tube_room_id);
+
+        sendMessage(event.room_id, "You have joined the spacetube!");
     } else {
-        await connectOtherInstance(event, connectionCode, spaceTubeInstance);
-        return;
+        sendMessage(event.room_id, "No tube found for that invite code");
     }
 };
 

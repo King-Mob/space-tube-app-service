@@ -27,6 +27,13 @@ import {
 
 const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
 
+function echo(event) {
+    const message = event.text;
+    const newMessage = "you said: " + message.split("!spacetube echo")[1];
+
+    sendSlackMessage(event.channel, newMessage, "spacetube");
+}
+
 async function create(event) {
     const existingChannelTubeRoomLink = await getTubeRoomLinkByChannelId(event.channel);
 
@@ -114,6 +121,11 @@ async function forward(event) {
 }
 
 function handleMention(event) {
+    if (event.text.includes("!echo")) {
+        echo(event);
+        return;
+    }
+
     if (event.text.includes("!create")) {
         create(event);
         return;
