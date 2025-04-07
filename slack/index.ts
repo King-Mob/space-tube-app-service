@@ -34,6 +34,12 @@ async function connect(event) {
 
     const { tube_room_id } = inviteTubeRoomsLinks[0];
 
+    const deleteExistingChannelTubeRoomLinks = `DELETE FROM ChannelTubeRoomLinks WHERE channel_id='${event.channel}';`;
+    await connection.run(deleteExistingChannelTubeRoomLinks);
+
+    const deleteExistingChannelTeamLinks = `DELETE FROM SlackChannelTeamLinks WHERE channel_id='${event.channel}';`;
+    await connection.run(deleteExistingChannelTeamLinks);
+
     const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`;
     await connection.run(insertChannelTubeRoomLink);
 
