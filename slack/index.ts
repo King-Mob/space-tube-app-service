@@ -18,8 +18,6 @@ async function create(event) {
     const createRoomResult = await createRoomResponse.json();
     const tube_room_id = createRoomResult.room_id;
 
-    console.log(tube_room_id);
-
     const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`;
     await connection.run(insertChannelTubeRoomLink);
 
@@ -179,10 +177,13 @@ export async function startSlack(app) {
 }
 
 async function getBot(channel_id: string) {
+    console.log(channel_id);
+
     const connection = await getDuckDBConnection();
     const getChannelTeamLinksSQL = `SELECT * FROM SlackChannelTeamLinks WHERE channel_id='${channel_id}';`;
     const channelTeamLinkRows = await connection.run(getChannelTeamLinksSQL);
     const channelTeamLinks = await channelTeamLinkRows.getRowObjects();
+    console.log(channelTeamLinks);
     const { team_id } = channelTeamLinks[0];
 
     const getBotTokenSQL = `SELECT * FROM SlackTeamBotTokenLinks WHERE team_id='${team_id}';`;
