@@ -22,7 +22,7 @@ import {
     deleteChannelTubeRoomLinks,
 } from "../duckdb.js";
 import { v4 as uuidv4 } from "uuid";
-import { xkpasswd } from "xkpasswd";
+import xkpasswd from "xkpasswd";
 
 const { HOME_SERVER } = process.env;
 
