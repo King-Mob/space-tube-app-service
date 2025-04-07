@@ -28,7 +28,7 @@ const { HOME_SERVER } = process.env;
 
 const echo = (event) => {
     const message = event.content.body;
-    const newMessage = "you said: " + message.split("!spacetube echo")[1];
+    const newMessage = "you said: " + message.split("!echo ")[1];
 
     sendMessage(event.room_id, newMessage);
 };

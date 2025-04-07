@@ -450,17 +450,6 @@ const handleTubeRoomMessage = async (tubeRoomLinks, event) => {
 
     const message = event.content.body;
     handleMessageLocalTube(tubeRoomLinks, event, message);
-
-    /*
-  const tubeName = tubeRoom.content.name;
-  if (tubeName.includes("~")) {
-    handleMessageRemoteTube(tubeRoom, event, message);
-    return;
-  } else {
-    handleMessageLocalTube(tubeRoom, event, message);
-    return;
-  }
-    */
 };
 
 export const handleTubeMessage = async (tubesOpen, event) => {
@@ -563,6 +552,11 @@ const handleFormat = async (event) => {
     if (!userId) return;
 
     if (userId.includes("@spacetube_bot")) {
+        if (body.includes("!echo")) {
+            commands.echo(event);
+            return;
+        }
+
         if (body.includes("!create")) {
             commands.create(event);
             return;
@@ -635,21 +629,6 @@ export const handleMessage = async (event) => {
     checkWhatsappUser(event);
 
     const message = event.content.body;
-
-    if (message.includes("!spacetube echo")) {
-        commands.echo(event);
-        return;
-    }
-
-    if (message.includes("!spacetube create")) {
-        commands.create(event);
-        return;
-    }
-
-    if (message.includes("!spacetube connect")) {
-        commands.connect(event);
-        return;
-    }
 
     if (message.includes("!spacetube link")) {
         const profileResponse = await getProfile(event.sender);

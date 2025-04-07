@@ -29,7 +29,7 @@ const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
 
 function echo(event) {
     const message = event.text;
-    const newMessage = "you said: " + message.split("!spacetube echo")[1];
+    const newMessage = "you said: " + message.split("!echo ")[1];
 
     sendSlackMessage(event.channel, newMessage, "spacetube");
 }
