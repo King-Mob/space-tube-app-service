@@ -382,6 +382,7 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
                     user_id: tubeUser.tube_user_id,
                     access_token: tubeUser.tube_user_access_token,
                 };
+                console.log(matrixUser);
 
                 const tubeUserMembership = getTubeUserMembership(matrixUser.user_id, roomId);
 
@@ -391,7 +392,9 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
                     insertTubeUserMembership(matrixUser.user_id, roomId);
                 }
 
-                sendMessageAsUser(matrixUser, roomId, message);
+                const response = await sendMessageAsUser(matrixUser, roomId, message);
+                const result = await response.json();
+                console.log(result);
                 break;
         }
     });
