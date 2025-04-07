@@ -1,4 +1,20 @@
-import { getDuckDBConnection, insertUserTubeUserLink, getTubeUserMembership } from "../duckdb";
+import {
+    insertUserTubeUserLink,
+    getTubeUserMembership,
+    getTubeRoomLinkByChannelId,
+    getInviteCodeByTubeId,
+    insertChannelTubeRoomLink,
+    insertChannelTeamLink,
+    insertInviteTubeRoomLink,
+    deleteChannelTubeRoomLinks,
+    deleteChannelTeamLinks,
+    getInviteTubeRoomLink,
+    getTubeUserByUserId,
+    insertTubeUserMembership,
+    insertTeamBotTokenLink,
+    getChannelTeamLink,
+    getTeamBotTokenLink,
+} from "../duckdb";
 import xkpasswd from "xkpasswd";
 import {
     sendMessageAsUser,
@@ -12,18 +28,10 @@ import {
 const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
 
 async function create(event) {
-    const connection = await getDuckDBConnection();
-
-    const getExistingChannelTubeRoomLinks = `SELECT * FROM ChannelTubeRoomLinks WHERE channel_id='${event.channel}'; `;
-    const existingChannelTubeRoomLinkRows = await connection.run(getExistingChannelTubeRoomLinks);
-    const existingChannelTubeRoomLinks = await existingChannelTubeRoomLinkRows.getRowObjects();
-    const existingChannelTubeRoomLink = existingChannelTubeRoomLinks[0];
+    const existingChannelTubeRoomLink = await getTubeRoomLinkByChannelId(event.channel);
 
     if (existingChannelTubeRoomLink) {
-        const getExistingInviteCode = `SELECT * FROM InviteTubeRoomLinks WHERE tube_room_id='${existingChannelTubeRoomLink.tube_room_id}';`;
-        const existingInviteCodeRows = await connection.run(getExistingInviteCode);
-        const existingInviteCodes = await existingInviteCodeRows.getRowObjects();
-        const existingInviteCode = existingInviteCodes[0];
+        const existingInviteCode = await getInviteCodeByTubeId(existingChannelTubeRoomLink.tube_room_id);
 
         sendSlackMessage(
             event.channel,
@@ -35,18 +43,12 @@ async function create(event) {
         const createRoomResult = await createRoomResponse.json();
         const tube_room_id = createRoomResult.room_id;
 
-        const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`;
-        await connection.run(insertChannelTubeRoomLink);
-
-        const insertChannelTeamLink = `INSERT INTO SlackChannelTeamLinks VALUES ('${event.channel}','${event.team}');`;
-        await connection.run(insertChannelTeamLink);
-
         const customInviteCode = event.text.split("!create ")[1];
         const inviteCode = customInviteCode || xkpasswd({ separators: "" });
 
-        const insertInviteTubeRoomLink = `INSERT INTO InviteTubeRoomLinks VALUES ('${inviteCode}','${tube_room_id}');`;
-        await connection.run(insertInviteTubeRoomLink);
-
+        insertChannelTubeRoomLink(event.channel, tube_room_id);
+        insertChannelTeamLink(event.channel, event.team);
+        insertInviteTubeRoomLink(inviteCode, tube_room_id);
         sendSlackMessage(event.channel, `Tube is open with invite code: ${inviteCode}`, "spacetube");
     }
 }
@@ -54,42 +56,23 @@ async function create(event) {
 async function connect(event) {
     const inviteCode = event.text.split("!connect ")[1];
 
-    const connection = await getDuckDBConnection();
+    const { tube_room_id } = await getInviteTubeRoomLink(inviteCode);
 
-    const getInviteTubeRoomLinkSQL = `SELECT * FROM InviteTubeRoomLinks WHERE invite_code='${inviteCode}';`;
-    const inviteTubeRoomsLinkRows = await connection.run(getInviteTubeRoomLinkSQL);
-    const inviteTubeRoomsLinks = await inviteTubeRoomsLinkRows.getRowObjects();
+    deleteChannelTubeRoomLinks(event.channel);
+    deleteChannelTeamLinks(event.channel);
 
-    const { tube_room_id } = inviteTubeRoomsLinks[0];
-
-    const deleteExistingChannelTubeRoomLinks = `DELETE FROM ChannelTubeRoomLinks WHERE channel_id='${event.channel}';`;
-    await connection.run(deleteExistingChannelTubeRoomLinks);
-
-    const deleteExistingChannelTeamLinks = `DELETE FROM SlackChannelTeamLinks WHERE channel_id='${event.channel}';`;
-    await connection.run(deleteExistingChannelTeamLinks);
-
-    const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`;
-    await connection.run(insertChannelTubeRoomLink);
-
-    const insertChannelTeamLink = `INSERT INTO SlackChannelTeamLinks VALUES ('${event.channel}','${event.team}');`;
-    await connection.run(insertChannelTeamLink);
+    insertChannelTubeRoomLink(event.channel, tube_room_id);
+    insertChannelTeamLink(event.channel, event.team);
 
     sendSlackMessage(event.channel, "You have joined the spacetube!", "spacetube");
 }
 
 async function forward(event) {
-    const connection = await getDuckDBConnection();
-
-    const linkRows = await connection.run(`SELECT * FROM ChannelTubeRoomLinks WHERE channel_id='${event.channel}';`);
-    const links = await linkRows.getRowObjects();
-    const link = links[0];
+    const link = await getTubeRoomLinkByChannelId(event.channel);
 
     if (!link) return;
 
-    const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${event.user}'`);
-    const users = await userRows.getRowObjects();
-
-    const user = users[0];
+    const user = await getTubeUserByUserId(event.user);
 
     const { bot_token, bot_user_id } = await getBot(event.channel);
     const message = event.text.replace(`<@${bot_user_id}>`, "");
@@ -105,8 +88,7 @@ async function forward(event) {
         if (!tubeUserMembership) {
             await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
             await join(matrixUser, link.tube_room_id);
-            const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${user.tube_user_id}','${link.tube_room_id}');`;
-            connection.run(insertTubeUserMembershipSQL);
+            insertTubeUserMembership(user.tube_user_id, link.tube_room_id);
         }
         await sendMessageAsUser(matrixUser, link.tube_room_id, message, {
             from: event.channel,
@@ -125,8 +107,7 @@ async function forward(event) {
         setDisplayName(matrixUser, displayName);
         await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
         await join(matrixUser, link.tube_room_id);
-        const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${user.tube_user_id}','${link.tube_room_id}');`;
-        connection.run(insertTubeUserMembershipSQL);
+        insertTubeUserMembership(user.tube_user_id, link.tube_room_id);
         sendMessageAsUser(matrixUser, link.tube_room_id, message, {
             from: event.channel,
         });
@@ -173,7 +154,6 @@ export async function startSlack(app) {
 
     app.get("/api/slack/process/", async function (req, res) {
         const { slackCode } = req.query;
-        const connection = await getDuckDBConnection();
 
         const data = new URLSearchParams();
         data.append("code", slackCode);
@@ -193,8 +173,7 @@ export async function startSlack(app) {
                 bot_user_id,
             } = slackResult;
 
-            const insertTeamBotTokenLink = `INSERT INTO SlackTeamBotTokenLinks VALUES ('${id}','${access_token}','${bot_user_id}');`;
-            connection.run(insertTeamBotTokenLink);
+            insertTeamBotTokenLink(id, access_token, bot_user_id);
 
             return res.send({ success: true });
         }
@@ -203,17 +182,10 @@ export async function startSlack(app) {
     });
 }
 
-async function getBot(channel_id: string) {
-    const connection = await getDuckDBConnection();
-    const getChannelTeamLinksSQL = `SELECT * FROM SlackChannelTeamLinks WHERE channel_id='${channel_id}';`;
-    const channelTeamLinkRows = await connection.run(getChannelTeamLinksSQL);
-    const channelTeamLinks = await channelTeamLinkRows.getRowObjects();
-    const { team_id } = channelTeamLinks[0];
+async function getBot(channelId: string) {
+    const { team_id } = await getChannelTeamLink(channelId);
+    const { bot_token, bot_user_id } = await getTeamBotTokenLink(team_id);
 
-    const getBotTokenSQL = `SELECT * FROM SlackTeamBotTokenLinks WHERE team_id='${team_id}';`;
-    const teamBotTokenLinkRows = await connection.run(getBotTokenSQL);
-    const teamBotTokenLinks = await teamBotTokenLinkRows.getRowObjects();
-    const { bot_token, bot_user_id } = teamBotTokenLinks[0];
     return { bot_token, bot_user_id };
 }
 
