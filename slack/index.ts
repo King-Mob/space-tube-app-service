@@ -25,7 +25,7 @@ async function create(event) {
     await connection.run(insertChannelTeamLink);
 
     const customInviteCode = event.text.split("!create ")[2];
-    const inviteCode = customInviteCode || xkpasswd({ seperators: "" });
+    const inviteCode = customInviteCode || xkpasswd({ separators: "" });
 
     const insertInviteTubeRoomLink = `INSERT INTO InviteTubeRoomLinks VALUES ('${inviteCode}','${tube_room_id}');`;
     await connection.run(insertInviteTubeRoomLink);
