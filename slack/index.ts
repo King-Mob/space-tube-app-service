@@ -14,23 +14,37 @@ const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
 async function create(event) {
     const connection = await getDuckDBConnection();
 
-    const createRoomResponse = await createRoom("slack tube room");
-    const createRoomResult = await createRoomResponse.json();
-    const tube_room_id = createRoomResult.room_id;
+    const getExistingChannelTubeRoomLinks = `SELECT * FROM ChannelTubeRoomLinks WHERE channel_id='${event.channel}'; `;
+    const existingChannelTubeRoomLinkRows = await connection.run(getExistingChannelTubeRoomLinks);
+    const existingChannelTubeRoomLinks = await existingChannelTubeRoomLinkRows.getRowObjects();
+    const existingChannelTubeRoomLink = existingChannelTubeRoomLinks[0];
 
-    const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`;
-    await connection.run(insertChannelTubeRoomLink);
+    if (existingChannelTubeRoomLink) {
+        const getExistingInviteCode = `SELECT * FROM InviteTubeRoomLinks WHERE tube_room_id='${existingChannelTubeRoomLink.tube_room_id}';`;
+        const existingInviteCodeRows = await connection.run(getExistingInviteCode);
+        const existingInviteCodes = await existingInviteCodeRows.getRowObjects();
+        const existingInviteCode = existingInviteCodes[0];
 
-    const insertChannelTeamLink = `INSERT INTO SlackChannelTeamLinks VALUES ('${event.channel}','${event.team}');`;
-    await connection.run(insertChannelTeamLink);
+        sendSlackMessage(event.channel, `Your invite code is ${existingInviteCode.invite_code}`, "spacetube");
+    } else {
+        const createRoomResponse = await createRoom("slack tube room");
+        const createRoomResult = await createRoomResponse.json();
+        const tube_room_id = createRoomResult.room_id;
 
-    const customInviteCode = event.text.split("!create ")[1];
-    const inviteCode = customInviteCode || xkpasswd({ separators: "" });
+        const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`;
+        await connection.run(insertChannelTubeRoomLink);
 
-    const insertInviteTubeRoomLink = `INSERT INTO InviteTubeRoomLinks VALUES ('${inviteCode}','${tube_room_id}');`;
-    await connection.run(insertInviteTubeRoomLink);
+        const insertChannelTeamLink = `INSERT INTO SlackChannelTeamLinks VALUES ('${event.channel}','${event.team}');`;
+        await connection.run(insertChannelTeamLink);
 
-    sendSlackMessage(event.channel, `Tube is open with invite code: ${inviteCode}`, "spacetube");
+        const customInviteCode = event.text.split("!create ")[1];
+        const inviteCode = customInviteCode || xkpasswd({ separators: "" });
+
+        const insertInviteTubeRoomLink = `INSERT INTO InviteTubeRoomLinks VALUES ('${inviteCode}','${tube_room_id}');`;
+        await connection.run(insertInviteTubeRoomLink);
+
+        sendSlackMessage(event.channel, `Tube is open with invite code: ${inviteCode}`, "spacetube");
+    }
 }
 
 async function connect(event) {
