@@ -25,7 +25,11 @@ async function create(event) {
         const existingInviteCodes = await existingInviteCodeRows.getRowObjects();
         const existingInviteCode = existingInviteCodes[0];
 
-        sendSlackMessage(event.channel, `Your invite code is ${existingInviteCode.invite_code}`, "spacetube");
+        sendSlackMessage(
+            event.channel,
+            `Tube already open with invite code: ${existingInviteCode.invite_code}`,
+            "spacetube"
+        );
     } else {
         const createRoomResponse = await createRoom("slack tube room");
         const createRoomResult = await createRoomResponse.json();
