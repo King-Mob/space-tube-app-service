@@ -364,7 +364,11 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
 
     const tubeUser = await getTubeUserByTubeUserId(event.sender);
 
+    console.log("event", message);
+
     tubeRoomLinks.forEach(async (link) => {
+        console.log("link", link, "from", from);
+
         if (link.channel_id === from) return;
 
         switch (link.channel_type) {
