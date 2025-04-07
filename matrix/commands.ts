@@ -5,16 +5,22 @@ import {
     setDisplayName,
     inviteAsSpacetubeRequest,
     join,
+    createRoom,
 } from "./matrixClientRequests.js";
-import { registerTube, connectSameInstance, connectOtherInstance, extractMessage } from "./handler.js";
+import { connectSameInstance, connectOtherInstance, extractMessage } from "./handler.js";
 import { getItem, storeItem, getDisplayName } from "./storage.js";
 import {
     getTubeRoomLinkByChannelId,
     getTubeUserByUserId,
     getTubeUserMembership,
     insertUserTubeUserLink,
+    insertTubeUserMembership,
+    getInviteCodeByTubeId,
+    insertChannelTubeRoomLink,
+    insertInviteTubeRoomLink,
 } from "../duckdb.js";
 import { v4 as uuidv4 } from "uuid";
+import { xkpasswd } from "xkpasswd";
 
 const { HOME_SERVER } = process.env;
 
@@ -26,10 +32,28 @@ const echo = (event) => {
 };
 
 const create = async (event) => {
-    const tubeCode = await registerTube(event.room_id);
+    const existingChannelTubeRoomLink = await getTubeRoomLinkByChannelId(event.room_id);
 
-    sendMessage(event.room_id, "The code for this room is:");
-    setTimeout(() => sendMessage(event.room_id, tubeCode), 500);
+    if (existingChannelTubeRoomLink) {
+        const existingInviteCode = await getInviteCodeByTubeId(existingChannelTubeRoomLink.tube_room_id);
+
+        sendMessage(
+            event.room_id,
+            `Tube already open with invite code: ${existingInviteCode.invite_code}`,
+            "spacetube"
+        );
+    } else {
+        const createRoomResponse = await createRoom("tube room");
+        const createRoomResult = await createRoomResponse.json();
+        const tube_room_id = createRoomResult.room_id;
+
+        const customInviteCode = event.text.split("!create ")[1];
+        const inviteCode = customInviteCode || xkpasswd({ separators: "" });
+
+        insertChannelTubeRoomLink(event.room_id, tube_room_id);
+        insertInviteTubeRoomLink(inviteCode, tube_room_id);
+        sendMessage(event.room_id, `Tube is open with invite code: ${inviteCode}`);
+    }
 };
 
 const connect = async (event) => {
@@ -89,6 +113,9 @@ const forward = async (event) => {
         const tubeUserMembership = await getTubeUserMembership(user.tube_user_id, link.tube_room_id);
 
         if (!tubeUserMembership) {
+            await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
+            await join(matrixUser, link.tube_room_id);
+            insertTubeUserMembership(user.tube_user_id, link.tube_room_id);
         }
 
         sendMessageAsUser(matrixUser, link.tube_room_id, message, {
@@ -107,8 +134,6 @@ const forward = async (event) => {
 
         insertUserTubeUserLink(event.sender, matrixUser);
     }
-
-    return;
 };
 
 const commands = {

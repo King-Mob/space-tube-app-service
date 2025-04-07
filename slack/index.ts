@@ -39,7 +39,7 @@ async function create(event) {
             "spacetube"
         );
     } else {
-        const createRoomResponse = await createRoom("slack tube room");
+        const createRoomResponse = await createRoom("tube room");
         const createRoomResult = await createRoomResponse.json();
         const tube_room_id = createRoomResult.room_id;
 
@@ -58,13 +58,17 @@ async function connect(event) {
 
     const { tube_room_id } = await getInviteTubeRoomLink(inviteCode);
 
-    deleteChannelTubeRoomLinks(event.channel);
-    deleteChannelTeamLinks(event.channel);
+    if (tube_room_id) {
+        deleteChannelTubeRoomLinks(event.channel);
+        deleteChannelTeamLinks(event.channel);
 
-    insertChannelTubeRoomLink(event.channel, tube_room_id);
-    insertChannelTeamLink(event.channel, event.team);
+        insertChannelTubeRoomLink(event.channel, tube_room_id);
+        insertChannelTeamLink(event.channel, event.team);
 
-    sendSlackMessage(event.channel, "You have joined the spacetube!", "spacetube");
+        sendSlackMessage(event.channel, "You have joined the spacetube!", "spacetube");
+    } else {
+        sendSlackMessage(event.channel, "No tube found for that invite code", "spacetube");
+    }
 }
 
 async function forward(event) {
@@ -74,7 +78,7 @@ async function forward(event) {
 
     const user = await getTubeUserByUserId(event.user);
 
-    const { bot_token, bot_user_id } = await getBot(event.channel);
+    const { bot_user_id } = await getBot(event.channel);
     const message = event.text.replace(`<@${bot_user_id}>`, "");
 
     if (user) {
@@ -90,18 +94,11 @@ async function forward(event) {
             await join(matrixUser, link.tube_room_id);
             insertTubeUserMembership(user.tube_user_id, link.tube_room_id);
         }
-        await sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+        sendMessageAsUser(matrixUser, link.tube_room_id, message, {
             from: event.channel,
         });
     } else {
-        const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${event.user}`, {
-            headers: {
-                Authorization: `Bearer ${bot_token}`,
-            },
-        });
-        const slackUser = await slackUserResponse.json();
-        const displayName =
-            slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
+        const displayName = await getSlackDisplayName(event.channel, event.user);
         const matrixUserResponse = await registerUser(displayName);
         const matrixUser = await matrixUserResponse.json();
         setDisplayName(matrixUser, displayName);
@@ -204,4 +201,16 @@ export async function sendSlackMessage(channel: string, text: string, username: 
             Authorization: `Bearer ${bot_token}`,
         },
     });
+}
+
+async function getSlackDisplayName(channelId, userId) {
+    const { bot_token } = await getBot(channelId);
+
+    const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${userId}`, {
+        headers: {
+            Authorization: `Bearer ${bot_token}`,
+        },
+    });
+    const slackUser = await slackUserResponse.json();
+    return slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
 }
