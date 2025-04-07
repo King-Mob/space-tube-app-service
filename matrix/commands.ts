@@ -52,7 +52,7 @@ const create = async (event) => {
         const customInviteCode = event.content.formatted_body.split("!create ")[1];
         const inviteCode = customInviteCode || xkpasswd({ separators: "" });
 
-        insertChannelTubeRoomLink(event.room_id, tube_room_id);
+        insertChannelTubeRoomLink(event.room_id, "matrix", tube_room_id);
         insertInviteTubeRoomLink(inviteCode, tube_room_id);
         sendMessage(event.room_id, `Tube is open with invite code: ${inviteCode}`);
     }
@@ -67,7 +67,7 @@ const connect = async (event) => {
     if (tube_room_id) {
         deleteChannelTubeRoomLinks(event.room_id);
 
-        insertChannelTubeRoomLink(event.room_id, tube_room_id);
+        insertChannelTubeRoomLink(event.room_id, "matrix", tube_room_id);
 
         sendMessage(event.room_id, "You have joined the spacetube!");
     } else {

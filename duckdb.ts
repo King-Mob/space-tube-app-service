@@ -85,8 +85,8 @@ export async function getTubeRoomLinkByChannelId(channelId) {
     return link;
 }
 
-export async function insertChannelTubeRoomLink(channelId, tubeRoomId) {
-    const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${channelId}', 'slack', '${tubeRoomId}');`;
+export async function insertChannelTubeRoomLink(channelId, channelType, tubeRoomId) {
+    const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${channelId}', '${channelType}', '${tubeRoomId}');`;
     await connection.run(insertChannelTubeRoomLink);
 }
 

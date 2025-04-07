@@ -53,7 +53,7 @@ async function create(event) {
         const customInviteCode = event.text.split("!create ")[1];
         const inviteCode = customInviteCode || xkpasswd({ separators: "" });
 
-        insertChannelTubeRoomLink(event.channel, tube_room_id);
+        insertChannelTubeRoomLink(event.channel, "slack", tube_room_id);
         insertChannelTeamLink(event.channel, event.team);
         insertInviteTubeRoomLink(inviteCode, tube_room_id);
         sendSlackMessage(event.channel, `Tube is open with invite code: ${inviteCode}`, "spacetube");
@@ -69,7 +69,7 @@ async function connect(event) {
         deleteChannelTubeRoomLinks(event.channel);
         deleteChannelTeamLinks(event.channel);
 
-        insertChannelTubeRoomLink(event.channel, tube_room_id);
+        insertChannelTubeRoomLink(event.channel, "slack", tube_room_id);
         insertChannelTeamLink(event.channel, event.team);
 
         sendSlackMessage(event.channel, "You have joined the spacetube!", "spacetube");
