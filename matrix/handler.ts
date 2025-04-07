@@ -31,12 +31,9 @@ import { handleWhatsapp, handleFormatWhatsapp, joinAsSpacetubeWhatsapp } from ".
 import { sendSlackMessage } from "../slack/index.js";
 import {
     getTubeRoomLinksByTubeId,
-    insertUserTubeUserLink,
     getTubeUserMembership,
     insertTubeUserMembership,
     getTubeUserByTubeUserId,
-    getTubeUserByUserId,
-    getTubeRoomLinkByChannelId,
 } from "../duckdb";
 
 const { HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_SERVER, WHATSAPP_ACCESS_TOKEN } = process.env;
@@ -50,6 +47,18 @@ export const inviteAsUser = async (inviter: user, invitee: user, roomId) => {
     await inviteAsUserRequest(inviter, invitee, roomId);
     await join(invitee, roomId);
 };
+
+export async function sendMessageAsMatrixUser(matrixUser, message, roomId, context = {}) {
+    const tubeUserMembership = await getTubeUserMembership(matrixUser.user_id, roomId);
+
+    if (!tubeUserMembership) {
+        await inviteAsSpacetubeRequest(matrixUser, roomId);
+        await join(matrixUser, roomId);
+        insertTubeUserMembership(matrixUser.user_id, roomId);
+    }
+
+    sendMessageAsUser(matrixUser, roomId, message, context);
+}
 
 export const getRoomNameAsSpacetube = async (roomId: string) => {
     const roomStateResponse = await getRoomState(roomId, null);
@@ -364,11 +373,7 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
 
     const tubeUser = await getTubeUserByTubeUserId(event.sender);
 
-    console.log("event", message);
-
     tubeRoomLinks.forEach(async (link) => {
-        console.log("link", link, "from", from);
-
         if (link.channel_id === from) return;
 
         switch (link.channel_type) {
@@ -377,26 +382,11 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
                 sendSlackMessage(link.channel_id, message, username);
                 break;
             case "matrix":
-                const roomId = link.channel_id;
                 const matrixUser = {
                     user_id: tubeUser.tube_user_id,
                     access_token: tubeUser.tube_user_access_token,
                 };
-                console.log(matrixUser);
-
-                const tubeUserMembership = await getTubeUserMembership(matrixUser.user_id, roomId);
-
-                console.log("membership", tubeUserMembership);
-
-                if (!tubeUserMembership) {
-                    await inviteAsSpacetubeRequest(matrixUser, roomId);
-                    await join(matrixUser, roomId);
-                    insertTubeUserMembership(matrixUser.user_id, roomId);
-                }
-
-                const response = await sendMessageAsUser(matrixUser, roomId, message);
-                const result = await response.json();
-                console.log(result);
+                sendMessageAsMatrixUser(matrixUser, message, link.channel_id);
                 break;
         }
     });

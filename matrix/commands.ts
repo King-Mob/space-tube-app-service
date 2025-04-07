@@ -7,7 +7,7 @@ import {
     join,
     createRoom,
 } from "./matrixClientRequests.js";
-import { extractMessage } from "./handler.js";
+import { extractMessage, sendMessageAsMatrixUser } from "./handler.js";
 import { getItem, storeItem, getDisplayName } from "./storage.js";
 import {
     getTubeRoomLinkByChannelId,
@@ -115,15 +115,8 @@ const forward = async (event) => {
             user_id: user.tube_user_id,
             access_token: user.tube_user_access_token,
         };
-        const tubeUserMembership = await getTubeUserMembership(user.tube_user_id, link.tube_room_id);
 
-        if (!tubeUserMembership) {
-            await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
-            await join(matrixUser, link.tube_room_id);
-            insertTubeUserMembership(user.tube_user_id, link.tube_room_id);
-        }
-
-        sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+        sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.room_id,
         });
     } else {
@@ -131,9 +124,8 @@ const forward = async (event) => {
         const matrixUserResponse = await registerUser(displayName);
         const matrixUser = await matrixUserResponse.json();
         setDisplayName(matrixUser, displayName);
-        await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
-        await join(matrixUser, link.tube_room_id);
-        sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+
+        sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.room_id,
         });
 

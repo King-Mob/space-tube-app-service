@@ -24,6 +24,7 @@ import {
     join,
     createRoom,
 } from "../matrix/matrixClientRequests";
+import { sendMessageAsMatrixUser } from "../matrix/handler";
 
 const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
 
@@ -94,14 +95,7 @@ async function forward(event) {
             access_token: user.tube_user_access_token,
         };
 
-        const tubeUserMembership = await getTubeUserMembership(user.tube_user_id, link.tube_room_id);
-
-        if (!tubeUserMembership) {
-            await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
-            await join(matrixUser, link.tube_room_id);
-            insertTubeUserMembership(user.tube_user_id, link.tube_room_id);
-        }
-        sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+        sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.channel,
         });
     } else {
@@ -109,10 +103,8 @@ async function forward(event) {
         const matrixUserResponse = await registerUser(displayName);
         const matrixUser = await matrixUserResponse.json();
         setDisplayName(matrixUser, displayName);
-        await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
-        await join(matrixUser, link.tube_room_id);
-        insertTubeUserMembership(user.tube_user_id, link.tube_room_id);
-        sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+
+        sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.channel,
         });
 
