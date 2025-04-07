@@ -86,6 +86,17 @@ async function forward(event) {
                 user_id: user.tube_user_id,
                 access_token: user.tube_user_access_token,
             };
+            const tubeUserMembershipSQL = `SELECT * FROM TubeUserRoomMemberships WHERE tube_user_id='${user.tube_user_id}' AND room_id='${link.tube_room_id}';`;
+            const tubeUserMembershipRows = await connection.run(tubeUserMembershipSQL);
+            const tubeUserMemberships = await tubeUserMembershipRows.getRowObjects();
+            const tubeUserMembership = tubeUserMemberships[0];
+
+            if (!tubeUserMembership) {
+                await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
+                await join(matrixUser, link.tube_room_id);
+                const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${user.tube_user_id}','${link.tube_room_id}');`;
+                connection.run(insertTubeUserMembershipSQL);
+            }
             const response = await sendMessageAsUser(matrixUser, link.tube_room_id, message, {
                 from: event.channel,
             });
@@ -105,6 +116,8 @@ async function forward(event) {
             setDisplayName(matrixUser, displayName);
             await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
             await join(matrixUser, link.tube_room_id);
+            const insertTubeUserMembershipSQL = `INSERT INTO TubeUserRoomMemberships VALUES ('${user.tube_user_id}','${link.tube_room_id}');`;
+            connection.run(insertTubeUserMembershipSQL);
             sendMessageAsUser(matrixUser, link.tube_room_id, message, {
                 from: event.channel,
             });
