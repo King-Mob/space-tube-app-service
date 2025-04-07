@@ -177,13 +177,10 @@ export async function startSlack(app) {
 }
 
 async function getBot(channel_id: string) {
-    console.log(channel_id);
-
     const connection = await getDuckDBConnection();
     const getChannelTeamLinksSQL = `SELECT * FROM SlackChannelTeamLinks WHERE channel_id='${channel_id}';`;
     const channelTeamLinkRows = await connection.run(getChannelTeamLinksSQL);
     const channelTeamLinks = await channelTeamLinkRows.getRowObjects();
-    console.log(channelTeamLinks);
     const { team_id } = channelTeamLinks[0];
 
     const getBotTokenSQL = `SELECT * FROM SlackTeamBotTokenLinks WHERE team_id='${team_id}';`;
