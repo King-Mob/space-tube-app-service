@@ -65,11 +65,7 @@ async function forward(event) {
     const linkRows = await connection.run(`SELECT * FROM ChannelTubeRoomLinks WHERE channel_id='${event.channel}';`);
     const links = await linkRows.getRowObjects();
 
-    const link = links[0];
-
-    console.log("link", link);
-
-    if (link) {
+    links.forEach(async (link) => {
         const userRows = await connection.run(`SELECT * FROM UserTubeUserLinks WHERE user_id='${event.user}'`);
         const users = await userRows.getRowObjects();
 
@@ -125,7 +121,7 @@ async function forward(event) {
             const insertUserSQL = `INSERT INTO UserTubeUserLinks VALUES ('${event.user}','${matrixUser.user_id}','${matrixUser.access_token}');`;
             connection.run(insertUserSQL);
         }
-    }
+    });
 }
 
 function handleMention(event) {
