@@ -32,7 +32,7 @@ async function create(event) {
     const insertInviteTubeRoomLink = `INSERT INTO InviteTubeRoomLinks VALUES ('${inviteCode}','${tube_room_id}');`;
     await connection.run(insertInviteTubeRoomLink);
 
-    sendSlackMessage(event.chanel, `Tube is open with invite code: ${inviteCode}`, "spacetube");
+    sendSlackMessage(event.channel, `Tube is open with invite code: ${inviteCode}`, "spacetube");
 }
 
 async function connect(event) {
