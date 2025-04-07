@@ -185,6 +185,7 @@ export async function startSlack(app) {
 
 async function getBot(channelId: string) {
     const channelTeamLink = await getChannelTeamLink(channelId);
+    console.log(channelId);
     console.log(channelTeamLink);
     const { team_id } = channelTeamLink;
     const { bot_token, bot_user_id } = await getTeamBotTokenLink(team_id);
