@@ -49,7 +49,7 @@ const create = async (event) => {
         const createRoomResult = await createRoomResponse.json();
         const tube_room_id = createRoomResult.room_id;
 
-        const customInviteCode = event.text.split("!create ")[1];
+        const customInviteCode = event.content.formatted_body.split("!create ")[1];
         const inviteCode = customInviteCode || xkpasswd({ separators: "" });
 
         insertChannelTubeRoomLink(event.room_id, tube_room_id);
