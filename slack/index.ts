@@ -1,10 +1,16 @@
 import { getDuckDBConnection } from "../duckdb";
-import { sendMessageAsUser, registerUser, setDisplayName, inviteAsSpacetubeRequest, join } from "../matrix/matrixClientRequests";
+import {
+    sendMessageAsUser,
+    registerUser,
+    setDisplayName,
+    inviteAsSpacetubeRequest,
+    join,
+} from "../matrix/matrixClientRequests";
 
 const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
 
 function create(event) {
-    console.log("create event sent")
+    console.log("create event sent");
     // makes a tube room
     // creates link between channel and tube room
     //      in duckDB
@@ -17,7 +23,7 @@ function create(event) {
 }
 
 async function connect(event) {
-    console.log("connect event sent")
+    console.log("connect event sent");
     const inviteCode = event.text.split("!connect ")[1];
 
     const connection = await getDuckDBConnection();
@@ -28,7 +34,7 @@ async function connect(event) {
 
     const { tube_room_id } = inviteTubeRoomsLinks[0];
 
-    const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`
+    const insertChannelTubeRoomLink = `INSERT INTO ChannelTubeRoomLinks VALUES ('${event.channel}', 'slack', '${tube_room_id}');`;
     await connection.run(insertChannelTubeRoomLink);
 
     const insertChannelTeamLink = `INSERT INTO SlackChannelTeamLinks VALUES ('${event.channel}','${event.team}');`;
@@ -55,23 +61,30 @@ async function forward(event) {
         const message = event.text.replace(`<@${bot_user_id}>`, "");
 
         if (user) {
-            const matrixUser = { user_id: user.tube_user_id, access_token: user.tube_user_access_token };
-            sendMessageAsUser(matrixUser, link.tube_room_id, message, { from: event.channel });
-        }
-        else {
+            const matrixUser = {
+                user_id: user.tube_user_id,
+                access_token: user.tube_user_access_token,
+            };
+            sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+                from: event.channel,
+            });
+        } else {
             const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${event.user}`, {
                 headers: {
-                    Authorization: `Bearer ${bot_token}`
-                }
+                    Authorization: `Bearer ${bot_token}`,
+                },
             });
             const slackUser = await slackUserResponse.json();
-            const displayName = slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
+            const displayName =
+                slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
             const matrixUserResponse = await registerUser(displayName);
             const matrixUser = await matrixUserResponse.json();
             setDisplayName(matrixUser, displayName);
             await inviteAsSpacetubeRequest(matrixUser, link.tube_room_id);
             await join(matrixUser, link.tube_room_id);
-            sendMessageAsUser(matrixUser, link.tube_room_id, message, { from: event.channel });
+            sendMessageAsUser(matrixUser, link.tube_room_id, message, {
+                from: event.channel,
+            });
 
             const insertUserSQL = `INSERT INTO UserTubeUserLinks VALUES ('${event.user}','${matrixUser.user_id}','${matrixUser.access_token}');`;
             connection.run(insertUserSQL);
@@ -101,21 +114,19 @@ export async function startSlack(app) {
         const { challenge, event } = req.body;
 
         // slack sends events twice, we only want to handle the first one
-        if (previousEvents.find(previousEvent => previousEvent.event_ts === event.event_ts)) {
+        if (previousEvents.find((previousEvent) => previousEvent.event_ts === event.event_ts)) {
             return;
-        }
-        else {
+        } else {
             previousEvents.push(event);
         }
 
-        if (challenge)
-            return res.send(challenge);
+        if (challenge) return res.send(challenge);
 
         if (event.type === "app_mention") {
-            console.log("slack event", event)
+            console.log("slack event", event);
             handleMention(event);
         }
-    })
+    });
 
     app.get("/api/slack/process/", async function (req, res) {
         const { slackCode } = req.query;
@@ -126,18 +137,18 @@ export async function startSlack(app) {
         data.append("client_id", SLACK_CLIENT_ID);
         data.append("client_secret", SLACK_SECRET);
 
-        console.log("slack process request got through")
-
         const slackResponse = await fetch("https://slack.com/api/oauth.v2.access", {
             method: "POST",
-            body: data
+            body: data,
         });
         const slackResult = await slackResponse.json();
 
-        console.log("slack result", slackResult)
-
         if (slackResult.ok) {
-            const { access_token, team: { id }, bot_user_id } = slackResult;
+            const {
+                access_token,
+                team: { id },
+                bot_user_id,
+            } = slackResult;
 
             const insertTeamBotTokenLink = `INSERT INTO SlackTeamBotTokenLinks VALUES ('${id}','${access_token}','${bot_user_id}');`;
             connection.run(insertTeamBotTokenLink);
@@ -146,7 +157,7 @@ export async function startSlack(app) {
         }
 
         return res.send({ success: false });
-    })
+    });
 }
 
 async function getBot(channel_id: string) {
@@ -171,11 +182,11 @@ export async function sendSlackMessage(channel: string, text: string, username: 
         body: JSON.stringify({
             channel,
             text,
-            username
+            username,
         }),
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${bot_token}`,
-        }
-    })
+        },
+    });
 }
