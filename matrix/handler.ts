@@ -393,34 +393,6 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
                 break;
         }
     });
-
-    /*
-  const inviteUser = await getItem("originalUserId", event.sender, "spacetube.group.invite");
-  const homeRoom = inviteUser.content.roomId;
-
-  const { connectedRooms } = tubeRoom.content;
-
-  for (const roomId of connectedRooms) {
-    if (roomId !== homeRoom) {
-      const groupCloneUsers = await getAllItems("roomId", roomId, "spacetube.group.clone");
-      const groupCloneUser = groupCloneUsers.find(clone => clone.content.originalUserId === event.sender);
-      if (groupCloneUser) {
-        sendMessageAsUser(groupCloneUser.content.user, roomId, message);
-      }
-      else {
-        const profileResponse = await getProfile(event.sender);
-        const { displayname } = await profileResponse.json();
-        const groupCloneUser = await createGroupCloneUser(displayname, event.sender, roomId);
-        const receivingGroupInviteUser = await getItem("roomId", roomId, "spacetube.group.invite");
-        const receivingGroupUser = await getItem("userId", receivingGroupInviteUser.content.originalUserId, "spacetube.group.user");
-        await inviteAsUser(receivingGroupUser.content.user, groupCloneUser, roomId);
-        const bigCloneUser = await getItem("userId", groupCloneUser.user_id, "spacetube.group.clone");
-        onCloneUserJoin(bigCloneUser, roomId);
-        sendMessageAsUser(groupCloneUser, roomId, message);
-      }
-    }
-  }
-  */
 };
 
 const handleMessageRemoteTube = async (tubeIntermediary, event, message) => {
@@ -732,6 +704,8 @@ export const handleMessage = async (event) => {
 
     const tubeRoomLinkRows = await connection.run(tubeRoomLinksSQL);
     const tubeRoomLinks = await tubeRoomLinkRows.getRowObjects();
+
+    console.log("tube room link", tubeRoomLinks);
 
     if (tubeRoomLinks.length > 0) {
         handleTubeRoomMessage(tubeRoomLinks, event);
