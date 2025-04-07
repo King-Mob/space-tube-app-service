@@ -24,7 +24,7 @@ async function create(event) {
     const insertChannelTeamLink = `INSERT INTO SlackChannelTeamLinks VALUES ('${event.channel}','${event.team}');`;
     await connection.run(insertChannelTeamLink);
 
-    const customInviteCode = event.text.split("!connect ")[2];
+    const customInviteCode = event.text.split("!create ")[2];
     const inviteCode = customInviteCode || xkpasswd({ seperators: "" });
 
     const insertInviteTubeRoomLink = `INSERT INTO InviteTubeRoomLinks VALUES ('${inviteCode}','${tube_room_id}');`;
