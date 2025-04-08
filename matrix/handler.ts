@@ -370,11 +370,13 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
 
         switch (link.channel_type) {
             case "slack":
-                const username = await getDisplayName(event.room_id, event.sender);
+                const profileResponse = await getProfile(event.sender);
+                const { displayname } = await profileResponse.json();
+
                 const serverName = "spacetu.be";
                 const mediaId = "JRSPJZaqLDLyULWRZodGybwd";
                 const imageUrl = `https://spacetube.${HOME_SERVER}/slack/image/?serverName=${serverName}&mediaId=${mediaId}`;
-                sendSlackMessage(link.channel_id, message, username, imageUrl);
+                sendSlackMessage(link.channel_id, message, displayname, imageUrl);
                 break;
             case "matrix":
                 const matrixUser = {

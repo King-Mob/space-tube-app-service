@@ -178,17 +178,14 @@ export async function startSlack(app) {
 
     app.get("/slack/image", async function (req: Request, res: Response) {
         const { serverName, mediaId } = req.query;
-        console.log(serverName, mediaId);
 
         const imageResponse = await getImage(serverName, mediaId);
-        console.log(imageResponse);
         const imageBlob: Blob = await imageResponse.blob();
         const imageBufferArray = await imageBlob.arrayBuffer();
+        const imageBuffer = Buffer.from(imageBufferArray);
 
         res.set("Content-Type", "image/png");
-        return res.send(Buffer.from(imageBufferArray));
-
-        //delete the file
+        return res.send(imageBuffer);
     });
 }
 
