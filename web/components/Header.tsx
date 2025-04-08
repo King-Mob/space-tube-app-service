@@ -4,9 +4,7 @@ const Header = () => (
     <Link to="/" id="header-link">
         <header>
             <h1 id="title">
-                <span>space</span>
-                <span className="very-small"> </span>
-                <span>tube</span>
+                space<span className="very-small"> </span>tube
             </h1>
             <p>Life is better in tubes.</p>
         </header>
