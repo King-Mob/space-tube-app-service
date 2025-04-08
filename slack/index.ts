@@ -17,6 +17,7 @@ import xkpasswd from "xkpasswd";
 import { registerUser, setDisplayName, createRoom, getImage } from "../matrix/matrixClientRequests";
 import { sendMessageAsMatrixUser } from "../matrix/handler";
 import { Request, Response } from "express";
+import { writeFileSync } from "node:fs";
 
 const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
 
@@ -182,10 +183,13 @@ export async function startSlack(app) {
         const imageResponse = await getImage(serverName, mediaId);
         console.log(imageResponse);
         const imageBlob: Blob = await imageResponse.blob();
-        const imageBuffer = await imageBlob.arrayBuffer();
-        console.log(imageBuffer);
-        //res.set("Content-Type", "image/png");
-        return res.send(imageBuffer);
+        const imageBufferArray = await imageBlob.arrayBuffer();
+
+        const fileName = serverName + mediaId;
+
+        writeFileSync(fileName, Buffer.from(imageBufferArray));
+
+        return res.sendFile(fileName);
     });
 }
 
