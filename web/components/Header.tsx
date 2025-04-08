@@ -5,6 +5,7 @@ const Header = () => (
         <header>
             <h1 id="title">
                 <span>space</span>
+                <span className="very-small"> </span>
                 <span>tube</span>
             </h1>
             <p>Life is better in tubes.</p>

@@ -367,3 +367,7 @@ footer {
 .center {
     text-align: center;
 }
+
+.very-small {
+    font-size: 1px;
+}
