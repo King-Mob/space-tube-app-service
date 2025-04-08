@@ -91,6 +91,7 @@ async function forward(event) {
     const message = event.text.replace(`<@${bot_user_id}>`, "");
 
     console.log("user", user);
+    console.log("link", link);
 
     if (user) {
         const matrixUser = {
