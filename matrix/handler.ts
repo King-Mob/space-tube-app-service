@@ -49,7 +49,7 @@ export async function sendMessageAsMatrixUser(matrixUser, message, roomId, conte
         insertTubeUserMembership(matrixUser.user_id, roomId);
     }
 
-    sendMessageAsUser(matrixUser, roomId, message, context);
+    return sendMessageAsUser(matrixUser, roomId, message, context);
 }
 
 export const getRoomNameAsSpacetube = async (roomId: string) => {

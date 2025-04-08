@@ -99,9 +99,11 @@ async function forward(event) {
             access_token: user.tube_user_access_token,
         };
 
-        sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
+        const response = await sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.channel,
         });
+        const result = await response.json();
+        console.log(result);
     } else {
         const displayName = await getSlackDisplayName(event.channel, event.user);
         const matrixUserResponse = await registerUser(displayName);
