@@ -226,7 +226,11 @@ async function getSlackDisplayName(channelId, userId) {
     const slackUser = await slackUserResponse.json();
     const userName = slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
 
-    const slackTeamResponse = await fetch(`https://slack.com/api/team.info?team=${team_id}`);
+    const slackTeamResponse = await fetch(`https://slack.com/api/team.info?team=${team_id}`, {
+        headers: {
+            Authorization: `Bearer ${bot_token}`,
+        },
+    });
     const { team } = await slackTeamResponse.json();
 
     return `${userName}.${team.name}`;
