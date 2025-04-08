@@ -373,10 +373,8 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
                 const profileResponse = await getProfile(event.sender);
                 const profile = await profileResponse.json();
 
-                const mxc = profile.avatar_url.split("mxc://")[1];
-
                 const imageUrl = profile.avatar_url
-                    ? `https://spacetube.${HOME_SERVER}/slack/image/?mxc=${mxc}`
+                    ? `https://spacetube.${HOME_SERVER}/slack/image/?mxc=${profile.avatar_url.split("mxc://")[1]}`
                     : `https://spacetube.${HOME_SERVER}/slack/image/?mxc=spacetu.be/PSBLUsPIprWrFYTOPXqqIXaY`;
                 sendSlackMessage(link.channel_id, message, profile.displayname, imageUrl);
                 break;
