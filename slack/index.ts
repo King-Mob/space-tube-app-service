@@ -104,9 +104,11 @@ async function forward(event) {
         const matrixUserResponse = await registerUser(displayName);
         const matrixUser = await matrixUserResponse.json();
         setDisplayName(matrixUser, displayName);
-        const avatarUrl = await getMatrixUrlFromSlack(profilePicUrl);
 
-        setProfilePicture(matrixUser, avatarUrl);
+        if (profilePicUrl) {
+            const avatarUrl = await getMatrixUrlFromSlack(profilePicUrl);
+            setProfilePicture(matrixUser, avatarUrl);
+        }
 
         sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.channel,
@@ -245,7 +247,7 @@ async function getSlackDisplayName(channelId: string, userId: string) {
 
     return {
         displayName: `${userName}.${team.name}`,
-        profilePicUrl: slackUser.profile.image_original.replaceAll("\\", ""),
+        profilePicUrl: slackUser.profile.image_original ? slackUser.profile.image_original.replaceAll("\\", "") : null,
     };
 }
 
