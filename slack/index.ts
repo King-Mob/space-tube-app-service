@@ -181,10 +181,11 @@ export async function startSlack(app) {
 
         const imageResponse = await getImage(serverName, mediaId);
         console.log(imageResponse);
-        const image = await imageResponse.blob();
-        console.log(image);
+        const imageBlob: Blob = await imageResponse.blob();
+        const imageBuffer = await imageBlob.arrayBuffer();
+        console.log(imageBuffer);
 
-        return res.render(image);
+        return res.send(imageBuffer);
     });
 }
 
