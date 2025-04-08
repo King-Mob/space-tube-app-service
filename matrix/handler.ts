@@ -372,7 +372,7 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
             case "slack":
                 const username = await getDisplayName(event.room_id, event.sender);
                 const serverName = "spacetu.be";
-                const mediaId = "pUlmjgHPgvUWrHKfrYMSscfC";
+                const mediaId = "JRSPJZaqLDLyULWRZodGybwd";
                 const imageUrl = `https://spacetube.${HOME_SERVER}/slack/image/?serverName=${serverName}&mediaId=${mediaId}`;
                 sendSlackMessage(link.channel_id, message, username, imageUrl);
                 break;
