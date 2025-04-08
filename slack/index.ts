@@ -185,11 +185,9 @@ export async function startSlack(app) {
         const imageBlob: Blob = await imageResponse.blob();
         const imageBufferArray = await imageBlob.arrayBuffer();
 
-        const fileName = serverName + mediaId;
+        return res.send(Buffer.from(imageBufferArray));
 
-        writeFileSync(fileName, Buffer.from(imageBufferArray));
-
-        return res.sendFile(fileName);
+        //delete the file
     });
 }
 
