@@ -184,7 +184,7 @@ export async function startSlack(app) {
         const imageBlob: Blob = await imageResponse.blob();
         const imageBuffer = await imageBlob.arrayBuffer();
         console.log(imageBuffer);
-
+        res.set("Content-Type", "image/png");
         return res.send(imageBuffer);
     });
 }
