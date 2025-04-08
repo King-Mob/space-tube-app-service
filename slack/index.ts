@@ -200,7 +200,7 @@ export async function startSlack(app) {
         const imageBufferArray = await imageBlob.arrayBuffer();
         const imageBuffer = Buffer.from(imageBufferArray);
 
-        res.set("Content-Type", "image/png");
+        res.set("Content-Type", imageResponse.headers["Content-Type"]);
         return res.send(imageBuffer);
     });
 }
