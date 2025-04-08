@@ -81,20 +81,15 @@ async function forward(event) {
     const { bot_user_id } = await getBot(event.channel);
     const message = event.text.replace(`<@${bot_user_id}>`, "");
 
-    console.log("user", user);
-    console.log("link", link);
-
     if (user) {
         const matrixUser = {
             user_id: user.tube_user_id,
             access_token: user.tube_user_access_token,
         };
 
-        const response = await sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
+        sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.channel,
         });
-        const result = await response.json();
-        console.log(result);
     } else {
         const displayName = await getSlackDisplayName(event.channel, event.user);
         const matrixUserResponse = await registerUser(displayName);
@@ -163,8 +158,6 @@ export async function startSlack(app) {
             body: data,
         });
         const slackResult = await slackResponse.json();
-
-        console.log(slackResult);
 
         if (slackResult.ok) {
             const {
