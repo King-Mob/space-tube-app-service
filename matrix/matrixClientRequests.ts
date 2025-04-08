@@ -194,7 +194,7 @@ export const leaveRoom = async (user: user, roomId: string) => {
     });
 };
 
-export const uploadImage = async (fileName: string, image) => {
+export const uploadImage = async (fileName: string, image: Buffer) => {
     const fileExtension = fileName.split(".")[1];
 
     return fetch(`https://matrix.${HOME_SERVER}/_matrix/media/v3/upload?filename=${fileName}`, {

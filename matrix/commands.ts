@@ -1,4 +1,12 @@
-import { sendMessage, sendMessageAsUser, registerUser, setDisplayName, createRoom } from "./matrixClientRequests.js";
+import {
+    sendMessage,
+    sendMessageAsUser,
+    registerUser,
+    setDisplayName,
+    createRoom,
+    getProfile,
+    setProfilePicture,
+} from "./matrixClientRequests.js";
 import { extractMessage, sendMessageAsMatrixUser } from "./handler.js";
 import { getItem, storeItem, getDisplayName } from "./storage.js";
 import {
@@ -110,10 +118,12 @@ const forward = async (event) => {
             from: event.room_id,
         });
     } else {
-        const displayName = await getDisplayName(event.room_id, event.sender);
-        const matrixUserResponse = await registerUser(displayName);
+        const profileResponse = await getProfile(event.sender);
+        const { displayname, avatar_url } = await profileResponse.json();
+        const matrixUserResponse = await registerUser(displayname);
         const matrixUser = await matrixUserResponse.json();
-        setDisplayName(matrixUser, displayName);
+        setDisplayName(matrixUser, displayname);
+        if (avatar_url) setProfilePicture(matrixUser, avatar_url);
 
         sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.room_id,
