@@ -430,7 +430,8 @@ if (process.env.DISCORD_TOKEN) {
 if (process.env.WHATSAPP_USER_ID) {
     //startWhatsapp();
 }
-
-startSlack(app);
+if (process.env.SLACK_SECRET) {
+    startSlack(app);
+}
 
 app.listen(8134);
