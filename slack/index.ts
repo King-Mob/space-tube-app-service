@@ -185,13 +185,10 @@ export async function startSlack(app) {
 }
 
 async function getBot(channelId: string) {
-    const channelTeamLink = await getChannelTeamLink(channelId);
-    console.log(channelId);
-    console.log(channelTeamLink);
-    const { team_id } = channelTeamLink;
+    const { team_id } = await getChannelTeamLink(channelId);
     const { bot_token, bot_user_id } = await getTeamBotTokenLink(team_id);
 
-    return { bot_token, bot_user_id };
+    return { bot_token, bot_user_id, team_id };
 }
 
 export async function sendSlackMessage(channel: string, text: string, username: string) {
@@ -212,7 +209,7 @@ export async function sendSlackMessage(channel: string, text: string, username: 
 }
 
 async function getSlackDisplayName(channelId, userId) {
-    const { bot_token } = await getBot(channelId);
+    const { bot_token, team_id } = await getBot(channelId);
 
     const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${userId}`, {
         headers: {
@@ -220,7 +217,10 @@ async function getSlackDisplayName(channelId, userId) {
         },
     });
     const slackUser = await slackUserResponse.json();
-    console.log(slackUser);
-    // i'd like the server name, going to put that in front of the display name
-    return slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
+    const userName = slackUser.profile.display_name || slackUser.profile.first_name + " " + slackUser.profile.last_name;
+
+    const slackTeamResponse = await fetch(`https://slack.com/api/team.info?team=${team_id}`);
+    const slackTeam = await slackTeamResponse.json();
+
+    return `${userName} :: ${slackTeam.name}`;
 }
