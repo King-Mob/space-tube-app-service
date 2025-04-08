@@ -16,6 +16,7 @@ import {
 import xkpasswd from "xkpasswd";
 import { registerUser, setDisplayName, createRoom, getImage } from "../matrix/matrixClientRequests";
 import { sendMessageAsMatrixUser } from "../matrix/handler";
+import { Request, Response } from "express";
 
 const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
 
@@ -174,7 +175,7 @@ export async function startSlack(app) {
         return res.send({ success: false });
     });
 
-    app.get("/slack/image", async function (req, res) {
+    app.get("/slack/image", async function (req: Request, res: Response) {
         const { serverName, mediaId } = req.query;
         console.log(serverName, mediaId);
 
