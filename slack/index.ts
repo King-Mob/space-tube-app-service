@@ -183,7 +183,7 @@ export async function startSlack(app) {
         const image = await imageResponse.blob();
         console.log(image);
 
-        res.send(image);
+        res.blob(image);
     });
 }
 
