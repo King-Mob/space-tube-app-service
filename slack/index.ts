@@ -185,6 +185,7 @@ export async function startSlack(app) {
         const imageBlob: Blob = await imageResponse.blob();
         const imageBufferArray = await imageBlob.arrayBuffer();
 
+        res.set("Content-Type", "image/png");
         return res.send(Buffer.from(imageBufferArray));
 
         //delete the file
