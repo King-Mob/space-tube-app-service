@@ -1,322 +1,363 @@
 @font-face {
-  font-family: Astropolis;
-  src: url(Astropolis.ttf);
+    font-family: Astropolis;
+    src: url(Astropolis.ttf);
 }
 
 html {
-  font-size: 1.25vh;
+    font-size: 1.25vh;
 }
 
 body {
-  margin: 0;
-  background-color: #272727;
-  color: white;
+    margin: 0;
+    background-color: #272727;
+    color: white;
 }
 
 a {
-  color: white;
+    color: white;
 }
 
 a:visited {
-  color: #8b8b8b;
+    color: #8b8b8b;
 }
 
 #app {
-  height: 100vh;
+    height: 100vh;
 }
 
 #home-container {
-  min-height: 100%;
-  width: 100%;
-  margin-left: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
+    min-height: 100%;
+    width: 100%;
+    margin-left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
 }
 
 #actions-container {
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 10rem;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10rem;
 }
 
 .form-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 1rem;
 }
 
 @media only screen and (min-width: 800px) {
-  #actions-container {
-    flex-direction: row;
-    justify-content: center;
-  }
-  .form-container {
-    min-width: 50%;
-    max-width: 75%;
-  }
+    #actions-container {
+        flex-direction: row;
+        justify-content: center;
+    }
+    .form-container {
+        min-width: 50%;
+        max-width: 75%;
+    }
 }
 
 @media only screen and (min-width: 1000px) {
-  #home-container {
-    width: 80%;
-    margin-left: 10%;
-  }
+    #home-container {
+        width: 80%;
+        margin-left: 10%;
+    }
 }
 
 #messenger-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .room-container {
-  height: 50%;
-  width: 100%;
+    height: 50%;
+    width: 100%;
 }
 
 @media only screen and (min-width: 1000px) {
-  #messenger-container {
-    flex-direction: row-reverse;
-  }
-  .room-container {
-    height: 100%;
-    width: 50%;
-  }
+    #messenger-container {
+        flex-direction: row-reverse;
+    }
+    .room-container {
+        height: 100%;
+        width: 50%;
+    }
 }
 
 h1 {
-  font-family: monospace;
-  margin: 0;
-  font-size: 6rem;
+    font-family: monospace;
+    margin: 0;
+    font-size: 6rem;
+    text-align: center;
 }
 
 #title {
-  font-size: 8rem;
-  font-family: Astropolis;
-  animation: glow 4s infinite;
+    font-size: 8rem;
+    font-family: Astropolis;
+    animation: glow 4s infinite;
 }
 
 @keyframes glow {
-  0% {
-    filter: drop-shadow(0 0 0.25rem green);
-  }
-  50% {
-    filter: drop-shadow(0 0 1.1rem green);
-  }
-  100% {
-    filter: drop-shadow(0 0 0.25rem green);
-  }
+    0% {
+        filter: drop-shadow(0 0 0.25rem green);
+    }
+    50% {
+        filter: drop-shadow(0 0 1.1rem green);
+    }
+    100% {
+        filter: drop-shadow(0 0 0.25rem green);
+    }
 }
 
 h2 {
-  font-family: monospace;
-  font-size: 5rem;
-  margin: 0;
+    font-family: monospace;
+    font-size: 5rem;
+    margin: 0;
 }
 
 h3 {
-  font-family: monospace;
-  font-size: 3rem;
-  margin: 0;
-  font-weight: normal;
+    font-family: monospace;
+    font-size: 3rem;
+    margin: 0;
+    font-weight: normal;
 }
 
 .room-title {
-  font-size: 3rem;
+    font-size: 3rem;
 }
 
 #matrix-room-title-container {
-  display: flex;
-  justify-content: space-between;
-  background-color: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 #matrix-room-title {
-  color: black;
+    color: black;
 }
 
 .message-container {
-  padding: 10px 5px;
-  color: black;
-  cursor: pointer;
+    padding: 10px 5px;
+    color: black;
+    cursor: pointer;
 }
 
 #tube-room-container .message-container {
-  color: white;
+    color: white;
 }
 
 #tube-room-title {
-  background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .name {
-  opacity: 0.7;
+    opacity: 0.7;
 }
 
 p {
-  font-family: monospace;
-  font-size: 2rem;
-  margin: 0px;
+    font-family: monospace;
+    font-size: 2rem;
+    margin: 0px;
 }
 
 .form-container p {
-  font-size: 3rem;
+    font-size: 3rem;
 }
 
 .room-events-container {
-  flex-grow: 1;
-  overflow-y: scroll;
+    flex-grow: 1;
+    overflow-y: scroll;
 }
 
 #tube-room-container {
-  background-color: #272727;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
+    background-color: #272727;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 #matrix-room-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  z-index: 2;
-  background-color: lightgrey;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 2;
+    background-color: lightgrey;
 }
 
 #new-message-container {
-  display: flex;
-  width: 100%;
+    display: flex;
+    width: 100%;
 }
 
 input {
-  font-size: 1.5rem;
-  font-family: monospace;
+    font-size: 1.5rem;
+    font-family: monospace;
 }
 
 #new-message-text {
-  flex-grow: 1;
+    flex-grow: 1;
 }
 
 #send-button {
-  font-size: 2rem;
-  font-family: monospace;
+    font-size: 2rem;
+    font-family: monospace;
 }
 
 .forwarded {
-  font-size: 1.5rem;
-  opacity: 0.5;
+    font-size: 1.5rem;
+    opacity: 0.5;
 }
 
 label {
-  font-size: 3rem;
-  font-family: monospace;
-  display: block;
+    font-size: 3rem;
+    font-family: monospace;
+    display: block;
 }
 
 #create-button {
-  display: block;
+    display: block;
 }
 
 .home-input {
-  font-size: 3rem;
-  width: 90%;
-  text-align: center;
-  border-radius: 3px;
-  margin-top: 1rem;
-  border: none;
+    font-size: 3rem;
+    width: 90%;
+    text-align: center;
+    border-radius: 3px;
+    margin-top: 1rem;
+    border: none;
 }
 
 .home-button {
-  display: block;
-  border: none;
-  font-family: monospace;
-  font-size: 3rem;
-  border-radius: 3px;
-  margin-top: 1rem;
+    display: block;
+    border: none;
+    font-family: monospace;
+    font-size: 3rem;
+    border-radius: 3px;
+    margin-top: 1rem;
 }
 
 .home-button:hover {
-  background-color: black;
-  color: white;
+    background-color: black;
+    color: white;
 }
 
 .home-button:active {
-  background-color: grey;
-  color: white;
+    background-color: grey;
+    color: white;
 }
 
 .home-button:disabled {
-  background-color: lightgrey;
-  color: grey;
+    background-color: lightgrey;
+    color: grey;
 }
 
 .star {
-  z-index: -3;
-  position: absolute;
-  font-size: 1rem;
-  filter: drop-shadow(0 0 0.2rem yellow);
+    z-index: -3;
+    position: absolute;
+    font-size: 1rem;
+    filter: drop-shadow(0 0 0.2rem yellow);
 }
 
 #update-button {
-  display: block;
+    display: block;
 }
 
 #tube-link-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+#header-link {
+    text-decoration: none;
+    color: white;
 }
 
 footer {
-  margin-top: 2rem;
+    margin-top: 2rem;
 }
 
 #profile-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .profile-picture {
-  cursor: pointer;
-  height: 10rem;
-  width: 10rem;
-  border-radius: 50%;
-  background-color: #8b8b8b;
-  object-fit: cover;
+    cursor: pointer;
+    height: 10rem;
+    width: 10rem;
+    border-radius: 50%;
+    background-color: #8b8b8b;
+    object-fit: cover;
 }
 
 .empty {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .profile-picture p {
-  margin-top: -7%;
-  font-size: 4rem;
+    margin-top: -7%;
+    font-size: 4rem;
 }
 
 #edit-user-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 #buttons-container button {
-  height: 100%;
-  font-size: 1.5rem;
+    height: 100%;
+    font-size: 1.5rem;
+}
+
+#slack-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+#instructions-container {
+    max-width: 800px;
+    margin: 10px;
+}
+
+#instructions-container h2 {
+    text-align: center;
+}
+
+#instructions-container p {
+    margin: 10px 0px;
+}
+
+#instructions-container span {
+    background-color: #00800099;
+}
+
+.divider {
+    width: 100%;
+    border-bottom: 1px solid white;
+    display: block;
+}
+
+.center {
+    text-align: center;
 }

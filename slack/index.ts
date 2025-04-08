@@ -1,6 +1,5 @@
 import {
     insertUserTubeUserLink,
-    getTubeUserMembership,
     getTubeRoomLinkByChannelId,
     getInviteCodeByTubeId,
     insertChannelTubeRoomLink,
@@ -10,20 +9,12 @@ import {
     deleteChannelTeamLinks,
     getInviteTubeRoomLink,
     getTubeUserByUserId,
-    insertTubeUserMembership,
     insertTeamBotTokenLink,
     getChannelTeamLink,
     getTeamBotTokenLink,
 } from "../duckdb";
 import xkpasswd from "xkpasswd";
-import {
-    sendMessageAsUser,
-    registerUser,
-    setDisplayName,
-    inviteAsSpacetubeRequest,
-    join,
-    createRoom,
-} from "../matrix/matrixClientRequests";
+import { registerUser, setDisplayName, createRoom } from "../matrix/matrixClientRequests";
 import { sendMessageAsMatrixUser } from "../matrix/handler";
 
 const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
