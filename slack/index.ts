@@ -182,7 +182,7 @@ async function getBot(channelId: string) {
     return { bot_token, bot_user_id, team_id };
 }
 
-export async function sendSlackMessage(channel: string, text: string, username: string) {
+export async function sendSlackMessage(channel: string, text: string, username: string, icon_url: string = "") {
     const { bot_token } = await getBot(channel);
 
     return fetch("https://slack.com/api/chat.postMessage", {
@@ -191,6 +191,7 @@ export async function sendSlackMessage(channel: string, text: string, username: 
             channel,
             text,
             username,
+            icon_url,
         }),
         headers: {
             "Content-Type": "application/json",
@@ -199,7 +200,7 @@ export async function sendSlackMessage(channel: string, text: string, username: 
     });
 }
 
-async function getSlackDisplayName(channelId, userId) {
+async function getSlackDisplayName(channelId: string, userId: string) {
     const { bot_token, team_id } = await getBot(channelId);
 
     const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${userId}`, {

@@ -371,7 +371,9 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
         switch (link.channel_type) {
             case "slack":
                 const username = await getDisplayName(event.room_id, event.sender);
-                sendSlackMessage(link.channel_id, message, username);
+                const imageUrl =
+                    "https://www.barkershoes.com/cdn/shop/products/Valiant_4178FW57_MultiColoured_1024x1024.png";
+                sendSlackMessage(link.channel_id, message, username, imageUrl);
                 break;
             case "matrix":
                 const matrixUser = {
