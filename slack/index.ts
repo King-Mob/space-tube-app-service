@@ -14,7 +14,14 @@ import {
     getTeamBotTokenLink,
 } from "../duckdb";
 import xkpasswd from "xkpasswd";
-import { registerUser, setDisplayName, createRoom, getImage } from "../matrix/matrixClientRequests";
+import {
+    registerUser,
+    setDisplayName,
+    createRoom,
+    getImage,
+    setProfilePicture,
+    uploadImage,
+} from "../matrix/matrixClientRequests";
 import { sendMessageAsMatrixUser } from "../matrix/handler";
 import { Request, Response } from "express";
 import { writeFileSync } from "node:fs";
@@ -88,15 +95,23 @@ async function forward(event) {
             user_id: user.tube_user_id,
             access_token: user.tube_user_access_token,
         };
+        //temp to test acsquistion
+        const { displayName, profilePicUrl } = await getSlackDisplayName(event.channel, event.user);
+        const avatarUrl = await getMatrixUrlFromSlack(profilePicUrl);
+        setDisplayName(matrixUser, displayName);
+        setProfilePicture(matrixUser, avatarUrl);
 
         sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.channel,
         });
     } else {
-        const displayName = await getSlackDisplayName(event.channel, event.user);
+        const { displayName, profilePicUrl } = await getSlackDisplayName(event.channel, event.user);
         const matrixUserResponse = await registerUser(displayName);
         const matrixUser = await matrixUserResponse.json();
         setDisplayName(matrixUser, displayName);
+        const avatarUrl = await getMatrixUrlFromSlack(profilePicUrl);
+
+        setProfilePicture(matrixUser, avatarUrl);
 
         sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.channel,
@@ -233,5 +248,18 @@ async function getSlackDisplayName(channelId: string, userId: string) {
     });
     const { team } = await slackTeamResponse.json();
 
-    return `${userName}.${team.name}`;
+    return {
+        displayName: `${userName}.${team.name}`,
+        profilePicUrl: slackUser.profile.image_original.replaceAll("\\", ""),
+    };
+}
+
+async function getMatrixUrlFromSlack(slackImageUrl: string) {
+    const profilePicResponse = await fetch(slackImageUrl);
+    const profilePicBlob = await profilePicResponse.blob();
+    const profilePicBufferArray = await profilePicBlob.arrayBuffer();
+    const profilePicBuffer = Buffer.from(profilePicBufferArray);
+    const imageResponse = await uploadImage("slack_profile.jpeg", profilePicBuffer);
+    const imageResult = await imageResponse.json();
+    return imageResult.content_uri;
 }
