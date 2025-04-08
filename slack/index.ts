@@ -14,7 +14,7 @@ import {
     getTeamBotTokenLink,
 } from "../duckdb";
 import xkpasswd from "xkpasswd";
-import { registerUser, setDisplayName, createRoom } from "../matrix/matrixClientRequests";
+import { registerUser, setDisplayName, createRoom, getImage } from "../matrix/matrixClientRequests";
 import { sendMessageAsMatrixUser } from "../matrix/handler";
 
 const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
@@ -172,6 +172,16 @@ export async function startSlack(app) {
         }
 
         return res.send({ success: false });
+    });
+
+    app.get("/slack/image", async function (req, res) {
+        const { serverName, mediaId } = req.query;
+        console.log(serverName, mediaId);
+
+        const image = await getImage(serverName, mediaId);
+        console.log(image);
+
+        res.send(image);
     });
 }
 

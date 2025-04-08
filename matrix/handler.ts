@@ -371,8 +371,9 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
         switch (link.channel_type) {
             case "slack":
                 const username = await getDisplayName(event.room_id, event.sender);
-                const imageUrl =
-                    "https://www.barkershoes.com/cdn/shop/products/Valiant_4178FW57_MultiColoured_1024x1024.png";
+                const serverName = "spacetu.be";
+                const mediaId = "pUlmjgHPgvUWrHKfrYMSscfC";
+                const imageUrl = `https://spacetube.${HOME_SERVER}/api/slack/image/?serverName=${serverName}&mediaId=${mediaId}`;
                 sendSlackMessage(link.channel_id, message, username, imageUrl);
                 break;
             case "matrix":
