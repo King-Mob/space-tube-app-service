@@ -90,6 +90,8 @@ async function forward(event) {
     const { bot_user_id } = await getBot(event.channel);
     const message = event.text.replace(`<@${bot_user_id}>`, "");
 
+    console.log("user", user);
+
     if (user) {
         const matrixUser = {
             user_id: user.tube_user_id,
