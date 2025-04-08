@@ -216,7 +216,7 @@ export const getProfile = async (userId: string) => {
 };
 
 export const getImage = async (mxc: string) => {
-    return fetch(`https://matrix.${HOME_SERVER}/_matrix/media/v3/download/${mxc}`, {
+    return fetch(`https://matrix.${HOME_SERVER}/_matrix/client/v1/media/download/${mxc}`, {
         headers: {
             Authorization: `Bearer ${APPLICATION_TOKEN}`,
         },
