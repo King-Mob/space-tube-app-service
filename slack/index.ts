@@ -177,9 +177,9 @@ export async function startSlack(app) {
     });
 
     app.get("/slack/image", async function (req: Request, res: Response) {
-        const { serverName, mediaId } = req.query;
+        const { mxc } = req.query;
 
-        const imageResponse = await getImage(serverName, mediaId);
+        const imageResponse = await getImage(mxc);
         const imageBlob: Blob = await imageResponse.blob();
         const imageBufferArray = await imageBlob.arrayBuffer();
         const imageBuffer = Buffer.from(imageBufferArray);

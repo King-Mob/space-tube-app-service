@@ -338,10 +338,9 @@ app.get("/api/groupuser/picture", async (req, res) => {
         const profile = await profileResponse.json();
 
         if (profile.avatar_url) {
-            const serverName = profile.avatar_url.split("/")[2];
-            const mediaId = profile.avatar_url.split("/")[3];
+            const mxc = profile.avatar_url.split("mxc://")[1];
 
-            const imageResponse = await getImage(serverName, mediaId);
+            const imageResponse = await getImage(mxc);
             const image = await imageResponse.blob();
 
             res.type(image.type);
