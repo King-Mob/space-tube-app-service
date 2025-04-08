@@ -209,7 +209,10 @@ export async function sendSlackMessage(channel: string, text: string, username: 
 }
 
 async function getSlackDisplayName(channelId, userId) {
+    console.log("get name");
+
     const { bot_token, team_id } = await getBot(channelId);
+    console.log(bot_token);
 
     const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${userId}`, {
         headers: {
