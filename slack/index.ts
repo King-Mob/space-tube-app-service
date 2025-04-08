@@ -95,11 +95,6 @@ async function forward(event) {
             user_id: user.tube_user_id,
             access_token: user.tube_user_access_token,
         };
-        //temp to test acsquistion
-        const { displayName, profilePicUrl } = await getSlackDisplayName(event.channel, event.user);
-        const avatarUrl = await getMatrixUrlFromSlack(profilePicUrl);
-        setDisplayName(matrixUser, displayName);
-        setProfilePicture(matrixUser, avatarUrl);
 
         sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
             from: event.channel,
