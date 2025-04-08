@@ -352,6 +352,12 @@ footer {
     background-color: #00800099;
 }
 
+#slack-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .divider {
     width: 100%;
     border-bottom: 1px solid white;
