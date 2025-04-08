@@ -173,6 +173,8 @@ export async function startSlack(app) {
         });
         const slackResult = await slackResponse.json();
 
+        console.log(slackResult);
+
         if (slackResult.ok) {
             const {
                 access_token,

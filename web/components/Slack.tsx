@@ -13,7 +13,6 @@ const Slack = () => {
     const processCode = async () => {
         const processSlackResponse = await processSlackRequest(slack_code);
         const processSlackResult = await processSlackResponse.json();
-        console.log(processSlackResult);
 
         if (processSlackResult.success) setSuccess(true);
     };
