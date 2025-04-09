@@ -35,9 +35,9 @@ const Slack = () => {
                     <span>@spacetube invite-code-here</span>
                 </p>
                 <p>
-                    3. Start sending messages by sending <span>@spacetube message-here</span> before the message.
+                    3. Start sending messages by sending <span>@spacetube your-message-here</span>
                 </p>
-                <p>Read on for the Slack Specifics.</p>
+                <p>Read on for the Slack Specifics...</p>
                 <span className="divider"></span>
                 <h3 className="center">Add the Spacetube plugin</h3>
                 {slack_code ? (
