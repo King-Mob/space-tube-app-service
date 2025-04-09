@@ -24,9 +24,16 @@ import {
 } from "../matrix/matrixClientRequests";
 import { sendMessageAsMatrixUser } from "../matrix/handler";
 import { Request, Response } from "express";
-import { writeFileSync } from "node:fs";
+import { v4 as uuidv4 } from "uuid";
+import sha1 from "sha1";
 
-const { SLACK_SECRET, SLACK_CLIENT_ID } = process.env;
+const { SLACK_SECRET, SLACK_CLIENT_ID, HOME_SERVER } = process.env;
+
+export function generateInviteCode(textPortion) {
+    const hashPortion = sha1(uuidv4()).slice(0, 8);
+
+    return `CoCoDoJo:${textPortion}${hashPortion}@${HOME_SERVER};`;
+}
 
 function echo(event) {
     const message = event.text;
@@ -51,8 +58,8 @@ async function create(event) {
         const createRoomResult = await createRoomResponse.json();
         const tube_room_id = createRoomResult.room_id;
 
-        const customInviteCode = event.text.split("!create ")[1];
-        const inviteCode = customInviteCode || xkpasswd({ separators: "" });
+        const inviteTextPortion = event.text.split("!create ")[1] || xkpasswd({ separators: "" });
+        const inviteCode = generateInviteCode(inviteTextPortion);
 
         insertChannelTubeRoomLink(event.channel, "slack", tube_room_id);
         insertInviteTubeRoomLink(inviteCode, tube_room_id);
