@@ -39,7 +39,10 @@ export function generateInviteCode(optionalInviteText: string) {
     return `CoCoDoJo_${cleanTextPortion}_${hashPortion}~${HOME_SERVER.replaceAll(".", "\\.")}`;
 }
 
-function echo(event) {
+async function echo(event) {
+    await deleteChannelTeamLinks(event.channel);
+    await insertChannelTeamLink(event.channel, event.team);
+
     const message = event.text;
     const newMessage = "you said: " + message.split("!echo ")[1];
 
@@ -72,7 +75,7 @@ async function remindInviteCode(existingTube) {
 }
 
 async function connect(event, message) {
-    deleteChannelTeamLinks(event.channel);
+    await deleteChannelTeamLinks(event.channel);
     await insertChannelTeamLink(event.channel, event.team);
 
     const invite = await getInviteTubeRoomLink(message);
