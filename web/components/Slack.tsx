@@ -31,11 +31,11 @@ const Slack = () => {
                 <p>Spacetube on Slack has a simple set-up with 3 steps:</p>
                 <p>1. Add the Spacetube plugin to your team's platform.</p>
                 <p>
-                    2. Create or connect to a tube using the <span>@spacetube !create</span> or{" "}
-                    <span>@spacetube !connect</span> commands.
+                    2. Create or connect to a tube by sending <span>@spacetube</span> or{" "}
+                    <span>@spacetube invite-code-here</span>
                 </p>
                 <p>
-                    3. Start sending messages by sending <span>@spacetube your-message-here</span> before the message.
+                    3. Start sending messages by sending <span>@spacetube message-here</span> before the message.
                 </p>
                 <p>Read on for the Slack Specifics.</p>
                 <span className="divider"></span>
@@ -89,8 +89,8 @@ const Slack = () => {
                 <p className="center">Once that's done, EITHER:</p>
                 <h3 className="center">Create a new tube</h3>
                 <p>
-                    1. Send <span>@spacetube !create your-optional-custom-invite-code-here</span> in the Slack channel
-                    to make a tube! You can leave out the custom invite code and spacetube will make one for you.
+                    1. Send <span>@spacetube optional-custom-invite-code-here</span> in the Slack channel to make a
+                    tube! You can leave out the custom invite code and spacetube will make one for you.
                 </p>
                 <p>
                     2. Share the invite code with someone in the group you want to connect to. Now they need to do the
@@ -100,8 +100,8 @@ const Slack = () => {
                 <h3 className="center">Connect to an existing tube</h3>
                 <p>1. Copy the invite code you received from someone else.</p>
                 <p>
-                    2. Use the code and send <span>@spacetube !connect received-invite-code-here</span> in the Slack
-                    channel to connect to their tube.
+                    2. Use the code and send <span>@spacetube received-invite-code-here</span> in the Slack channel to
+                    connect to their tube.
                 </p>
                 <p className="center">FINALLY</p>
                 <h3 className="center">Send messages</h3>
