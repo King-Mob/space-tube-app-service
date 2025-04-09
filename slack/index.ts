@@ -29,10 +29,12 @@ import sha1 from "sha1";
 
 const { SLACK_SECRET, SLACK_CLIENT_ID, HOME_SERVER } = process.env;
 
-export function generateInviteCode(textPortion) {
+export function generateInviteCode(textPortion: string) {
+    const cleanTextPortion = textPortion.replaceAll("@", "").replaceAll("CoCoDoJo:", "");
+
     const hashPortion = sha1(uuidv4()).slice(0, 8);
 
-    return `CoCoDoJo:${textPortion}${hashPortion}@${HOME_SERVER};`;
+    return `CoCoDoJo:${cleanTextPortion}${hashPortion}@${HOME_SERVER}`;
 }
 
 function echo(event) {
