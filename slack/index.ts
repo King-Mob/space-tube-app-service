@@ -126,10 +126,9 @@ async function handleMention(event) {
     const existingTube = await getTubeRoomLinkByChannelId(event.channel);
     const { bot_user_id } = await getBotFromTeam(event.team);
     const message = event.text.replace(`<@${bot_user_id}>`, "");
+    const messageNoSpaces = message.replaceAll(" ", "");
 
     if (!existingTube) {
-        const messageNoSpaces = message.replaceAll(" ", "");
-
         if (event.text.includes(INVITE_PREFIX)) {
             connect(event, messageNoSpaces);
             return;
@@ -138,8 +137,8 @@ async function handleMention(event) {
             return;
         }
     } else {
-        if (!message) {
-            remindInviteCode(event);
+        if (!messageNoSpaces) {
+            remindInviteCode(existingTube);
             return;
         } else {
             if (event.text.includes("!echo")) {
