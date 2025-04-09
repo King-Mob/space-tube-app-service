@@ -104,7 +104,7 @@ async function forward(event, message) {
             from: event.channel,
         });
     } else {
-        const { displayName, profilePicUrl } = await getSlackDisplayName(event.channel, event.user);
+        const { displayName, profilePicUrl } = await getSlackProfile(event.channel, event.user);
         const matrixUserResponse = await registerUser(displayName);
         const matrixUser = await matrixUserResponse.json();
         setDisplayName(matrixUser, displayName);
@@ -245,7 +245,7 @@ export async function sendSlackMessage(channel: string, text: string, username: 
     });
 }
 
-async function getSlackDisplayName(channelId: string, userId: string) {
+async function getSlackProfile(channelId: string, userId: string) {
     const { bot_token, team_id } = await getBotFromChannel(channelId);
 
     const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${userId}`, {
