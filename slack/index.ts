@@ -32,11 +32,11 @@ const { SLACK_SECRET, SLACK_CLIENT_ID, HOME_SERVER } = process.env;
 export function generateInviteCode(optionalInviteText: string) {
     const textPortion = optionalInviteText || xkpasswd({ separators: "" });
 
-    const cleanTextPortion = textPortion.replaceAll("@", "").replaceAll("CoCoDoJo:", "");
+    const cleanTextPortion = textPortion.replaceAll("@", "").replaceAll("CoCoDoJo_", "");
 
     const hashPortion = sha1(uuidv4()).slice(0, 8);
 
-    return `CoCoDoJo:${cleanTextPortion}${hashPortion}@${HOME_SERVER}`;
+    return `CoCoDoJo_${cleanTextPortion}_${hashPortion}@${HOME_SERVER}`;
 }
 
 function echo(event) {
