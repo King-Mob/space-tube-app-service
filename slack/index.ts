@@ -132,7 +132,7 @@ async function handleMention(event) {
             connect(event, message);
             return;
         } else {
-            create(event, message);
+            create(event, message.replaceAll(" ", ""));
             return;
         }
     } else {
