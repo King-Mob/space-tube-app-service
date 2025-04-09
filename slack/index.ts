@@ -124,7 +124,7 @@ async function forward(event, message) {
 
 async function handleMention(event) {
     const existingTube = await getTubeRoomLinkByChannelId(event.channel);
-    const { bot_user_id } = await getBot(event.channel);
+    const { bot_user_id } = await getBotFromTeam(event.team);
     const message = event.text.replace(`<@${bot_user_id}>`, "");
 
     if (!existingTube) {
@@ -215,15 +215,19 @@ export async function startSlack(app) {
     });
 }
 
-async function getBot(channelId: string) {
+async function getBotFromChannel(channelId: string) {
     const { team_id } = await getChannelTeamLink(channelId);
-    const { bot_token, bot_user_id } = await getTeamBotTokenLink(team_id);
+    return await getBotFromTeam(team_id);
+}
 
-    return { bot_token, bot_user_id, team_id };
+async function getBotFromTeam(teamId: string) {
+    const { bot_token, bot_user_id } = await getTeamBotTokenLink(teamId);
+
+    return { bot_token, bot_user_id, team_id: teamId };
 }
 
 export async function sendSlackMessage(channel: string, text: string, username: string, icon_url: string = "") {
-    const { bot_token } = await getBot(channel);
+    const { bot_token } = await getBotFromChannel(channel);
 
     return fetch("https://slack.com/api/chat.postMessage", {
         method: "POST",
@@ -241,7 +245,7 @@ export async function sendSlackMessage(channel: string, text: string, username: 
 }
 
 async function getSlackDisplayName(channelId: string, userId: string) {
-    const { bot_token, team_id } = await getBot(channelId);
+    const { bot_token, team_id } = await getBotFromChannel(channelId);
 
     const slackUserResponse = await fetch(`https://slack.com/api/users.profile.get?user=${userId}`, {
         headers: {
