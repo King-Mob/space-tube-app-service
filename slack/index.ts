@@ -29,7 +29,9 @@ import sha1 from "sha1";
 
 const { SLACK_SECRET, SLACK_CLIENT_ID, HOME_SERVER } = process.env;
 
-export function generateInviteCode(textPortion: string) {
+export function generateInviteCode(optionalInviteText: string) {
+    const textPortion = optionalInviteText || xkpasswd({ separators: "" });
+
     const cleanTextPortion = textPortion.replaceAll("@", "").replaceAll("CoCoDoJo:", "");
 
     const hashPortion = sha1(uuidv4()).slice(0, 8);
@@ -60,8 +62,8 @@ async function create(event) {
         const createRoomResult = await createRoomResponse.json();
         const tube_room_id = createRoomResult.room_id;
 
-        const inviteTextPortion = event.text.split("!create ")[1] || xkpasswd({ separators: "" });
-        const inviteCode = generateInviteCode(inviteTextPortion);
+        const optionalInviteText = event.text.split("!create ")[1];
+        const inviteCode = generateInviteCode(optionalInviteText);
 
         insertChannelTubeRoomLink(event.channel, "slack", tube_room_id);
         insertInviteTubeRoomLink(inviteCode, tube_room_id);

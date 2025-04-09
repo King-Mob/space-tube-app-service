@@ -8,7 +8,7 @@ import {
     setProfilePicture,
 } from "./matrixClientRequests.js";
 import { extractMessage, sendMessageAsMatrixUser } from "./handler.js";
-import { getItem, storeItem, getDisplayName } from "./storage.js";
+import { getItem, storeItem } from "./storage.js";
 import {
     getTubeRoomLinkByChannelId,
     getTubeUserByUserId,
@@ -20,7 +20,7 @@ import {
     deleteChannelTubeRoomLinks,
 } from "../duckdb.js";
 import { v4 as uuidv4 } from "uuid";
-import xkpasswd from "xkpasswd";
+import { generateInviteCode } from "../slack/index.js";
 
 const { HOME_SERVER } = process.env;
 
@@ -47,8 +47,8 @@ const create = async (event) => {
         const createRoomResult = await createRoomResponse.json();
         const tube_room_id = createRoomResult.room_id;
 
-        const customInviteCode = event.content.formatted_body.split("!create ")[1];
-        const inviteCode = customInviteCode || xkpasswd({ separators: "" });
+        const optionalInviteText = event.content.formatted_body.split("!create ")[1];
+        const inviteCode = generateInviteCode(optionalInviteText);
 
         insertChannelTubeRoomLink(event.room_id, "matrix", tube_room_id);
         insertInviteTubeRoomLink(inviteCode, tube_room_id);
