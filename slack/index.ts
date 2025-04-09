@@ -128,11 +128,13 @@ async function handleMention(event) {
     const message = event.text.replace(`<@${bot_user_id}>`, "");
 
     if (!existingTube) {
+        const messageNoSpaces = message.replaceAll(" ", "");
+
         if (event.text.includes(INVITE_PREFIX)) {
-            connect(event, message);
+            connect(event, messageNoSpaces);
             return;
         } else {
-            create(event, message.replaceAll(" ", ""));
+            create(event, messageNoSpaces);
             return;
         }
     } else {
