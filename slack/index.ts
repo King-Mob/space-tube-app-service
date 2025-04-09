@@ -75,12 +75,12 @@ async function connect(event, message) {
     deleteChannelTeamLinks(event.channel);
     await insertChannelTeamLink(event.channel, event.team);
 
-    const { tube_room_id } = await getInviteTubeRoomLink(message);
+    const invite = await getInviteTubeRoomLink(message);
 
-    if (tube_room_id) {
+    if (invite) {
         deleteChannelTubeRoomLinks(event.channel);
 
-        insertChannelTubeRoomLink(event.channel, "slack", tube_room_id);
+        insertChannelTubeRoomLink(event.channel, "slack", invite.tube_room_id);
         sendSlackMessage(event.channel, "You have joined the spacetube!", "spacetube");
     } else {
         sendSlackMessage(event.channel, "No tube found for that invite code", "spacetube");
