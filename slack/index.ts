@@ -27,7 +27,7 @@ import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import sha1 from "sha1";
 
-const { SLACK_SECRET, SLACK_CLIENT_ID, HOME_SERVER } = process.env;
+const { SLACK_SECRET, SLACK_CLIENT_ID, HOME_SERVER, INVITE_PREFIX } = process.env;
 
 export function generateInviteCode(optionalInviteText: string) {
     const textPortion = optionalInviteText || xkpasswd({ separators: "" });
@@ -46,40 +46,36 @@ function echo(event) {
     sendSlackMessage(event.channel, newMessage, "spacetube");
 }
 
-async function create(event) {
-    const existingChannelTubeRoomLink = await getTubeRoomLinkByChannelId(event.channel);
+async function create(event, message) {
+    const createRoomResponse = await createRoom("tube room");
+    const createRoomResult = await createRoomResponse.json();
+    const tube_room_id = createRoomResult.room_id;
 
-    if (existingChannelTubeRoomLink) {
-        const existingInviteCode = await getInviteCodeByTubeId(existingChannelTubeRoomLink.tube_room_id);
+    const optionalInviteText = message;
+    const inviteCode = generateInviteCode(optionalInviteText);
 
-        sendSlackMessage(
-            event.channel,
-            `Tube already open with invite code: ${existingInviteCode.invite_code}`,
-            "spacetube"
-        );
-    } else {
-        const createRoomResponse = await createRoom("tube room");
-        const createRoomResult = await createRoomResponse.json();
-        const tube_room_id = createRoomResult.room_id;
+    insertChannelTubeRoomLink(event.channel, "slack", tube_room_id);
+    insertInviteTubeRoomLink(inviteCode, tube_room_id);
 
-        const optionalInviteText = event.text.split("!create ")[1];
-        const inviteCode = generateInviteCode(optionalInviteText);
-
-        insertChannelTubeRoomLink(event.channel, "slack", tube_room_id);
-        insertInviteTubeRoomLink(inviteCode, tube_room_id);
-
-        await insertChannelTeamLink(event.channel, event.team);
-        sendSlackMessage(event.channel, `Tube is open with invite code: ${inviteCode}`, "spacetube");
-    }
+    await insertChannelTeamLink(event.channel, event.team);
+    sendSlackMessage(event.channel, `Tube is open with invite code: ${inviteCode}`, "spacetube");
 }
 
-async function connect(event) {
+async function remindInviteCode(existingTube) {
+    const existingInviteCode = await getInviteCodeByTubeId(existingTube.tube_room_id);
+
+    sendSlackMessage(
+        existingTube.channel_id,
+        `Tube already open with invite code: ${existingInviteCode.invite_code}`,
+        "spacetube"
+    );
+}
+
+async function connect(event, message) {
     deleteChannelTeamLinks(event.channel);
     await insertChannelTeamLink(event.channel, event.team);
 
-    const inviteCode = event.text.split("!connect ")[1];
-
-    const { tube_room_id } = await getInviteTubeRoomLink(inviteCode);
+    const { tube_room_id } = await getInviteTubeRoomLink(message);
 
     if (tube_room_id) {
         deleteChannelTubeRoomLinks(event.channel);
@@ -91,15 +87,12 @@ async function connect(event) {
     }
 }
 
-async function forward(event) {
+async function forward(event, message) {
     const link = await getTubeRoomLinkByChannelId(event.channel);
 
     if (!link) return;
 
     const user = await getTubeUserByUserId(event.user);
-
-    const { bot_user_id } = await getBot(event.channel);
-    const message = event.text.replace(`<@${bot_user_id}>`, "");
 
     if (user) {
         const matrixUser = {
@@ -129,24 +122,33 @@ async function forward(event) {
     }
 }
 
-function handleMention(event) {
-    if (event.text.includes("!echo")) {
-        echo(event);
-        return;
-    }
+async function handleMention(event) {
+    const existingTube = await getTubeRoomLinkByChannelId(event.channel);
+    const { bot_user_id } = await getBot(event.channel);
+    const message = event.text.replace(`<@${bot_user_id}>`, "");
 
-    if (event.text.includes("!create")) {
-        create(event);
-        return;
-    }
+    if (!existingTube) {
+        if (event.text.includes(INVITE_PREFIX)) {
+            connect(event, message);
+            return;
+        } else {
+            create(event, message);
+            return;
+        }
+    } else {
+        if (!message) {
+            remindInviteCode(event);
+            return;
+        } else {
+            if (event.text.includes("!echo")) {
+                echo(event);
+                return;
+            }
 
-    if (event.text.includes("!connect")) {
-        connect(event);
-        return;
+            forward(event, message);
+            return;
+        }
     }
-
-    forward(event);
-    return;
 }
 
 const previousEvents = [];
