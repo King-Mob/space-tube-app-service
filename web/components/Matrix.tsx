@@ -46,7 +46,7 @@ const Matrix = () => {
                     it after the group you're going to talk to.
                 </p>
                 <p>
-                    2. Invite <span>@spacetube:spacetu.be</span> to the room.
+                    2. Invite <span>@spacetube_bot:spacetu.be</span> to the room.
                 </p>
                 <p className="center">Once that's done, EITHER:</p>
                 <h3 className="center">Create a new tube</h3>
