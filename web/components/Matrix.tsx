@@ -43,7 +43,7 @@ const Matrix = () => {
                 <p>
                     1. Create the room you want to use Spacetube in. IMPORTANT:{" "}
                     <span>TOGGLE END-TO-END ENCRYPTION OFF</span>. THE BOT CANNOT USE E2EE YET. It's convenient to name
-                    it after the group you're going to talk to.
+                    the room after the group you're going to talk to.
                 </p>
                 <p>
                     2. Invite <span>@spacetube_bot:spacetu.be</span> to the room.
@@ -63,7 +63,7 @@ const Matrix = () => {
                 <h3 className="center">Connect to an existing tube</h3>
                 <p>1. Copy the invite code you received from someone else.</p>
                 <p>
-                    2. Send @spacetube followed by the invite code you received to the room. It shold look like{" "}
+                    2. Send @spacetube followed by the invite code you received to the room. It should look like{" "}
                     <span>@spacetube invite-code-here</span>
                 </p>
                 <p className="center">FINALLY</p>

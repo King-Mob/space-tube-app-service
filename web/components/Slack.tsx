@@ -101,8 +101,8 @@ const Slack = () => {
                 <h3 className="center">Connect to an existing tube</h3>
                 <p>1. Copy the invite code you received from someone else.</p>
                 <p>
-                    2. Send @spacetube followed by the invite code you received to the Slack channel. It shold look like{" "}
-                    <span>@spacetube invite-code-here</span>
+                    2. Send @spacetube followed by the invite code you received to the Slack channel. It should look
+                    like <span>@spacetube invite-code-here</span>
                 </p>
                 <p className="center">FINALLY</p>
                 <h3 className="center">Send messages</h3>
