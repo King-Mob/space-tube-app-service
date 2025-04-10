@@ -51,8 +51,8 @@ const Matrix = () => {
                 <p className="center">Once that's done, EITHER:</p>
                 <h3 className="center">Create a new tube</h3>
                 <p>
-                    1. Send <span>@spacetube</span> in the rom to make a new tube! Spacetube will make a new invite code
-                    for you. You can customise your invite code by sending{" "}
+                    1. Send <span>@spacetube</span> in the room to make a new tube! Spacetube will make a new invite
+                    code for you. You can customise your invite code by sending{" "}
                     <span>@spacetube custom-invite-code-here</span> instead when you make the tube.
                 </p>
                 <p>
