@@ -516,7 +516,7 @@ export const linkAsUser = async (roomId: string, name: string, groupUser = null)
 };
 
 export const extractMessage = (body: string) => {
-    const colonIncluded = body.split("</a>: ")[1];
+    const colonIncluded = body.split("</a>:")[1];
     const colonNotIncluded = body.split("</a>")[1];
 
     return colonIncluded ? colonIncluded : colonNotIncluded;
