@@ -54,12 +54,12 @@ const remindInviteCode = async (existingTube) => {
 };
 
 const connect = async (event, message) => {
-    const { tube_room_id } = await getInviteTubeRoomLink(message);
+    const invite = await getInviteTubeRoomLink(message);
 
-    if (tube_room_id) {
+    if (invite) {
         deleteChannelTubeRoomLinks(event.room_id);
 
-        insertChannelTubeRoomLink(event.room_id, "matrix", tube_room_id);
+        insertChannelTubeRoomLink(event.room_id, "matrix", invite.tube_room_id);
 
         sendMessage(event.room_id, "You have joined the spacetube!");
     } else {
