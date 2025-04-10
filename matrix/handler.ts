@@ -547,9 +547,10 @@ const handleFormat = async (event) => {
 
     if (userId.includes("@spacetube_bot")) {
         const existingTube = await getTubeRoomLinkByChannelId(event.room_id);
-        const message = extractMessage(event.content.formatted_body);
+        const message = extractMessage(body);
         const messageNoSpaces = message.replaceAll(" ", "");
 
+        console.log("body", body);
         console.log("message no space", messageNoSpaces);
 
         if (!existingTube) {
