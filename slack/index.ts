@@ -36,7 +36,7 @@ export function generateInviteCode(optionalInviteText: string) {
 
     const hashPortion = sha1(uuidv4()).slice(0, 8);
 
-    return `CoCoDoJo_${cleanTextPortion}_${hashPortion}~${HOME_SERVER.replaceAll(".", "\\.")}`;
+    return `CoCoDoJo_${cleanTextPortion}_${hashPortion}~${HOME_SERVER.replaceAll(".", "\\")}`;
 }
 
 async function echo(event) {
