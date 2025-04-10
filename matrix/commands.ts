@@ -47,7 +47,7 @@ const remindInviteCode = async (existingTube) => {
     const existingInviteCode = await getInviteCodeByTubeId(existingTube.tube_room_id);
 
     sendMessage(
-        existingTube.chanel_id,
+        existingTube.channel_id,
         `Tube already open with invite code: ${existingInviteCode.invite_code}`,
         "spacetube"
     );
