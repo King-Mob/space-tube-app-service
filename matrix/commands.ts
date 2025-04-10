@@ -31,36 +31,30 @@ const echo = (event) => {
     sendMessage(event.room_id, newMessage);
 };
 
-const create = async (event) => {
-    const existingChannelTubeRoomLink = await getTubeRoomLinkByChannelId(event.room_id);
+const create = async (event, message) => {
+    const createRoomResponse = await createRoom("tube room");
+    const createRoomResult = await createRoomResponse.json();
+    const tube_room_id = createRoomResult.room_id;
 
-    if (existingChannelTubeRoomLink) {
-        const existingInviteCode = await getInviteCodeByTubeId(existingChannelTubeRoomLink.tube_room_id);
+    const inviteCode = generateInviteCode(message);
 
-        sendMessage(
-            event.room_id,
-            `Tube already open with invite code: ${existingInviteCode.invite_code}`,
-            "spacetube"
-        );
-    } else {
-        const createRoomResponse = await createRoom("tube room");
-        const createRoomResult = await createRoomResponse.json();
-        const tube_room_id = createRoomResult.room_id;
-
-        const optionalInviteText = event.content.formatted_body.split("!create ")[1];
-        const inviteCode = generateInviteCode(optionalInviteText);
-
-        insertChannelTubeRoomLink(event.room_id, "matrix", tube_room_id);
-        insertInviteTubeRoomLink(inviteCode, tube_room_id);
-        sendMessage(event.room_id, `Tube is open with invite code: ${inviteCode}`);
-    }
+    insertChannelTubeRoomLink(event.room_id, "matrix", tube_room_id);
+    insertInviteTubeRoomLink(inviteCode, tube_room_id);
+    sendMessage(event.room_id, `Tube is open with invite code: ${inviteCode}`);
 };
 
-const connect = async (event) => {
-    const message = extractMessage(event.content.formatted_body);
-    const inviteCode = message.split("!connect ")[1];
+const remindInviteCode = async (existingTube) => {
+    const existingInviteCode = await getInviteCodeByTubeId(existingTube.tube_room_id);
 
-    const { tube_room_id } = await getInviteTubeRoomLink(inviteCode);
+    sendMessage(
+        existingTube.chanel_id,
+        `Tube already open with invite code: ${existingInviteCode.invite_code}`,
+        "spacetube"
+    );
+};
+
+const connect = async (event, message) => {
+    const { tube_room_id } = await getInviteTubeRoomLink(message);
 
     if (tube_room_id) {
         deleteChannelTubeRoomLinks(event.room_id);
@@ -99,14 +93,12 @@ const link = async (roomId: string, name: string, groupUser = null) => {
     return { homeServer: HOME_SERVER, linkToken };
 };
 
-const forward = async (event) => {
+const forward = async (event, message) => {
     const link = await getTubeRoomLinkByChannelId(event.room_id);
 
     if (!link) return;
 
     const user = await getTubeUserByUserId(event.sender);
-
-    const message = extractMessage(event.content.formatted_body);
 
     if (user) {
         const matrixUser = {
@@ -136,6 +128,7 @@ const forward = async (event) => {
 const commands = {
     echo,
     create,
+    remindInviteCode,
     connect,
     link,
     forward,

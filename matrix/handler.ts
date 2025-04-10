@@ -22,13 +22,14 @@ import { sendMessageWhatsapp } from "../whatsapp/index.js";
 import { handleWhatsapp, handleFormatWhatsapp, joinAsSpacetubeWhatsapp } from "../whatsapp/index.js";
 import { sendSlackMessage } from "../slack/index.js";
 import {
+    getTubeRoomLinkByChannelId,
     getTubeRoomLinksByTubeId,
     getTubeUserMembership,
     insertTubeUserMembership,
     getTubeUserByTubeUserId,
 } from "../duckdb";
 
-const { HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_SERVER, WHATSAPP_ACCESS_TOKEN } = process.env;
+const { HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_SERVER, WHATSAPP_ACCESS_TOKEN, INVITE_PREFIX } = process.env;
 
 const inviteAsSpacetube = async (invitee: user, roomId: string) => {
     await inviteAsSpacetubeRequest(invitee, roomId);
@@ -548,23 +549,32 @@ const handleFormat = async (event) => {
     if (!userId) return;
 
     if (userId.includes("@spacetube_bot")) {
-        if (body.includes("!echo")) {
-            commands.echo(event);
-            return;
-        }
+        const existingTube = await getTubeRoomLinkByChannelId(event.room_id);
+        const message = extractMessage(event.content.formatted_body);
+        const messageNoSpaces = message.replaceAll(" ", "");
 
-        if (body.includes("!create")) {
-            commands.create(event);
-            return;
-        }
+        if (!existingTube) {
+            if (event.text.includes(INVITE_PREFIX)) {
+                commands.connect(event, messageNoSpaces);
+                return;
+            } else {
+                commands.create(event, messageNoSpaces);
+                return;
+            }
+        } else {
+            if (!messageNoSpaces) {
+                commands.remindInviteCode(existingTube);
+                return;
+            } else {
+                if (event.text.includes("!echo")) {
+                    commands.echo(event);
+                    return;
+                }
 
-        if (body.includes("!connect")) {
-            commands.connect(event);
-            return;
+                commands.forward(event, message);
+                return;
+            }
         }
-
-        commands.forward(event);
-        return;
     }
 
     const user = await getItem("userId", userId);
@@ -630,12 +640,6 @@ export const handleMessage = async (event) => {
         const profileResponse = await getProfile(event.sender);
         const { displayname } = await profileResponse.json();
         linkAsSpacetube(event.room_id, displayname);
-        return;
-    }
-
-    if (message.includes("!spacetube forward")) {
-        console.log("forwarding message");
-        commands.forward(event);
         return;
     }
 
