@@ -51,8 +51,9 @@ const Matrix = () => {
                 <p className="center">Once that's done, EITHER:</p>
                 <h3 className="center">Create a new tube</h3>
                 <p>
-                    1. Send <span>@spacetube optional-custom-invite-code-here</span> in the room to make a tube! You can
-                    leave out the custom invite code and spacetube will make one for you.
+                    1. Send <span>@spacetube</span> in the rom to make a new tube! Spacetube will make a new invite code
+                    for you. You can customise your invite code by sending{" "}
+                    <span>@spacetube custom-invite-code-here</span> instead when you make the tube.
                 </p>
                 <p>
                     2. Share the invite code with someone in the group you want to connect to. Now they need to do the
@@ -62,8 +63,8 @@ const Matrix = () => {
                 <h3 className="center">Connect to an existing tube</h3>
                 <p>1. Copy the invite code you received from someone else.</p>
                 <p>
-                    2. Use the code and send <span>@spacetube received-invite-code-here</span> in the room to connect to
-                    their tube.
+                    2. Send @spacetube followed by the invite code you received to the room. It shold look like{" "}
+                    <span>@spacetube invite-code-here</span>
                 </p>
                 <p className="center">FINALLY</p>
                 <h3 className="center">Send messages</h3>
