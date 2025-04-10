@@ -91,7 +91,7 @@ const Slack = () => {
                 <p>
                     1. Send <span>@spacetube</span> in the Slack channel to make a new tube! Spacetube will make a new
                     invite code for you. You can customise your invite code by sending{" "}
-                    <span>@spacetube custom-invite-code-here</span> when you make the tube.
+                    <span>@spacetube custom-invite-code-here</span> instead when you make the tube.
                 </p>
                 <p>
                     2. Share the invite code with someone in the group you want to connect to. Now they need to do the
