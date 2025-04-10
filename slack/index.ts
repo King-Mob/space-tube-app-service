@@ -62,6 +62,7 @@ async function create(event, message) {
 
     await insertChannelTeamLink(event.channel, event.team);
     sendSlackMessage(event.channel, `Tube is open with invite code: ${inviteCode}`, "spacetube");
+    //add message about what the other group needs to do
 }
 
 async function remindInviteCode(existingTube) {
@@ -85,6 +86,7 @@ async function connect(event, message) {
 
         insertChannelTubeRoomLink(event.channel, "slack", invite.tube_room_id);
         sendSlackMessage(event.channel, "You have joined the spacetube!", "spacetube");
+        //add message about how to send messages
     } else {
         sendSlackMessage(event.channel, "No tube found for that invite code", "spacetube");
     }
