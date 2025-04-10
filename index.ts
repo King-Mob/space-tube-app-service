@@ -31,6 +31,7 @@ import { getItem, getItemIncludes, getAllItems, storeItem } from "./matrix/stora
 import { startDuckDB } from "./duckdb.js";
 import { startDiscord } from "./discord/index.js";
 import { startSlack } from "./slack/index.js";
+
 //import { startWhatsapp } from "./whatsapp/index.js";
 
 // listening
@@ -57,7 +58,7 @@ as.on("event", (event) => {
             handleRemoteOpen(event);
             break;
         case "spacetube.forward":
-            commands.forward(event);
+            commands.forward(event, event.content);
             break;
     }
 });
