@@ -258,7 +258,7 @@ label {
 
 .star {
     z-index: -3;
-    position: absolute;
+    position: fixed;
     font-size: 1rem;
     filter: drop-shadow(0 0 0.2rem yellow);
 }
