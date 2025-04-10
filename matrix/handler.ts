@@ -517,12 +517,9 @@ export const linkAsUser = async (roomId: string, name: string, groupUser = null)
 
 export const extractMessage = (body: string) => {
     const colonIncluded = body.split("</a>: ")[1];
-    if (colonIncluded) {
-        return colonIncluded;
-    } else {
-        const colonNotIncluded = body.split("</a>")[1];
-        return colonNotIncluded;
-    }
+    const colonNotIncluded = body.split("</a>")[1];
+
+    return colonIncluded ? colonIncluded : colonNotIncluded;
 };
 
 export const sendGroupUserMessage = async (event: event, body: string) => {
@@ -552,6 +549,8 @@ const handleFormat = async (event) => {
         const existingTube = await getTubeRoomLinkByChannelId(event.room_id);
         const message = extractMessage(event.content.formatted_body);
         const messageNoSpaces = message.replaceAll(" ", "");
+
+        console.log("message no space", messageNoSpaces);
 
         if (!existingTube) {
             if (messageNoSpaces.includes(INVITE_PREFIX)) {
