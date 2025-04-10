@@ -516,7 +516,11 @@ export const linkAsUser = async (roomId: string, name: string, groupUser = null)
 };
 
 export const extractMessage = (body: string) => {
-    return body.split("</a>")[1].replace(":", "");
+    return body
+        .split("</a>")[1]
+        .split("")
+        .filter((item, index) => !(item === ":" && index === 0))
+        .join("");
 };
 
 export const sendGroupUserMessage = async (event: event, body: string) => {
