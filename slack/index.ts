@@ -134,7 +134,7 @@ async function handleMention(event) {
     const messageNoSpaces = message.replaceAll(" ", "");
 
     if (!existingTube) {
-        if (event.text.includes(INVITE_PREFIX)) {
+        if (messageNoSpaces.includes(INVITE_PREFIX)) {
             connect(event, messageNoSpaces);
             return;
         } else {
@@ -146,7 +146,7 @@ async function handleMention(event) {
             remindInviteCode(existingTube);
             return;
         } else {
-            if (event.text.includes("!echo")) {
+            if (messageNoSpaces.includes("!echo")) {
                 echo(event);
                 return;
             }

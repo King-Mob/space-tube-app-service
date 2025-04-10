@@ -554,7 +554,7 @@ const handleFormat = async (event) => {
         const messageNoSpaces = message.replaceAll(" ", "");
 
         if (!existingTube) {
-            if (event.text.includes(INVITE_PREFIX)) {
+            if (messageNoSpaces.includes(INVITE_PREFIX)) {
                 commands.connect(event, messageNoSpaces);
                 return;
             } else {
@@ -566,7 +566,7 @@ const handleFormat = async (event) => {
                 commands.remindInviteCode(existingTube);
                 return;
             } else {
-                if (event.text.includes("!echo")) {
+                if (messageNoSpaces.includes("!echo")) {
                     commands.echo(event);
                     return;
                 }
