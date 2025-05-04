@@ -1,7 +1,7 @@
 
 
 export async function startRocketchat(app) {
-    app.post("/rocketchat/events", async function (req, res) {
+    app.post("/rocketchat/event", async function (req, res) {
         const { event } = req.body;
 
         console.log(req);
