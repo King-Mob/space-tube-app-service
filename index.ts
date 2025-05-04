@@ -31,6 +31,7 @@ import { getItem, getItemIncludes, getAllItems, storeItem } from "./matrix/stora
 import { startDuckDB } from "./duckdb.js";
 import { startDiscord } from "./discord/index.js";
 import { startSlack } from "./slack/index.js";
+import { startRocketchat } from "./rocketchat/index.js";
 
 //import { startWhatsapp } from "./whatsapp/index.js";
 
@@ -392,7 +393,7 @@ app.put("/api/groupuser", imageUpload, async (req, res) => {
                         setProfilePicture(cloneUser.content.user, content_uri);
                     });
 
-                    fs.unlink(filePath, () => {});
+                    fs.unlink(filePath, () => { });
                 });
             }
             if (req.body.displayName) {
@@ -434,5 +435,7 @@ if (process.env.WHATSAPP_USER_ID) {
 if (process.env.SLACK_SECRET) {
     startSlack(app);
 }
+
+startRocketchat(app);
 
 app.listen(8134);
