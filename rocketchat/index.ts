@@ -2,7 +2,7 @@
 
 export async function startRocketchat(app) {
     app.post("/rocketchat/event", async function (req, res) {
-        const { event } = req.body;
+        const event = req.body;
         const serverIP = req.headers["x-real-ip"];
 
         console.log(event, serverIP);
