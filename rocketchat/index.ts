@@ -3,8 +3,14 @@
 export async function startRocketchat(app) {
     app.post("/rocketchat/event", async function (req, res) {
         const { event } = req.body;
+        const { headers } = req.body;
+        const serverIP = headers["x-real-ip"];
 
-        console.log(req);
+        console.log(event, serverIP);
+
+        // duckdb, check for url for ip
+        // if none, return {registration: false}
+
 
         res.send({ success: true })
 
@@ -12,13 +18,12 @@ export async function startRocketchat(app) {
 
     app.post("/rocketchat/register", async function (req, res) {
         const { url } = req.body;
-        console.log(req.headers);
+        const { headers } = req.body;
+        const serverIP = headers["x-real-ip"];
 
-        // req.rawHeaders'x-real-ip': '167.99.92.110'
-        //
+        console.log(url, serverIP);
 
         // duckdb set rocketchat ip pair to whatever
-
 
         res.send({ success: true });
     })
