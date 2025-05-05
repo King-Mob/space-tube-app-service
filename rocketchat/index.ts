@@ -22,7 +22,7 @@ async function handleEvent(event, url) {
     const channelId = `${event.room.id}@${url}`;
 
     const existingTube = await getTubeRoomLinkByChannelId(channelId);
-    const message = event.params.join("");
+    const message = event.params.join(" ");
     const messageNoSpaces = message.replaceAll(" ", "");
 
     if (!existingTube) {
