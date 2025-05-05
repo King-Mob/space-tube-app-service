@@ -1,48 +1,62 @@
 import { existsSync } from "node:fs";
 import { DuckDBInstance } from "@duckdb/node-api";
+import { createModuleResolutionCache } from "typescript";
 
 let connection;
 
 export async function startDuckDB() {
     const spacetubeDuckDBFileName = "spacetube_duckdb.db";
 
-    const duckDBInitiated = existsSync(spacetubeDuckDBFileName);
     const instance = await DuckDBInstance.create(spacetubeDuckDBFileName);
     connection = await instance.connect();
 
+    const tables = [
+        {
+            name: "ChannelTubeRoomLinks",
+            creationCommand:
+                "CREATE TABLE ChannelTubeRoomLinks (channel_id VARCHAR, channel_type VARCHAR, tube_room_id VARCHAR);",
+        },
+        {
+            name: "TubeUserRoomMemberships",
+            creationCommand: "CREATE TABLE TubeUserRoomMemberships (tube_user_id VARCHAR, room_id VARCHAR);",
+        },
+        {
+            name: "UserTubeUserLinks",
+            creationCommand:
+                "CREATE TABLE UserTubeUserLinks (user_id VARCHAR, tube_user_id VARCHAR, tube_user_access_token VARCHAR);",
+        },
+        {
+            name: "SlackChannelTeamLinks",
+            creationCommand: "CREATE TABLE SlackChannelTeamLinks (channel_id VARCHAR, team_id VARCHAR);",
+        },
+        {
+            name: "SlackTeamBotTokenLinks",
+            creationCommand:
+                "CREATE TABLE SlackTeamBotTokenLinks (team_id VARCHAR, bot_token VARCHAR, bot_user_id VARCHAR);",
+        },
+        {
+            name: "InviteTubeRoomLinks",
+            creationCommand: "CREATE TABLE InviteTubeRoomLinks (invite_code VARCHAR, tube_room_id VARCHAR);",
+        },
+        {
+            name: "RocketchatUrlIpLinks",
+            creationCommand: "CREATE TABLE RocketchatUrlIpLinks (url VARCHAR, ip_address VARCHAR);",
+        },
+    ];
+
     const existingTablesRows = await connection.run("SHOW TABLES;");
     const existingTables = await existingTablesRows.getRowObjects();
-    console.log(existingTables);
 
-    if (!duckDBInitiated) {
-        const createChannelTubeRoomLinks =
-            "CREATE TABLE ChannelTubeRoomLinks (channel_id VARCHAR, channel_type VARCHAR, tube_room_id VARCHAR);";
-        await connection.run(createChannelTubeRoomLinks);
+    tables.forEach(async (table) => {
+        const tableExists = existingTables.filter((existingTable) => existingTable.name === table.name).length > 0;
 
-        const createTubeUserRoomMemberships =
-            "CREATE TABLE TubeUserRoomMemberships (tube_user_id VARCHAR, room_id VARCHAR);";
-        await connection.run(createTubeUserRoomMemberships);
-
-        const createUserTubeUserLinks =
-            "CREATE TABLE UserTubeUserLinks (user_id VARCHAR, tube_user_id VARCHAR, tube_user_access_token VARCHAR);";
-        await connection.run(createUserTubeUserLinks);
-
-        const createSlackChannelTeamLinks = "CREATE TABLE SlackChannelTeamLinks (channel_id VARCHAR, team_id VARCHAR);";
-        await connection.run(createSlackChannelTeamLinks);
-
-        const createSlackTeamBotTokenLinks =
-            "CREATE TABLE SlackTeamBotTokenLinks (team_id VARCHAR, bot_token VARCHAR, bot_user_id VARCHAR);";
-        await connection.run(createSlackTeamBotTokenLinks);
-
-        const createInviteTubeRoomLinks =
-            "CREATE TABLE InviteTubeRoomLinks (invite_code VARCHAR, tube_room_id VARCHAR);";
-        await connection.run(createInviteTubeRoomLinks);
-
-        const createRocketchatUrlIpLinks = "CREATE TABLE RocketchatUrlIpLinks (url VARCHAR, ip_address VARCHAT);";
-        await connection.run(createRocketchatUrlIpLinks);
-
-        console.log("duckdb initiated");
-    }
+        if (tableExists) {
+            console.log(`${table.name} already exists`);
+        } else {
+            await connection.run(table.creationCommand);
+            console.log(`${table.name} created`);
+        }
+    });
 
     return connection;
 }
