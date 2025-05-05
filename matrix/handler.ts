@@ -392,7 +392,9 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
                 break;
             case "rocketchat":
                 const [roomId, serverIP] = link.channel_id.split("@");
+                console.log(roomId, serverIP);
                 const urlLinks = await getRocketchatUrlIpLinkByIp(serverIP);
+                console.log(urlLinks);
                 const { url } = urlLinks[0];
 
                 sendRocketchatMessage(roomId, message, url);
