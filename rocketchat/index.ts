@@ -23,7 +23,7 @@ import { sendMessageAsMatrixUser } from "../matrix/handler";
 const { INVITE_PREFIX } = process.env;
 
 async function echo(event, url) {
-    const message = event.text;
+    const message = event.params.join(" ");
     const newMessage = "you said: " + message.split("!echo ")[1];
 
     sendRocketchatMessage(event.room.id, newMessage, url);
