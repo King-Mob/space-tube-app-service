@@ -70,8 +70,9 @@ async function connect(event, message, url) {
     }
 }
 
-async function forward(event, message) {
-    const link = await getTubeRoomLinkByChannelId(event.channel);
+async function forward(event, message, url) {
+    const channelId = `${event.room.id}@${url}`;
+    const link = await getTubeRoomLinkByChannelId(channelId);
 
     if (!link) return;
 
@@ -131,7 +132,7 @@ async function handleEvent(event, url) {
                 return;
             }
 
-            forward(event, message);
+            forward(event, message, url);
             return;
         }
     }
