@@ -26,7 +26,7 @@ async function echo(event, url) {
     const message = event.text;
     const newMessage = "you said: " + message.split("!echo ")[1];
 
-    sendMessage(event.room.id, newMessage, url);
+    sendRocketchatMessage(event.room.id, newMessage, url);
 }
 
 async function create(event, message, url) {
@@ -41,14 +41,14 @@ async function create(event, message, url) {
     insertChannelTubeRoomLink(channelId, "rocketchat", tube_room_id);
     insertInviteTubeRoomLink(inviteCode, tube_room_id);
 
-    sendMessage(event.room.id, `Tube is open with invite code: ${inviteCode}`, url);
+    sendRocketchatMessage(event.room.id, `Tube is open with invite code: ${inviteCode}`, url);
     //add message about what the other group needs to do
 }
 
 async function remindInviteCode(existingTube, url) {
     const existingInviteCode = await getInviteCodeByTubeId(existingTube.tube_room_id);
 
-    sendMessage(
+    sendRocketchatMessage(
         existingTube.channel_id.split("@")[0],
         `Tube already open with invite code: ${existingInviteCode.invite_code}`,
         url
@@ -63,10 +63,10 @@ async function connect(event, message, url) {
         deleteChannelTubeRoomLinks(channelId);
 
         insertChannelTubeRoomLink(channelId, "rocketchat", invite.tube_room_id);
-        sendMessage(event.room.id, "You have joined the spacetube!", url);
+        sendRocketchatMessage(event.room.id, "You have joined the spacetube!", url);
         //add message about how to send messages
     } else {
-        sendMessage(event.room.id, "No tube found for that invite code", url);
+        sendRocketchatMessage(event.room.id, "No tube found for that invite code", url);
     }
 }
 
@@ -138,7 +138,7 @@ async function handleEvent(event, url) {
     }
 }
 
-async function sendMessage(roomId, text, url) {
+export async function sendRocketchatMessage(roomId, text, url) {
     console.log(url, roomId, text);
 
     fetch(url, {

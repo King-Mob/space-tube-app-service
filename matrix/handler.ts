@@ -21,12 +21,14 @@ import { sendMessageDiscord } from "../discord/index.js";
 import { sendMessageWhatsapp } from "../whatsapp/index.js";
 import { handleWhatsapp, handleFormatWhatsapp, joinAsSpacetubeWhatsapp } from "../whatsapp/index.js";
 import { sendSlackMessage } from "../slack/index.js";
+import { sendRocketchatMessage } from "../rocketchat/index.js";
 import {
     getTubeRoomLinkByChannelId,
     getTubeRoomLinksByTubeId,
     getTubeUserMembership,
     insertTubeUserMembership,
     getTubeUserByTubeUserId,
+    getRocketchatUrlIpLinkByIp,
 } from "../duckdb";
 
 const { HOME_SERVER, WHATSAPP_USER_ID, WHATSAPP_SERVER, WHATSAPP_ACCESS_TOKEN, INVITE_PREFIX } = process.env;
@@ -359,6 +361,8 @@ export const handleRemoteOpen = async (event) => {
     }
 };
 
+// THIS IS ACTUALLY IN USE
+
 const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: event, message: string) => {
     const {
         context: { from },
@@ -385,6 +389,13 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
                     access_token: tubeUser.tube_user_access_token,
                 };
                 sendMessageAsMatrixUser(matrixUser, message, link.channel_id);
+                break;
+            case "rocketchat":
+                const [roomId, serverIP] = link.channel_id.split("@");
+                const urlLinks = await getRocketchatUrlIpLinkByIp(serverIP);
+                const { url } = urlLinks[0];
+
+                sendRocketchatMessage(roomId, message, url);
                 break;
         }
     });
