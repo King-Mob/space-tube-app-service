@@ -3,12 +3,19 @@ import { getRocketchatUrlIpLinkByIp, insertRocketchatUrlIpLink } from "../duckdb
 async function handleEvent(event, url) {
     console.log(event);
 
+    sendMessage("GENERAL", "we done did it baby", url);
+}
+
+async function sendMessage(roomId, text, url) {
     fetch(url, {
         method: "POST",
         body: JSON.stringify({
-            roomId: "GENERAL",
-            text: "we done did it baby",
+            roomId,
+            text,
         }),
+        headers: {
+            Authorization: "Bearer whatever-some-token",
+        },
     });
 }
 
