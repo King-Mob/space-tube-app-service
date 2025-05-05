@@ -1,8 +1,8 @@
-# 🛸Space Tube🛸
+# 🛸Spacetube🛸
 
-Welcome to Space Tube!
+Welcome to Spacetube!
 
-Space Tube is a way to connect chat groups together, so that they can communicate with each other as their group identities.
+Spacetube is a way to connect chat groups together, so that they can communicate with each other as their group identities.
 
 You can use the default hosted instance running on spacetu.be or set-up your own. Here are the instructions on how to do that.
 
@@ -30,7 +30,7 @@ You are using the web version of spacetube!
 
 ### Through Discord
 
-1. Add the Space Tube bot to your server, using this link: https://discord.com/oauth2/authorize?client_id=1024778983021215764&permissions=603982848&response_type=code&redirect_uri=https%3A%2F%2Fspacetube.spacetu.be&scope=messages.read+bot
+1. Add the Spacetube bot to your server, using this link: https://discord.com/oauth2/authorize?client_id=1024778983021215764&permissions=603982848&response_type=code&redirect_uri=https%3A%2F%2Fspacetube.spacetu.be&scope=messages.read+bot
 2. Add Space Tube bot to the channel you want to open the tube in
 3. use the /create command to make a new tube opening
 4. Copy the connection code Space Tube Bot sent you and share with your contact in the other group
@@ -49,10 +49,10 @@ You can host space tube yourself! It's an app service on matrix, so you'll need 
 
 You will need:
 
-- a matrix homeserver. The recommended way to have one is using matrix-ansible-docker
-  on that server you need:
-- git `git --version`
-- npm `node --version` recommend later version of node, 18.12.0 works
+-   a matrix homeserver. The recommended way to have one is using matrix-ansible-docker
+    on that server you need:
+-   git `git --version`
+-   npm `node --version` recommend later version of node, 18.12.0 works
 
 1. create your homeserver. this service assumes you have a domain, matrix.example.com that you run matrix on. This is how [matrix-docker-ansible-deploy](https://github.com/spantaleev/matrix-docker-ansible-deploy) gets you to set it up. If you're new to matrix, matrix-docker-ansible-deploy is a straightforward way to start. Note: you need the federation turned on if you want spacetube to work across different homeservers.
 2. `git clone https://github.com/King-Mob/space-tube-app-service.git` the appservice to your server. `cd space-tube-app-service` to open the directory
