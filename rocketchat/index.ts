@@ -100,7 +100,7 @@ async function forward(event, message, url) {
         }
 
         sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
-            from: event.channel,
+            from: channelId,
         });
 
         insertUserTubeUserLink(event.user, matrixUser);
