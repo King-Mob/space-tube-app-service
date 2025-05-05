@@ -14,6 +14,7 @@ async function sendMessage(roomId, text, url) {
             text,
         }),
         headers: {
+            "Content-type": "application/json",
             Authorization: "Bearer whatever-some-token",
         },
     });
