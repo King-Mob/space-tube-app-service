@@ -1,5 +1,12 @@
-import { getRocketchatUrlIpLinkByIp, insertRocketchatUrlIpLink, getTubeRoomLinkByChannelId } from "../duckdb";
+import {
+    getRocketchatUrlIpLinkByIp,
+    insertRocketchatUrlIpLink,
+    getTubeRoomLinkByChannelId,
+    insertChannelTubeRoomLink,
+    insertInviteTubeRoomLink,
+} from "../duckdb";
 import { generateInviteCode } from "../slack";
+import { createRoom } from "../matrix/matrixClientRequests";
 
 const { INVITE_PREFIX } = process.env;
 
@@ -10,7 +17,21 @@ async function echo(event, url) {
     sendMessage(event.room.id, newMessage, url);
 }
 
-async function create(event, message) {}
+async function create(event, message, url) {
+    const channelId = `${event.room.id}@${url}`;
+    const createRoomResponse = await createRoom("tube room");
+    const createRoomResult = await createRoomResponse.json();
+    const tube_room_id = createRoomResult.room_id;
+
+    const optionalInviteText = message;
+    const inviteCode = generateInviteCode(optionalInviteText);
+
+    insertChannelTubeRoomLink(channelId, "rocketchat", tube_room_id);
+    insertInviteTubeRoomLink(inviteCode, tube_room_id);
+
+    sendMessage(event.room.id, `Tube is open with invite code: ${inviteCode}`, url);
+    //add message about what the other group needs to do
+}
 
 async function remindInviteCode(existingTube) {}
 
@@ -30,7 +51,7 @@ async function handleEvent(event, url) {
             connect(event, messageNoSpaces);
             return;
         } else {
-            create(event, messageNoSpaces);
+            create(event, messageNoSpaces, url);
             return;
         }
     } else {
