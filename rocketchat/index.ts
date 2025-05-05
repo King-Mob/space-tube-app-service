@@ -5,6 +5,8 @@ import {
     insertChannelTubeRoomLink,
     insertInviteTubeRoomLink,
     getInviteCodeByTubeId,
+    getInviteTubeRoomLink,
+    deleteChannelTubeRoomLinks,
 } from "../duckdb";
 import { generateInviteCode } from "../slack";
 import { createRoom } from "../matrix/matrixClientRequests";
@@ -44,7 +46,19 @@ async function remindInviteCode(existingTube, url) {
     );
 }
 
-async function connect(event, message) {}
+async function connect(event, message, url) {
+    const invite = await getInviteTubeRoomLink(message);
+
+    if (invite) {
+        deleteChannelTubeRoomLinks(event.channel);
+
+        insertChannelTubeRoomLink(event.channel, "slack", invite.tube_room_id);
+        sendMessage(event.room.id, "You have joined the spacetube!", url);
+        //add message about how to send messages
+    } else {
+        sendMessage(event.room.id, "No tube found for that invite code", url);
+    }
+}
 
 async function forward(event, message) {}
 
@@ -57,7 +71,7 @@ async function handleEvent(event, url) {
 
     if (!existingTube) {
         if (messageNoSpaces.includes(INVITE_PREFIX)) {
-            connect(event, messageNoSpaces);
+            connect(event, messageNoSpaces, url);
             return;
         } else {
             create(event, messageNoSpaces, url);
