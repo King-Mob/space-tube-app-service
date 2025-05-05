@@ -90,7 +90,7 @@ async function forward(event, message, url) {
         });
     } else {
         const displayName = event.sender.name;
-        const profilePicUrl = await getRocketChatProfilePicUrl(event.sender.username, url);
+        const profilePicUrl = "";
         const matrixUserResponse = await registerUser(displayName);
         const matrixUser = await matrixUserResponse.json();
         setDisplayName(matrixUser, displayName);
@@ -104,7 +104,7 @@ async function forward(event, message, url) {
             from: channelId,
         });
 
-        // insertUserTubeUserLink(userId, matrixUser);
+        insertUserTubeUserLink(userId, matrixUser);
     }
 }
 
@@ -180,21 +180,6 @@ export async function startRocketchat(app) {
 
         res.send({ success: true });
     });
-}
-
-async function getRocketChatProfilePicUrl(username: string, url: string) {
-    console.log(username);
-    const baseUrl = url.split("/apps")[0];
-    console.log(`${baseUrl}/v1/users.getAvatar?username=${username}`);
-    const avatarResponse = await fetch(`${baseUrl}/v1/users.getAvatar?username=${username}`, {
-        headers: {
-            accept: "image/svg+xml, application/json",
-        },
-    });
-    console.log(avatarResponse);
-    const avatarResult = await avatarResponse.text();
-    console.log(avatarResult);
-    return avatarResult;
 }
 
 async function getMatrixUrlFromRocketchat(rocketchatImageUrl: string) {
