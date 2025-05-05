@@ -2,7 +2,6 @@ import { existsSync } from "node:fs";
 import { DuckDBInstance } from "@duckdb/node-api";
 
 let connection;
-const { SLACK_TOKEN, SLACK_CHANNEL, SLACK_TEAM, SLACK_BOT_USER_ID, TEST_INVITE_CODE } = process.env;
 
 export async function startDuckDB() {
     const spacetubeDuckDBFileName = "spacetube_duckdb.db";
@@ -10,6 +9,9 @@ export async function startDuckDB() {
     const duckDBInitiated = existsSync(spacetubeDuckDBFileName);
     const instance = await DuckDBInstance.create(spacetubeDuckDBFileName);
     connection = await instance.connect();
+
+    const existingTables = await connection.run("SHOW TABLES;");
+    console.log(existingTables);
 
     if (!duckDBInitiated) {
         const createChannelTubeRoomLinks =
@@ -34,6 +36,9 @@ export async function startDuckDB() {
         const createInviteTubeRoomLinks =
             "CREATE TABLE InviteTubeRoomLinks (invite_code VARCHAR, tube_room_id VARCHAR);";
         await connection.run(createInviteTubeRoomLinks);
+
+        const createRocketchatUrlIpLinks = "CREATE TABLE RocketchatUrlIpLinks (url VARCHAR, ip_address VARCHAT);";
+        await connection.run(createRocketchatUrlIpLinks);
 
         console.log("duckdb initiated");
     }
