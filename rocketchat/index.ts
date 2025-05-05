@@ -185,7 +185,7 @@ export async function startRocketchat(app) {
 async function getRocketChatProfilePicUrl(username: string, url: string) {
     const baseUrl = url.split("/apps")[0];
     const avatarResponse = await fetch(`${baseUrl}/v1/users.getAvatar?username=${username}`);
-    const avatarResult = await avatarResponse.json();
+    const avatarResult = await avatarResponse.text();
     console.log(avatarResult);
     return avatarResult;
 }
