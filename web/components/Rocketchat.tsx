@@ -33,11 +33,14 @@ const Rocketchat = () => {
                     browse file for the plugin you just downloaded/built. Click Agree.
                 </p>
                 <p>
-                    3. Register your chat server with Spacetube. On the App Info page, under APIs, copy the url in the
-                    curl POST request, and then in the general channel send /spacetube followed by the url you just
+                    3. Register your chat server with Spacetube. On the App Info page, under APIs, there's a url inside
+                    a curl POST request, like in this picture:
+                    <img src="https://raw.githubusercontent.com/King-Mob/spacetu.be/refs/heads/main/content/images/spacetube-rocketchat-register.png" />
+                    . Copy just the url, and then in the general channel send /spacetube followed by the url you just
                     copied, like this:{" "}
                     <span>
-                        /spacetube https://chat.example.com/api/apps/public/c16853cf-c591-4453-b1dd-7def3e08cf02/forward
+                        /spacetube
+                        https://rocketchat.wobbly.app/api/apps/public/c16853cf-c591-4453-b1dd-7def3e08cf02/forward
                     </span>
                 </p>
                 <p className="center">Once that's done, EITHER:</p>
