@@ -7,9 +7,12 @@ import {
     getInviteCodeByTubeId,
     getInviteTubeRoomLink,
     deleteChannelTubeRoomLinks,
+    getTubeUserByUserId,
+    insertUserTubeUserLink,
 } from "../duckdb";
 import { generateInviteCode } from "../slack";
-import { createRoom } from "../matrix/matrixClientRequests";
+import { createRoom, registerUser, setDisplayName, setProfilePicture } from "../matrix/matrixClientRequests";
+import { sendMessageAsMatrixUser } from "../matrix/handler";
 
 const { INVITE_PREFIX } = process.env;
 
@@ -61,7 +64,44 @@ async function connect(event, message, url) {
     }
 }
 
-async function forward(event, message) {}
+async function forward(event, message) {
+    console.log(event);
+    return;
+    const link = await getTubeRoomLinkByChannelId(event.channel);
+
+    if (!link) return;
+
+    const user = await getTubeUserByUserId(event.user);
+
+    if (user) {
+        const matrixUser = {
+            user_id: user.tube_user_id,
+            access_token: user.tube_user_access_token,
+        };
+
+        sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
+            from: event.channel,
+        });
+    } else {
+        /*
+          const { displayName, profilePicUrl } = await getSlackProfile(event.channel, event.user);
+       const matrixUserResponse = await registerUser(displayName);
+        const matrixUser = await matrixUserResponse.json();
+       setDisplayName(matrixUser, displayName);
+
+        if (profilePicUrl) {
+            const avatarUrl = await getMatrixUrlFromSlack(profilePicUrl);
+            setProfilePicture(matrixUser, avatarUrl);
+        }
+
+        sendMessageAsMatrixUser(matrixUser, message, link.tube_room_id, {
+            from: event.channel,
+        });
+
+        insertUserTubeUserLink(event.user, matrixUser);
+        */
+    }
+}
 
 async function handleEvent(event, url) {
     const channelId = `${event.room.id}@${url}`;
