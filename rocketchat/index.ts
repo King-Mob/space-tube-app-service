@@ -191,6 +191,7 @@ async function getRocketChatProfilePicUrl(username: string, url: string) {
             accept: "image/svg+xml, application/json",
         },
     });
+    console.log(avatarResponse);
     const avatarResult = await avatarResponse.text();
     console.log(avatarResult);
     return avatarResult;
