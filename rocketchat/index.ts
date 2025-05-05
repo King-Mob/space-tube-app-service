@@ -11,7 +11,13 @@ import {
     insertUserTubeUserLink,
 } from "../duckdb";
 import { generateInviteCode } from "../slack";
-import { createRoom, registerUser, setDisplayName, setProfilePicture } from "../matrix/matrixClientRequests";
+import {
+    createRoom,
+    registerUser,
+    setDisplayName,
+    setProfilePicture,
+    uploadImage,
+} from "../matrix/matrixClientRequests";
 import { sendMessageAsMatrixUser } from "../matrix/handler";
 
 const { INVITE_PREFIX } = process.env;
@@ -65,8 +71,6 @@ async function connect(event, message, url) {
 }
 
 async function forward(event, message) {
-    console.log(event);
-    return;
     const link = await getTubeRoomLinkByChannelId(event.channel);
 
     if (!link) return;
@@ -83,14 +87,14 @@ async function forward(event, message) {
             from: event.channel,
         });
     } else {
-        /*
-          const { displayName, profilePicUrl } = await getSlackProfile(event.channel, event.user);
-       const matrixUserResponse = await registerUser(displayName);
+        const displayName = event.sender.name;
+        const profilePicUrl = "";
+        const matrixUserResponse = await registerUser(displayName);
         const matrixUser = await matrixUserResponse.json();
-       setDisplayName(matrixUser, displayName);
+        setDisplayName(matrixUser, displayName);
 
         if (profilePicUrl) {
-            const avatarUrl = await getMatrixUrlFromSlack(profilePicUrl);
+            const avatarUrl = await getMatrixUrlFromRocketchat(profilePicUrl);
             setProfilePicture(matrixUser, avatarUrl);
         }
 
@@ -99,7 +103,6 @@ async function forward(event, message) {
         });
 
         insertUserTubeUserLink(event.user, matrixUser);
-        */
     }
 }
 
@@ -176,4 +179,14 @@ export async function startRocketchat(app) {
 
         res.send({ success: true });
     });
+}
+
+async function getMatrixUrlFromRocketchat(rocketchatImageUrl: string) {
+    const profilePicResponse = await fetch(rocketchatImageUrl);
+    const profilePicBlob = await profilePicResponse.blob();
+    const profilePicBufferArray = await profilePicBlob.arrayBuffer();
+    const profilePicBuffer = Buffer.from(profilePicBufferArray);
+    const imageResponse = await uploadImage("slack_profile.jpeg", profilePicBuffer);
+    const imageResult = await imageResponse.json();
+    return imageResult.content_uri;
 }
