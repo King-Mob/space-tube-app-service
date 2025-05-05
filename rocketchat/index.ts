@@ -4,6 +4,7 @@ import {
     getTubeRoomLinkByChannelId,
     insertChannelTubeRoomLink,
     insertInviteTubeRoomLink,
+    getInviteCodeByTubeId,
 } from "../duckdb";
 import { generateInviteCode } from "../slack";
 import { createRoom } from "../matrix/matrixClientRequests";
@@ -33,7 +34,15 @@ async function create(event, message, url) {
     //add message about what the other group needs to do
 }
 
-async function remindInviteCode(existingTube) {}
+async function remindInviteCode(existingTube, url) {
+    const existingInviteCode = await getInviteCodeByTubeId(existingTube.tube_room_id);
+
+    sendMessage(
+        existingTube.channel_id.split("@")[0],
+        `Tube already open with invite code: ${existingInviteCode.invite_code}`,
+        url
+    );
+}
 
 async function connect(event, message) {}
 
@@ -56,7 +65,7 @@ async function handleEvent(event, url) {
         }
     } else {
         if (!messageNoSpaces) {
-            remindInviteCode(existingTube);
+            remindInviteCode(existingTube, url);
             return;
         } else {
             if (messageNoSpaces.includes("!echo")) {
