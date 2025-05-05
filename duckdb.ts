@@ -10,7 +10,8 @@ export async function startDuckDB() {
     const instance = await DuckDBInstance.create(spacetubeDuckDBFileName);
     connection = await instance.connect();
 
-    const existingTables = await connection.run("SHOW TABLES;");
+    const existingTablesRows = await connection.run("SHOW TABLES;");
+    const existingTables = await existingTablesRows.getRowObjects();
     console.log(existingTables);
 
     if (!duckDBInitiated) {
