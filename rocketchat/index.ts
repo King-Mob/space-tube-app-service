@@ -104,7 +104,7 @@ async function forward(event, message, url) {
             from: channelId,
         });
 
-        insertUserTubeUserLink(userId, matrixUser);
+        // insertUserTubeUserLink(userId, matrixUser);
     }
 }
 
