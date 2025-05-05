@@ -72,11 +72,12 @@ async function connect(event, message, url) {
 
 async function forward(event, message, url) {
     const channelId = `${event.room.id}@${url}`;
+    const userId = `${event.sender.id}@${url}`;
     const link = await getTubeRoomLinkByChannelId(channelId);
 
     if (!link) return;
 
-    const user = await getTubeUserByUserId(event.user);
+    const user = await getTubeUserByUserId(userId);
 
     if (user) {
         const matrixUser = {
@@ -103,7 +104,7 @@ async function forward(event, message, url) {
             from: channelId,
         });
 
-        insertUserTubeUserLink(event.user, matrixUser);
+        insertUserTubeUserLink(userId, matrixUser);
     }
 }
 
