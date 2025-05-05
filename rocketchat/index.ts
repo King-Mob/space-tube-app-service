@@ -17,9 +17,10 @@ export async function startRocketchat(app) {
         const event = req.body;
         const serverIP = req.headers["x-real-ip"];
 
-        const urlIpLink = await getRocketchatUrlIpLinkByIp(serverIP);
+        const urlIpLinks = await getRocketchatUrlIpLinkByIp(serverIP);
+        const urlIpLink = urlIpLinks[0];
 
-        if (urlIpLink[0]) {
+        if (urlIpLink) {
             handleEvent(event, urlIpLink.url);
             res.send({ success: true });
         } else {
