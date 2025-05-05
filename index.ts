@@ -92,6 +92,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("dist-web"));
 app.use("/slack", express.static("dist-web"));
 app.use("/matrix", express.static("dist-web"));
+app.use("/rocketchat", express.static("dist-web"));
 
 app.post("/api/register", async (req, res) => {
     const linkEvent = await getItem("linkToken", req.body.linkToken, "spacetube.link");
@@ -393,7 +394,7 @@ app.put("/api/groupuser", imageUpload, async (req, res) => {
                         setProfilePicture(cloneUser.content.user, content_uri);
                     });
 
-                    fs.unlink(filePath, () => { });
+                    fs.unlink(filePath, () => {});
                 });
             }
             if (req.body.displayName) {
