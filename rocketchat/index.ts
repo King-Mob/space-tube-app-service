@@ -89,7 +89,7 @@ async function forward(event, message, url) {
         });
     } else {
         const displayName = event.sender.name;
-        const profilePicUrl = "";
+        const profilePicUrl = await getRocketChatProfilePicUrl(event.sender.username, url);
         const matrixUserResponse = await registerUser(displayName);
         const matrixUser = await matrixUserResponse.json();
         setDisplayName(matrixUser, displayName);
@@ -139,8 +139,6 @@ async function handleEvent(event, url) {
 }
 
 export async function sendRocketchatMessage(roomId, text, url, alias = "Spacetube") {
-    console.log(url, roomId, text);
-
     fetch(url, {
         method: "POST",
         body: JSON.stringify({
@@ -181,6 +179,14 @@ export async function startRocketchat(app) {
 
         res.send({ success: true });
     });
+}
+
+async function getRocketChatProfilePicUrl(username: string, url: string) {
+    const baseUrl = url.split("/apps")[0];
+    const avatarResponse = await fetch(`${baseUrl}/v1/users.getAvatar?username=${username}`);
+    const avatarResult = await avatarResponse.json();
+    console.log(avatarResult);
+    return avatarResult;
 }
 
 async function getMatrixUrlFromRocketchat(rocketchatImageUrl: string) {
