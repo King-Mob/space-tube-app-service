@@ -47,12 +47,13 @@ async function remindInviteCode(existingTube, url) {
 }
 
 async function connect(event, message, url) {
+    const channelId = `${event.room.id}@${url}`;
     const invite = await getInviteTubeRoomLink(message);
 
     if (invite) {
-        deleteChannelTubeRoomLinks(event.channel);
+        deleteChannelTubeRoomLinks(channelId);
 
-        insertChannelTubeRoomLink(event.channel, "slack", invite.tube_room_id);
+        insertChannelTubeRoomLink(channelId, "rocketchat", invite.tube_room_id);
         sendMessage(event.room.id, "You have joined the spacetube!", url);
         //add message about how to send messages
     } else {
