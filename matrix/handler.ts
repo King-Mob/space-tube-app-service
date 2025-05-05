@@ -378,8 +378,8 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
             const profile = await profileResponse.json();
 
             const imageUrl = profile.avatar_url
-                ? `https://spacetube.${HOME_SERVER}/slack/image/?mxc=${profile.avatar_url.split("mxc://")[1]}`
-                : `https://spacetube.${HOME_SERVER}/slack/image/?mxc=spacetu.be/PSBLUsPIprWrFYTOPXqqIXaY`;
+                ? `https://spacetube.${HOME_SERVER}/image/?mxc=${profile.avatar_url.split("mxc://")[1]}`
+                : `https://spacetube.${HOME_SERVER}/image/?mxc=spacetu.be/PSBLUsPIprWrFYTOPXqqIXaY`;
             sendSlackMessage(link.channel_id, message, profile.displayname, imageUrl);
         }
         if (link.channel_type === "matrix") {
@@ -392,9 +392,12 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
         if (link.channel_type === "rocketchat") {
             const profileResponse = await getProfile(event.sender);
             const profile = await profileResponse.json();
+            const imageUrl = profile.avatar_url
+                ? `https://spacetube.${HOME_SERVER}/image/?mxc=${profile.avatar_url.split("mxc://")[1]}`
+                : `https://spacetube.${HOME_SERVER}/image/?mxc=spacetu.be/PSBLUsPIprWrFYTOPXqqIXaY`;
 
             const [roomId, url] = link.channel_id.split("@");
-            sendRocketchatMessage(roomId, message, url, profile.displayname);
+            sendRocketchatMessage(roomId, message, url, profile.displayname, imageUrl);
         }
     });
 };

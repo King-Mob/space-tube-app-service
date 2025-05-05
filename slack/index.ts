@@ -206,19 +206,6 @@ export async function startSlack(app) {
 
         return res.send({ success: false });
     });
-
-    app.get("/slack/image", async function (req: Request, res: Response) {
-        const { mxc } = req.query;
-
-        const imageResponse = await getImage(mxc);
-
-        const imageBlob: Blob = await imageResponse.blob();
-        const imageBufferArray = await imageBlob.arrayBuffer();
-        const imageBuffer = Buffer.from(imageBufferArray);
-
-        res.set("Content-Type", imageResponse.headers["Content-Type"]);
-        return res.send(imageBuffer);
-    });
 }
 
 async function getBotFromChannel(channelId: string) {

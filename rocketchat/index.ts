@@ -20,7 +20,7 @@ import {
 } from "../matrix/matrixClientRequests";
 import { sendMessageAsMatrixUser } from "../matrix/handler";
 
-const { INVITE_PREFIX } = process.env;
+const { INVITE_PREFIX, HOME_SERVER } = process.env;
 
 async function echo(event, url) {
     const message = event.params.join(" ");
@@ -139,13 +139,15 @@ async function handleEvent(event, url) {
     }
 }
 
-export async function sendRocketchatMessage(roomId, text, url, alias = "Spacetube") {
+const defaultImageUrl = `https://spacetube.${HOME_SERVER}/image/?mxc=spacetu.be/PSBLUsPIprWrFYTOPXqqIXaY`;
+export async function sendRocketchatMessage(roomId, text, url, alias = "Spacetube", imageUrl = defaultImageUrl) {
     fetch(url, {
         method: "POST",
         body: JSON.stringify({
             roomId,
             text,
             alias,
+            imageUrl,
         }),
         headers: {
             "Content-type": "application/json",

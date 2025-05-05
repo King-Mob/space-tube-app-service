@@ -94,6 +94,19 @@ app.use("/slack", express.static("dist-web"));
 app.use("/matrix", express.static("dist-web"));
 app.use("/rocketchat", express.static("dist-web"));
 
+app.get("/image", async function (req, res) {
+    const { mxc } = req.query;
+
+    const imageResponse = await getImage(mxc);
+
+    const imageBlob: Blob = await imageResponse.blob();
+    const imageBufferArray = await imageBlob.arrayBuffer();
+    const imageBuffer = Buffer.from(imageBufferArray);
+
+    res.set("Content-Type", imageResponse.headers["Content-Type"]);
+    return res.send(imageBuffer);
+});
+
 app.post("/api/register", async (req, res) => {
     const linkEvent = await getItem("linkToken", req.body.linkToken, "spacetube.link");
     if (linkEvent) {
