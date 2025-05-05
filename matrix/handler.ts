@@ -373,27 +373,28 @@ const handleMessageLocalTube = async (tubeRoomLinks: TubeRoomLink[], event: even
     tubeRoomLinks.forEach(async (link) => {
         if (link.channel_id === from) return;
 
-        switch (link.channel_type) {
-            case "slack":
-                const profileResponse = await getProfile(event.sender);
-                const profile = await profileResponse.json();
+        if (link.channel_type === "slack") {
+            const profileResponse = await getProfile(event.sender);
+            const profile = await profileResponse.json();
 
-                const imageUrl = profile.avatar_url
-                    ? `https://spacetube.${HOME_SERVER}/slack/image/?mxc=${profile.avatar_url.split("mxc://")[1]}`
-                    : `https://spacetube.${HOME_SERVER}/slack/image/?mxc=spacetu.be/PSBLUsPIprWrFYTOPXqqIXaY`;
-                sendSlackMessage(link.channel_id, message, profile.displayname, imageUrl);
-                break;
-            case "matrix":
-                const matrixUser = {
-                    user_id: tubeUser.tube_user_id,
-                    access_token: tubeUser.tube_user_access_token,
-                };
-                sendMessageAsMatrixUser(matrixUser, message, link.channel_id);
-                break;
-            case "rocketchat":
-                const [roomId, url] = link.channel_id.split("@");
-                sendRocketchatMessage(roomId, message, url);
-                break;
+            const imageUrl = profile.avatar_url
+                ? `https://spacetube.${HOME_SERVER}/slack/image/?mxc=${profile.avatar_url.split("mxc://")[1]}`
+                : `https://spacetube.${HOME_SERVER}/slack/image/?mxc=spacetu.be/PSBLUsPIprWrFYTOPXqqIXaY`;
+            sendSlackMessage(link.channel_id, message, profile.displayname, imageUrl);
+        }
+        if (link.channel_type === "matrix") {
+            const matrixUser = {
+                user_id: tubeUser.tube_user_id,
+                access_token: tubeUser.tube_user_access_token,
+            };
+            sendMessageAsMatrixUser(matrixUser, message, link.channel_id);
+        }
+        if (link.channel_type === "rocketchat") {
+            const profileResponse = await getProfile(event.sender);
+            const profile = await profileResponse.json();
+
+            const [roomId, url] = link.channel_id.split("@");
+            sendRocketchatMessage(roomId, message, url, profile.displayname);
         }
     });
 };

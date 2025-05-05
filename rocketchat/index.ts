@@ -138,7 +138,7 @@ async function handleEvent(event, url) {
     }
 }
 
-export async function sendRocketchatMessage(roomId, text, url) {
+export async function sendRocketchatMessage(roomId, text, url, alias = "Spacetube") {
     console.log(url, roomId, text);
 
     fetch(url, {
@@ -146,6 +146,7 @@ export async function sendRocketchatMessage(roomId, text, url) {
         body: JSON.stringify({
             roomId,
             text,
+            alias,
         }),
         headers: {
             "Content-type": "application/json",
