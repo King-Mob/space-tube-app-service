@@ -175,3 +175,15 @@ export async function getTeamBotTokenLink(teamId) {
     const teamBotTokenLink = teamBotTokenLinks[0];
     return teamBotTokenLink;
 }
+
+export async function insertRocketchatUrlIpLink(url, ip_address) {
+    const insertRocketchatUrlIpLink = `INSERT INTO RocketchatUrlIpLinks VALUES ('${url}','${ip_address}');`;
+    connection.run(insertRocketchatUrlIpLink);
+}
+
+export async function getRocketchatUrlIpLinkByIp(ip_address) {
+    const getUrlSQL = `SELECT * FROM RocketchatUrlIpLinks WHERE ip_address='${ip_address}';`;
+    const urlIpLinkRows = await connection.run(getUrlSQL);
+    const urlIpLinks = await urlIpLinkRows.getRowObjects();
+    return urlIpLinks;
+}

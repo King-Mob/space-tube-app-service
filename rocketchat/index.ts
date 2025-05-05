@@ -1,18 +1,30 @@
+import { getRocketchatUrlIpLinkByIp, insertRocketchatUrlIpLink } from "../duckdb";
 
+async function handleEvent(event, url) {
+    console.log(event);
+
+    fetch(url, {
+        method: "POST",
+        body: JSON.stringify({
+            roomId: "GENERAL",
+            text: "we done did it baby",
+        }),
+    });
+}
 
 export async function startRocketchat(app) {
     app.post("/rocketchat/event", async function (req, res) {
         const event = req.body;
         const serverIP = req.headers["x-real-ip"];
 
-        console.log(event, serverIP);
+        const urlIpLink = await getRocketchatUrlIpLinkByIp(serverIP);
 
-        // duckdb, check for url for ip
-        // if none, return {registration: false}
-
-
-        res.send({ success: true })
-
+        if (urlIpLink[0]) {
+            handleEvent(event, urlIpLink.url);
+            res.send({ success: true });
+        } else {
+            res.send({ success: false, registration: false });
+        }
     });
 
     app.post("/rocketchat/register", async function (req, res) {
@@ -21,8 +33,8 @@ export async function startRocketchat(app) {
 
         console.log(url, serverIP);
 
-        // duckdb set rocketchat ip pair to whatever
+        insertRocketchatUrlIpLink(url, serverIP);
 
         res.send({ success: true });
-    })
+    });
 }
