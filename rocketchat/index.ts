@@ -7,6 +7,8 @@ async function handleEvent(event, url) {
 }
 
 async function sendMessage(roomId, text, url) {
+    console.log(url, roomId, text);
+
     fetch(url, {
         method: "POST",
         body: JSON.stringify({
