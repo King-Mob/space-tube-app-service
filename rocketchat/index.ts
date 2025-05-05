@@ -1,9 +1,52 @@
-import { getRocketchatUrlIpLinkByIp, insertRocketchatUrlIpLink } from "../duckdb";
+import { getRocketchatUrlIpLinkByIp, insertRocketchatUrlIpLink, getTubeRoomLinkByChannelId } from "../duckdb";
+import { generateInviteCode } from "../slack";
+
+const { INVITE_PREFIX } = process.env;
+
+async function echo(event, url) {
+    const message = event.text;
+    const newMessage = "you said: " + message.split("!echo ")[1];
+
+    sendMessage(event.room.id, newMessage, url);
+}
+
+async function create(event, message) {}
+
+async function remindInviteCode(existingTube) {}
+
+async function connect(event, message) {}
+
+async function forward(event, message) {}
 
 async function handleEvent(event, url) {
-    console.log(event);
+    const channelId = `${event.room.id}@${url}`;
 
-    sendMessage("GENERAL", "we done did it baby", url);
+    const existingTube = await getTubeRoomLinkByChannelId(channelId);
+    const message = event.params.join("");
+    const messageNoSpaces = message.replaceAll(" ", "");
+
+    if (!existingTube) {
+        if (messageNoSpaces.includes(INVITE_PREFIX)) {
+            connect(event, messageNoSpaces);
+            return;
+        } else {
+            create(event, messageNoSpaces);
+            return;
+        }
+    } else {
+        if (!messageNoSpaces) {
+            remindInviteCode(existingTube);
+            return;
+        } else {
+            if (messageNoSpaces.includes("!echo")) {
+                echo(event, url);
+                return;
+            }
+
+            forward(event, message);
+            return;
+        }
+    }
 }
 
 async function sendMessage(roomId, text, url) {
