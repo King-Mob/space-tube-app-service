@@ -21,6 +21,10 @@ a:visited {
     color: #8b8b8b;
 }
 
+img {
+    max-width: 100%;
+}
+
 #app {
     height: 100vh;
 }
@@ -336,6 +340,7 @@ footer {
 }
 
 #instructions-container {
+    width: 100%;
     max-width: 800px;
     margin: 10px;
 }
@@ -350,6 +355,7 @@ footer {
 
 #instructions-container span {
     background-color: #00800099;
+    overflow-wrap: break-word;
 }
 
 #slack-button {
